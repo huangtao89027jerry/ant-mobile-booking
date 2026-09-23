@@ -142,10 +142,18 @@ button, input { letter-spacing: 0; }
 .lessons-toggle .form-title { margin: 0; color: #333; text-align: left; }
 .lessons-toggle > svg { color: #999; transition: transform .2s ease; }
 .lessons-toggle > svg.expanded { transform: rotate(180deg); }
-.section-count { margin-left: 4px; color: #1677ff; font-size: 13px; font-weight: 500; }
+.lesson-title-wrap, .lessons-action { display: inline-flex; align-items: center; }
+.lesson-title-wrap { gap: 9px; min-width: 0; }
+.lesson-selection-meta { color: #1677ff; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.lessons-action { flex: none; gap: 2px; color: #8c8c8c; font-size: 12px; line-height: 20px; }
 .booking-lesson-tip { margin: 6px 0 8px; color: #999; font-size: 12px; line-height: 18px; }
 .generated-lessons { margin-top: 8px; border-top: 1px solid var(--line); }
-.lesson-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 8px 0; border-bottom: 1px solid var(--line); color: #333; font-size: 13px; line-height: 20px; }
+.lesson-row { position: relative; display: flex; align-items: center; gap: 9px; min-height: 46px; padding: 8px 0; border-bottom: 1px solid var(--line); color: #333; font-size: 13px; line-height: 20px; cursor: pointer; }
+.lesson-check { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.lesson-checkmark { display: grid; place-items: center; flex: none; width: 20px; height: 20px; border: 1px solid #c9cdd4; border-radius: 50%; color: transparent; }
+.lesson-check:checked + .lesson-checkmark { border-color: #1677ff; background: #1677ff; color: #fff; }
+.lesson-check:focus-visible + .lesson-checkmark { outline: 2px solid #91caff; outline-offset: 2px; }
+.lesson-label { flex: 1; min-width: 0; }
 .lesson-row .adm-tag { padding: 3px 7px; font-size: 11px; line-height: 16px; white-space: nowrap; }
 .summary { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 12px; color: #666; font-size: 12px; line-height: 20px; }
 .summary strong { color: #ff4d4f; font-size: 18px; line-height: 24px; }

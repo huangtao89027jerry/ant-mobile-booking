@@ -5,7 +5,7 @@ import {
   Selector, Space, Stepper, TabBar, Tabs, Tag, Toast
 } from 'antd-mobile'
 import {
-  BadgeDollarSign, CalendarDays, CalendarPlus, CheckCircle2, ChevronDown,
+  BadgeDollarSign, CalendarDays, CalendarPlus, Check, CheckCircle2, ChevronDown,
   ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck, ClipboardList,
   Clock3, Info, Library, ListChecks, MessageSquareText, Plus, ReceiptText, Search,
   Sparkles, UserRoundSearch, Users, UsersRound, X
@@ -178,6 +178,7 @@ function Booking({ go, createOrder }) {
   const [endDate,setEndDate]=useState(() => { const d = new Date(today); d.setDate(today.getDate() + 21); return d })
   const [rules,setRules]=useState([{ id: 1, days: [3], start: '17:00', end: '18:00' }])
   const [lessonsExpanded,setLessonsExpanded]=useState(false)
+  const [excludedLessonKeys,setExcludedLessonKeys]=useState(() => new Set())
   const [popup,setPopup]=useState('')
   const [datePicker,setDatePicker]=useState('')
   const [weekdayRuleId,setWeekdayRuleId]=useState(null)
@@ -197,7 +198,8 @@ function Booking({ go, createOrder }) {
     }
     return list
   }, [startDate, endDate, rules])
-  const selectedHours = Math.round(lessons.reduce((sum, lesson) => sum + lesson.duration / 60, 0) * 100) / 100
+  const selectedLessons = lessons.filter(lesson => !excludedLessonKeys.has(lesson.key))
+  const selectedHours = Math.round(selectedLessons.reduce((sum, lesson) => sum + lesson.duration / 60, 0) * 100) / 100
   const updateRules = next => setRules(next)
   const updateRule = (id, patch) => updateRules(rules.map(rule => rule.id === id ? { ...rule, ...patch } : rule))
   const addRule = () => updateRules([...rules, { id: Date.now(), days: [5], start: '17:00', end: '18:00' }])
@@ -205,9 +207,9 @@ function Booking({ go, createOrder }) {
     if(!student) return Toast.show('请先选择学员')
     if(!room) return Toast.show('请先选择上课教室')
     if(rules.some(rule => !rule.days.length || rule.start >= rule.end)) return Toast.show('请检查上课星期和时间范围')
-    if(!lessons.length) return Toast.show('所选日期范围内没有预约课次')
+    if(!selectedLessons.length) return Toast.show('至少选择一个预约课次')
     if(selectedHours > qty) return Toast.show('预约数量不能超过购买数量，请调整购买数量或预约课次')
-    createOrder(type, { time: `${lessons[0].label} · 共${lessons.length}次`, price: `¥${qty*500}` }); Toast.show(type==='收费中'?'已锁定时段，进入收费中':'意向单创建成功'); go('orders')
+    createOrder(type, { time: `${selectedLessons[0].label} · 共${selectedLessons.length}次`, price: `¥${qty*500}` }); Toast.show(type==='收费中'?'已锁定时段，进入收费中':'意向单创建成功'); go('orders')
   }
   return <div className="page">
     <Header title="选课下单" onBack={()=>go('board')} />
@@ -228,9 +230,9 @@ function Booking({ go, createOrder }) {
         {rules.length > 1 && <Button className="remove-rule" fill="none" aria-label="删除上课时间" onClick={()=>updateRules(rules.filter(item=>item.id!==rule.id))}><X size={16} /></Button>}
       </div>)}</div>
     </section>
-    <section className="booking-section lessons-section"><button className="lessons-toggle" onClick={()=>setLessonsExpanded(value=>!value)}><span className="form-title">预约课次 <span className="section-count">{lessons.length}次 · {selectedHours}小时</span></span><ChevronDown className={lessonsExpanded?'expanded':''} size={18} /></button>
-      {lessonsExpanded && <div className="generated-lessons">{lessons.map((lesson,i)=><div className="lesson-row" key={lesson.key}><span>{lesson.label}</span><Tag color={i===2?'warning':'success'}>{i===2?'有人等待':'可预约'}</Tag></div>)}</div>}
-      <div className="summary"><span>购买数量 {qty}小时 · 预约 {selectedHours}小时</span><strong>¥{qty*500}</strong></div></section>
+    <section className="booking-section lessons-section"><button className="lessons-toggle" onClick={()=>setLessonsExpanded(value=>!value)}><span className="lesson-title-wrap"><span className="form-title">预约课次</span><span className="lesson-selection-meta">已选 {selectedLessons.length}/{lessons.length}次 · {selectedHours}小时</span></span><span className="lessons-action"><span>{lessonsExpanded?'收起':'选择课次'}</span><ChevronDown className={lessonsExpanded?'expanded':''} size={17} /></span></button>
+      {lessonsExpanded && <div className="generated-lessons">{lessons.map((lesson,i)=><label className="lesson-row" key={lesson.key}><input className="lesson-check" type="checkbox" checked={!excludedLessonKeys.has(lesson.key)} onChange={event=>setExcludedLessonKeys(current=>{const next=new Set(current);if(event.target.checked)next.delete(lesson.key);else next.add(lesson.key);return next})} /><span className="lesson-checkmark"><Check size={14} /></span><span className="lesson-label">{lesson.label}</span><Tag color={i===2?'warning':'success'}>{i===2?'有人等待':'可预约'}</Tag></label>)}</div>}
+      <div className="summary"><span>购买数量 {qty}小时 · 已预约 {selectedHours}小时</span><strong>¥{qty*500}</strong></div></section>
     <div className="bottom-action"><Button onClick={()=>submit('等待中')}>排队等待</Button><Button color="primary" onClick={()=>submit('收费中')}>去收费</Button></div>
     <Popup visible={!!popup} onMaskClick={()=>setPopup('')} bodyStyle={{borderRadius:'12px 12px 0 0'}}><div style={{padding:16}}><h3>{popup==='student'?'选择学员':'选择上课教室'}</h3><List>{options.map(x=><List.Item key={x} clickable onClick={()=>{popup==='student'?setStudent(x):setRoom(x);setPopup('')}}>{x}</List.Item>)}</List></div></Popup>
     <DatePicker title={datePicker==='start'?'选择开始日期':'选择结束日期'} precision="day" value={datePicker==='start'?startDate:endDate} min={datePicker==='end'?startDate:undefined} visible={!!datePicker} onClose={()=>setDatePicker('')} onConfirm={value=>{if(datePicker==='start'){setStartDate(value);if(value>endDate)setEndDate(value)}else setEndDate(value);setDatePicker('')}} />
