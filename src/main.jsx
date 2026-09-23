@@ -7,7 +7,7 @@ import {
 import {
   BadgeDollarSign, CalendarDays, CalendarPlus, CheckCircle2, ChevronDown,
   ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck, ClipboardList,
-  Info, Library, ListChecks, MessageSquareText, Plus, ReceiptText, Search,
+  Clock3, Info, Library, ListChecks, MessageSquareText, Plus, ReceiptText, Search,
   Sparkles, UserRoundSearch, Users, UsersRound, X
 } from 'lucide-react'
 import 'antd-mobile/es/global'
@@ -219,12 +219,12 @@ function Booking({ go, createOrder }) {
       <List.Item extra={<Stepper min={1} value={qty} onChange={setQty} />}>购买数量</List.Item>
       <List.Item extra={<div className="date-range"><button className="date-value" onClick={()=>setDatePicker('start')}>{formatDate(startDate)}</button><span>至</span><button className="date-value" onClick={()=>setDatePicker('end')}>{formatDate(endDate)}</button></div>}>上课日期</List.Item>
     </List></section>
-    <section className="booking-section time-section"><div className="section-heading"><div><div className="form-title">上课时间</div><p>按星期和时间生成预约课次</p></div><Button className="add-rule" fill="none" onClick={addRule}><Plus size={16} />添加</Button></div>
+    <section className="booking-section time-section"><div className="section-heading"><div><div className="form-title">上课时间</div><p>按星期和时间生成预约课次</p></div><Button className="add-rule" fill="none" onClick={addRule}><Plus size={16} /><span>添加</span></Button></div>
       <div className="rule-list">{rules.map(rule=><div className="schedule-rule" key={rule.id}>
-        <Button className="weekday-value" fill="none" onClick={()=>setWeekdayRuleId(rule.id)}>{rule.days.length ? rule.days.map(day=>weekdayNames[day]).join('、') : '请选择星期'}<ChevronDown size={14} /></Button>
-        <input aria-label="开始时间" type="time" value={rule.start} onChange={event=>updateRule(rule.id,{start:event.target.value})} />
+        <Button className="weekday-value" fill="none" onClick={()=>setWeekdayRuleId(rule.id)}><span className="weekday-label">{rule.days.length ? rule.days.map(day=>weekdayNames[day]).join('、') : '请选择星期'}</span><ChevronDown size={14} /></Button>
+        <label className="time-field"><input aria-label="开始时间" type="time" value={rule.start} onChange={event=>updateRule(rule.id,{start:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>
         <span className="time-separator">至</span>
-        <input aria-label="结束时间" type="time" value={rule.end} onChange={event=>updateRule(rule.id,{end:event.target.value})} />
+        <label className="time-field"><input aria-label="结束时间" type="time" value={rule.end} onChange={event=>updateRule(rule.id,{end:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>
         {rules.length > 1 && <Button className="remove-rule" fill="none" aria-label="删除上课时间" onClick={()=>updateRules(rules.filter(item=>item.id!==rule.id))}><X size={16} /></Button>}
       </div>)}</div>
     </section>

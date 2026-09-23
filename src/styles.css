@@ -124,12 +124,17 @@ button, input { letter-spacing: 0; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; }
 .section-heading .form-title { margin-bottom: 1px; }
 .section-heading p { margin: 0; color: #999; font-size: 12px; line-height: 18px; }
-.add-rule { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0 4px 10px; color: #1677ff; font-size: 13px; }
+.add-rule { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0 4px 10px; color: #1677ff; font-size: 13px; line-height: 20px; }
+.add-rule svg, .weekday-value svg { display: block; flex: none; }
+.add-rule span { display: block; line-height: 20px; }
 .rule-list { margin-top: 10px; border-top: 1px solid var(--line); }
 .schedule-rule { display: grid; grid-template-columns: minmax(80px, 1fr) minmax(76px, .85fr) 16px minmax(76px, .85fr) 28px; align-items: center; gap: 5px; min-height: 52px; border-bottom: 1px solid var(--line); }
 .schedule-rule .weekday-value { display: inline-flex; align-items: center; justify-content: flex-start; gap: 3px; min-width: 0; padding: 0; color: #333; font-size: 13px; }
-.weekday-value span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.schedule-rule input[type="time"] { width: 100%; min-width: 0; height: 34px; padding: 0 3px; border: 1px solid #e5e5e5; border-radius: 5px; background: #fff; color: #333; font-size: 13px; }
+.weekday-label { display: block; min-width: 0; overflow: hidden; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.time-field { position: relative; display: flex; align-items: center; min-width: 0; height: 36px; }
+.schedule-rule .time-field input[type="time"] { width: 100%; min-width: 0; height: 36px; padding: 0 27px 0 7px; border: 1px solid #e5e5e5; border-radius: 5px; appearance: none; background: #fff; color: #333; font-size: 13px; font-variant-numeric: tabular-nums; }
+.time-field input[type="time"]::-webkit-calendar-picker-indicator { width: 0; margin: 0; opacity: 0; }
+.time-field svg { position: absolute; right: 8px; display: block; color: #8c8c8c; pointer-events: none; }
 .time-separator { color: #999; font-size: 12px; text-align: center; }
 .schedule-rule .remove-rule { display: grid; place-items: center; width: 28px; height: 32px; padding: 0; color: #999; }
 .lessons-section { padding-top: 14px; padding-bottom: 18px; }
