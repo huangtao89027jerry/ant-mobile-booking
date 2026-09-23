@@ -118,6 +118,8 @@ button, input { letter-spacing: 0; }
 .course-value { max-width: 196px; overflow: hidden; text-overflow: ellipsis; }
 .booking-section .adm-stepper { --height: 32px; --button-width: 36px; --input-width: 44px; }
 .date-value { padding: 0; border: 0; background: transparent; color: #666; font: inherit; }
+.date-range { display: flex; align-items: center; gap: 8px; }
+.date-range > span { color: #999; }
 .time-section { padding-top: 14px; padding-bottom: 14px; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; }
 .section-heading .form-title { margin-bottom: 1px; }
@@ -131,10 +133,14 @@ button, input { letter-spacing: 0; }
 .time-separator { color: #999; font-size: 12px; text-align: center; }
 .schedule-rule .remove-rule { display: grid; place-items: center; width: 28px; height: 32px; padding: 0; color: #999; }
 .lessons-section { padding-top: 14px; padding-bottom: 18px; }
+.lessons-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #777; }
+.lessons-toggle .form-title { margin: 0; color: #333; text-align: left; }
+.lessons-toggle > svg { color: #999; transition: transform .2s ease; }
+.lessons-toggle > svg.expanded { transform: rotate(180deg); }
 .section-count { margin-left: 4px; color: #1677ff; font-size: 13px; font-weight: 500; }
 .booking-lesson-tip { margin: 6px 0 8px; color: #999; font-size: 12px; line-height: 18px; }
-.lesson-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 50px; padding: 10px 0; border-bottom: 1px solid var(--line); color: #333; font-size: 14px; line-height: 22px; }
-.lesson-row .adm-checkbox { --icon-size: 22px; }
+.generated-lessons { margin-top: 8px; border-top: 1px solid var(--line); }
+.lesson-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 8px 0; border-bottom: 1px solid var(--line); color: #333; font-size: 13px; line-height: 20px; }
 .lesson-row .adm-tag { padding: 3px 7px; font-size: 11px; line-height: 16px; white-space: nowrap; }
 .summary { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 12px; color: #666; font-size: 12px; line-height: 20px; }
 .summary strong { color: #ff4d4f; font-size: 18px; line-height: 24px; }

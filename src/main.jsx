@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
-  Button, Card, Checkbox, DatePicker, Dialog, List, NavBar, Popup, SearchBar,
+  Button, Card, DatePicker, Dialog, List, NavBar, Popup, SearchBar,
   Selector, Space, Stepper, TabBar, Tabs, Tag, Toast
 } from 'antd-mobile'
 import {
@@ -177,7 +177,7 @@ function Booking({ go, createOrder }) {
   const [startDate,setStartDate]=useState(today)
   const [endDate,setEndDate]=useState(() => { const d = new Date(today); d.setDate(today.getDate() + 21); return d })
   const [rules,setRules]=useState([{ id: 1, days: [3], start: '17:00', end: '18:00' }])
-  const [checked,setChecked]=useState(null)
+  const [lessonsExpanded,setLessonsExpanded]=useState(false)
   const [popup,setPopup]=useState('')
   const [datePicker,setDatePicker]=useState('')
   const [weekdayRuleId,setWeekdayRuleId]=useState(null)
@@ -197,32 +197,27 @@ function Booking({ go, createOrder }) {
     }
     return list
   }, [startDate, endDate, rules])
-  const selectedKeys = checked === null ? lessons.map(lesson => lesson.key) : checked.filter(key => lessons.some(lesson => lesson.key === key))
-  const selectedLessons = lessons.filter(lesson => selectedKeys.includes(lesson.key))
-  const selectedHours = Math.round(selectedLessons.reduce((sum, lesson) => sum + lesson.duration / 60, 0) * 100) / 100
-  const updateRules = next => { setRules(next); setChecked(null) }
+  const selectedHours = Math.round(lessons.reduce((sum, lesson) => sum + lesson.duration / 60, 0) * 100) / 100
+  const updateRules = next => setRules(next)
   const updateRule = (id, patch) => updateRules(rules.map(rule => rule.id === id ? { ...rule, ...patch } : rule))
   const addRule = () => updateRules([...rules, { id: Date.now(), days: [5], start: '17:00', end: '18:00' }])
   const submit = type => {
     if(!student) return Toast.show('请先选择学员')
     if(!room) return Toast.show('请先选择上课教室')
     if(rules.some(rule => !rule.days.length || rule.start >= rule.end)) return Toast.show('请检查上课星期和时间范围')
-    if(!selectedKeys.length) return Toast.show('至少生成一个预约课次')
+    if(!lessons.length) return Toast.show('所选日期范围内没有预约课次')
     if(selectedHours > qty) return Toast.show('预约数量不能超过购买数量，请调整购买数量或预约课次')
-    createOrder(type, { time: `${selectedLessons[0].label} · 共${selectedLessons.length}次`, price: `¥${qty*500}` }); Toast.show(type==='收费中'?'已锁定时段，进入收费中':'意向单创建成功'); go('orders')
+    createOrder(type, { time: `${lessons[0].label} · 共${lessons.length}次`, price: `¥${qty*500}` }); Toast.show(type==='收费中'?'已锁定时段，进入收费中':'意向单创建成功'); go('orders')
   }
   return <div className="page">
     <Header title="选课下单" onBack={()=>go('board')} />
-    <section className="booking-section"><div className="form-title">学员信息</div><List>
+    <section className="booking-section"><div className="form-title">预约信息</div><List>
       <List.Item extra={<span className={!student?'placeholder':''}>{student||'请选择'}</span>} clickable onClick={()=>setPopup('student')}>学员</List.Item>
-    </List></section>
-    <section className="booking-section"><div className="form-title">上课信息</div><List>
       <List.Item extra={<span className="field-value">郭老师</span>}>任课老师</List.Item><List.Item extra={<span className="field-value">长沙校区</span>}>上课校区</List.Item>
       <List.Item extra={<span className={!room?'placeholder':''}>{room||'请选择'}</span>} clickable onClick={()=>setPopup('room')}>上课教室</List.Item>
       <List.Item extra={<span className="field-value course-value">数学一对一 · ¥500/小时</span>}>课程</List.Item>
       <List.Item extra={<Stepper min={1} value={qty} onChange={setQty} />}>购买数量</List.Item>
-      <List.Item extra={<button className="date-value" onClick={()=>setDatePicker('start')}>{formatDate(startDate)}</button>} clickable onClick={()=>setDatePicker('start')}>开始日期</List.Item>
-      <List.Item extra={<button className="date-value" onClick={()=>setDatePicker('end')}>{formatDate(endDate)}</button>} clickable onClick={()=>setDatePicker('end')}>结束日期</List.Item>
+      <List.Item extra={<div className="date-range"><button className="date-value" onClick={()=>setDatePicker('start')}>{formatDate(startDate)}</button><span>至</span><button className="date-value" onClick={()=>setDatePicker('end')}>{formatDate(endDate)}</button></div>}>上课日期</List.Item>
     </List></section>
     <section className="booking-section time-section"><div className="section-heading"><div><div className="form-title">上课时间</div><p>按星期和时间生成预约课次</p></div><Button className="add-rule" fill="none" onClick={addRule}><Plus size={16} />添加</Button></div>
       <div className="rule-list">{rules.map(rule=><div className="schedule-rule" key={rule.id}>
@@ -233,12 +228,12 @@ function Booking({ go, createOrder }) {
         {rules.length > 1 && <Button className="remove-rule" fill="none" aria-label="删除上课时间" onClick={()=>updateRules(rules.filter(item=>item.id!==rule.id))}><X size={16} /></Button>}
       </div>)}</div>
     </section>
-    <section className="booking-section lessons-section"><div className="form-title">预约课次 <span className="section-count">{selectedKeys.length}次</span></div><div className="booking-lesson-tip">根据起止日期和上课时间自动生成，可取消不需要的课次。</div><Checkbox.Group value={selectedKeys} onChange={setChecked}>
-      {lessons.map((lesson,i)=><div className="lesson-row" key={lesson.key}><Checkbox value={lesson.key} /><span>{lesson.label}</span><Tag color={i===2?'warning':'success'}>{i===2?'有人等待':'可收费'}</Tag></div>)}
-    </Checkbox.Group><div className="summary"><span>预约 {selectedKeys.length}次 · 共 {selectedHours}小时 · 购买 {qty}小时</span><strong>¥{qty*500}</strong></div></section>
+    <section className="booking-section lessons-section"><button className="lessons-toggle" onClick={()=>setLessonsExpanded(value=>!value)}><span className="form-title">预约课次 <span className="section-count">{lessons.length}次 · {selectedHours}小时</span></span><ChevronDown className={lessonsExpanded?'expanded':''} size={18} /></button>
+      {lessonsExpanded && <div className="generated-lessons">{lessons.map((lesson,i)=><div className="lesson-row" key={lesson.key}><span>{lesson.label}</span><Tag color={i===2?'warning':'success'}>{i===2?'有人等待':'可预约'}</Tag></div>)}</div>}
+      <div className="summary"><span>购买数量 {qty}小时 · 预约 {selectedHours}小时</span><strong>¥{qty*500}</strong></div></section>
     <div className="bottom-action"><Button onClick={()=>submit('等待中')}>排队等待</Button><Button color="primary" onClick={()=>submit('收费中')}>去收费</Button></div>
     <Popup visible={!!popup} onMaskClick={()=>setPopup('')} bodyStyle={{borderRadius:'12px 12px 0 0'}}><div style={{padding:16}}><h3>{popup==='student'?'选择学员':'选择上课教室'}</h3><List>{options.map(x=><List.Item key={x} clickable onClick={()=>{popup==='student'?setStudent(x):setRoom(x);setPopup('')}}>{x}</List.Item>)}</List></div></Popup>
-    <DatePicker title={datePicker==='start'?'选择开始日期':'选择结束日期'} precision="day" value={datePicker==='start'?startDate:endDate} min={datePicker==='end'?startDate:undefined} max={datePicker==='start'?endDate:undefined} visible={!!datePicker} onClose={()=>setDatePicker('')} onConfirm={value=>{if(datePicker==='start'){setStartDate(value);if(value>endDate)setEndDate(value)}else setEndDate(value);setChecked(null);setDatePicker('')}} />
+    <DatePicker title={datePicker==='start'?'选择开始日期':'选择结束日期'} precision="day" value={datePicker==='start'?startDate:endDate} min={datePicker==='end'?startDate:undefined} visible={!!datePicker} onClose={()=>setDatePicker('')} onConfirm={value=>{if(datePicker==='start'){setStartDate(value);if(value>endDate)setEndDate(value)}else setEndDate(value);setDatePicker('')}} />
     <Popup visible={weekdayRuleId!==null} onMaskClick={()=>setWeekdayRuleId(null)} bodyStyle={{borderRadius:'12px 12px 0 0',padding:16}}><h3>选择上课星期</h3><Selector multiple columns={4} options={weekdayOptions} value={weekdayRuleId===null?[]:rules.find(rule=>rule.id===weekdayRuleId)?.days.map(String)} onChange={value=>weekdayRuleId!==null&&updateRule(weekdayRuleId,{days:value.map(Number)})} /><Button block color="primary" onClick={()=>setWeekdayRuleId(null)} style={{marginTop:16}}>完成</Button></Popup>
   </div>
 }
