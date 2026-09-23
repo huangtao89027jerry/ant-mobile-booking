@@ -159,6 +159,7 @@ button, input { letter-spacing: 0; }
 .summary strong { color: #ff4d4f; font-size: 18px; line-height: 24px; }
 
 .orders-tools { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 8px 12px; background: #fff; border-bottom: 8px solid var(--page-bg); }
+.orders-tabs { background: #fff; }
 .orders-tabs .adm-tabs-tab-list { padding: 0 12px; }
 .orders-tabs .adm-tabs-tab { flex: 1; justify-content: center; min-width: 0; font-size: 16px; }
 .orders-tabs .adm-tabs-tab-active { font-weight: 500; }
