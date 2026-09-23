@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
-  Button, Card, Checkbox, Dialog, List, NavBar, Popup, SearchBar,
+  Button, Card, Checkbox, DatePicker, Dialog, List, NavBar, Popup, SearchBar,
   Selector, Space, Stepper, TabBar, Tabs, Tag, Toast
 } from 'antd-mobile'
 import {
@@ -106,29 +106,62 @@ function Teachers({ go }) {
 }
 
 function Board({ go, teacher }) {
-  const [offset, setOffset] = useState(0)
+  const [viewDate, setViewDate] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d })
   const [selected, setSelected] = useState(null)
+  const [monthPickerVisible, setMonthPickerVisible] = useState(false)
+  const touchStart = useRef(null)
+  const suppressClick = useRef(false)
   const currentTeacher = teacher || teachers[0]
   const baseDate = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
-  const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(baseDate); d.setDate(baseDate.getDate() + offset + i); return d }), [baseDate, offset])
+  const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(viewDate); d.setDate(viewDate.getDate() + i); return d }), [viewDate])
   const dayName = ['周日','周一','周二','周三','周四','周五','周六']
-  const dateRange = `${dates[0].getFullYear()}.${String(dates[0].getMonth()+1).padStart(2,'0')}.${String(dates[0].getDate()).padStart(2,'0')} - ${String(dates[2].getMonth()+1).padStart(2,'0')}.${String(dates[2].getDate()).padStart(2,'0')}`
+  const monthLabel = `${dates[0].getFullYear()}年${dates[0].getMonth() + 1}月`
   const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
   const demoDates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); return dateKey(d) }), [baseDate])
   const events = { [`${demoDates[0]}-9`]:['agenda','日程','磨课'], [`${demoDates[2]}-10`]:['course','已排课','数学一对一'], [`${demoDates[1]}-12`]:['paying','收费中','14:24 · 2人等待'], [`${demoDates[0]}-14`]:['waiting','3人等待',''] }
   const choose = (row, day) => {
+    if (suppressClick.current) return
     const date = dateKey(dates[day])
     const event = events[`${date}-${8+row}`]
     if (event?.[0] === 'paying') return Toast.show('该时段正在收费锁定中，暂不可预约')
     if (event?.[0] === 'course' || event?.[0] === 'agenda') return Dialog.confirm({ content: `当前时段已有${event[1]}，预约后将进入等待。是否继续？`, confirmText:'继续预约' }).then(ok => ok && setSelected({row,day,date}))
     setSelected({row,day,date})
   }
+  const shiftDays = amount => {
+    setViewDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return next })
+    setSelected(null)
+  }
+  const onTouchStart = event => { const point = event.touches[0]; touchStart.current = { x: point.clientX, y: point.clientY } }
+  const onTouchEnd = event => {
+    if (!touchStart.current) return
+    const point = event.changedTouches[0]
+    const dx = point.clientX - touchStart.current.x
+    const dy = point.clientY - touchStart.current.y
+    touchStart.current = null
+    if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy)) return
+    suppressClick.current = true
+    window.setTimeout(() => { suppressClick.current = false }, 400)
+    shiftDays(dx < 0 ? 1 : -1)
+  }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('teachers')} />
     <Card className="profile-card"><div className="teacher-row"><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}</div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></div></Card>
-    <div className="schedule">
-      <div className="date-nav"><Button aria-label="前3天" fill="none" onClick={() => { setOffset(v=>v-3); setSelected(null) }}><ChevronLeft /></Button><div className="date-label"><span>可约日期</span><b>{dateRange}</b></div><Button aria-label="后3天" fill="none" onClick={() => { setOffset(v=>v+3); setSelected(null) }}><ChevronRight /></Button></div>
-      <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{String(d.getMonth()+1).padStart(2,'0')}.{String(d.getDate()).padStart(2,'0')}</b></span>)}</div>
+    <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div className="date-nav"><Button className="month-picker-button" fill="none" onClick={() => setMonthPickerVisible(true)}>{monthLabel}<ChevronDown size={17} /></Button></div>
+      <DatePicker
+        title="选择月份"
+        precision="month"
+        value={viewDate}
+        visible={monthPickerVisible}
+        onClose={() => setMonthPickerVisible(false)}
+        onConfirm={value => {
+          const next = new Date(value.getFullYear(), value.getMonth(), 1)
+          setViewDate(next)
+          setSelected(null)
+          setMonthPickerVisible(false)
+        }}
+      />
+      <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
       <div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
       <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}{isSelected&&!ev&&<div className="slot-selected">已选时段<br />{8+row}:00-{9+row}:00</div>}</div>})}</React.Fragment>)}</div>
     </div>
