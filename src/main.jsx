@@ -221,9 +221,9 @@ function Booking({ go, createOrder }) {
       <List.Item extra={<Stepper min={1} value={qty} onChange={setQty} />}>购买数量</List.Item>
       <List.Item extra={<div className="date-range"><button className="date-value" onClick={()=>setDatePicker('start')}>{formatDate(startDate)}</button><span>至</span><button className="date-value" onClick={()=>setDatePicker('end')}>{formatDate(endDate)}</button></div>}>上课日期</List.Item>
     </List></section>
-    <section className="booking-section time-section"><div className="section-heading"><div><div className="form-title">上课时间</div><p>按星期和时间生成预约课次</p></div><Button className="add-rule" fill="none" onClick={addRule}><Plus size={16} /><span>添加</span></Button></div>
+    <section className="booking-section time-section"><div className="section-heading"><div><div className="form-title">上课时间</div><p>按星期和时间生成预约课次</p></div><button type="button" className="add-rule" onClick={addRule}><Plus size={16} /><span>添加</span></button></div>
       <div className="rule-list">{rules.map(rule=><div className="schedule-rule" key={rule.id}>
-        <Button className="weekday-value" fill="none" onClick={()=>setWeekdayRuleId(rule.id)}><span className="weekday-label">{rule.days.length ? rule.days.map(day=>weekdayNames[day]).join('、') : '请选择星期'}</span><ChevronDown size={14} /></Button>
+        <button type="button" className="weekday-value" onClick={()=>setWeekdayRuleId(rule.id)}><span className="weekday-label">{rule.days.length ? rule.days.map(day=>weekdayNames[day]).join('、') : '请选择星期'}</span><ChevronDown size={14} /></button>
         <label className="time-field"><span className="time-value">{rule.start}</span><input aria-label="开始时间" type="time" value={rule.start} onChange={event=>updateRule(rule.id,{start:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>
         <span className="time-separator">至</span>
         <label className="time-field"><span className="time-value">{rule.end}</span><input aria-label="结束时间" type="time" value={rule.end} onChange={event=>updateRule(rule.id,{end:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>

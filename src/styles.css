@@ -121,15 +121,15 @@ button, input { letter-spacing: 0; }
 .date-range { display: flex; align-items: center; gap: 8px; }
 .date-range > span { color: #999; }
 .time-section { padding-top: 14px; padding-bottom: 14px; }
-.section-heading { display: flex; align-items: center; justify-content: space-between; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .section-heading .form-title { margin-bottom: 1px; }
 .section-heading p { margin: 0; color: #999; font-size: 12px; line-height: 18px; }
-.add-rule { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 5px; min-width: 68px; height: 32px; padding: 0 10px; border-radius: 6px; background: #f0f7ff; color: #1677ff; font-size: 13px; line-height: 20px; white-space: nowrap; }
+.add-rule { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 4px; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: #1677ff; font: inherit; font-size: 14px; line-height: 20px; white-space: nowrap; }
 .add-rule svg, .weekday-value svg { display: block; flex: none; }
 .add-rule span { display: block; line-height: 20px; }
 .rule-list { margin-top: 10px; border-top: 1px solid var(--line); }
 .schedule-rule { display: grid; grid-template-columns: minmax(82px, 1.05fr) minmax(0, 1fr) 14px minmax(0, 1fr) 24px; align-items: center; gap: 6px; min-height: 58px; border-bottom: 1px solid var(--line); }
-.schedule-rule .weekday-value { display: inline-flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; padding: 0 8px; border-radius: 6px; background: #f5f7fa; color: #333; font-size: 13px; }
+.schedule-rule .weekday-value { display: inline-flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; padding: 0 8px; border: 0; border-radius: 6px; background: #f5f7fa; color: #333; font: inherit; font-size: 13px; text-align: left; }
 .weekday-label { display: block; min-width: 0; overflow: hidden; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
 .time-field { position: relative; display: flex; align-items: center; min-width: 0; height: 36px; padding: 0 26px 0 8px; overflow: hidden; border: 1px solid #e5e5e5; border-radius: 6px; background: #fff; }
 .time-value { overflow: hidden; color: #333; font-size: 13px; font-variant-numeric: tabular-nums; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
