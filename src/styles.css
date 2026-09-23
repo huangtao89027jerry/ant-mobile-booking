@@ -105,23 +105,38 @@ button, input { letter-spacing: 0; }
 .bottom-action { position: fixed; left: 50%; bottom: 0; z-index: 12; display: flex; gap: 8px; width: min(430px, 100%); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #fff; border-top: 1px solid var(--line); }
 .bottom-action .adm-button { flex: 1; }
 .bottom-action .adm-button:disabled { border-color: #e5e5e5; background: #f2f3f5; color: #999; opacity: 1; }
-.form-card { margin: 10px 12px; border-radius: 8px; }
-.form-card .adm-card-body { padding: 16px; }
+.booking-section { margin: 0; padding: 16px 18px 8px; border-bottom: 8px solid var(--page-bg); background: #fff; }
 .form-title { margin: 0 0 6px; font-size: 16px; line-height: 24px; font-weight: 600; }
-.form-card .adm-list { --border-top: none; --border-bottom: none; --padding-left: 0; --padding-right: 0; }
-.form-card .adm-list-item { padding-left: 0; }
-.form-card .adm-list-item-content { min-height: 48px; padding-right: 0; border-bottom-color: var(--line); }
-.form-card .adm-list-item-content-main { flex: 0 0 92px; padding: 12px 0; color: #333; font-size: 14px; line-height: 22px; }
-.form-card .adm-list-item-content-extra { display: flex; flex: 1; justify-content: flex-end; min-width: 0; padding-left: 12px; color: #666; font-size: 14px; line-height: 22px; text-align: right; }
-.form-card .adm-list-item-arrow { margin-left: 8px; color: #bfbfbf; }
+.booking-section .adm-list { --border-top: none; --border-bottom: none; --padding-left: 0; --padding-right: 0; }
+.booking-section .adm-list-item { padding-left: 0; }
+.booking-section .adm-list-item-content { min-height: 48px; padding-right: 0; border-bottom-color: var(--line); }
+.booking-section .adm-list-item-content-main { flex: 0 0 92px; padding: 12px 0; color: #333; font-size: 14px; line-height: 22px; }
+.booking-section .adm-list-item-content-extra { display: flex; flex: 1; justify-content: flex-end; min-width: 0; padding-left: 12px; color: #666; font-size: 14px; line-height: 22px; text-align: right; }
+.booking-section .adm-list-item-arrow { margin-left: 8px; color: #bfbfbf; }
 .field-value { display: block; min-width: 0; color: #666; white-space: nowrap; }
 .placeholder { color: #999; }
 .course-value { max-width: 196px; overflow: hidden; text-overflow: ellipsis; }
-.form-card .adm-stepper { --height: 32px; --button-width: 36px; --input-width: 44px; }
+.booking-section .adm-stepper { --height: 32px; --button-width: 36px; --input-width: 44px; }
+.date-value { padding: 0; border: 0; background: transparent; color: #666; font: inherit; }
+.time-section { padding-top: 14px; padding-bottom: 14px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; }
+.section-heading .form-title { margin-bottom: 1px; }
+.section-heading p { margin: 0; color: #999; font-size: 12px; line-height: 18px; }
+.add-rule { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0 4px 10px; color: #1677ff; font-size: 13px; }
+.rule-list { margin-top: 10px; border-top: 1px solid var(--line); }
+.schedule-rule { display: grid; grid-template-columns: minmax(80px, 1fr) minmax(76px, .85fr) 16px minmax(76px, .85fr) 28px; align-items: center; gap: 5px; min-height: 52px; border-bottom: 1px solid var(--line); }
+.schedule-rule .weekday-value { display: inline-flex; align-items: center; justify-content: flex-start; gap: 3px; min-width: 0; padding: 0; color: #333; font-size: 13px; }
+.weekday-value span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.schedule-rule input[type="time"] { width: 100%; min-width: 0; height: 34px; padding: 0 3px; border: 1px solid #e5e5e5; border-radius: 5px; background: #fff; color: #333; font-size: 13px; }
+.time-separator { color: #999; font-size: 12px; text-align: center; }
+.schedule-rule .remove-rule { display: grid; place-items: center; width: 28px; height: 32px; padding: 0; color: #999; }
+.lessons-section { padding-top: 14px; padding-bottom: 18px; }
+.section-count { margin-left: 4px; color: #1677ff; font-size: 13px; font-weight: 500; }
+.booking-lesson-tip { margin: 6px 0 8px; color: #999; font-size: 12px; line-height: 18px; }
 .lesson-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 50px; padding: 10px 0; border-bottom: 1px solid var(--line); color: #333; font-size: 14px; line-height: 22px; }
 .lesson-row .adm-checkbox { --icon-size: 22px; }
 .lesson-row .adm-tag { padding: 3px 7px; font-size: 11px; line-height: 16px; white-space: nowrap; }
-.summary { display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; color: #666; font-size: 13px; line-height: 20px; }
+.summary { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 12px; color: #666; font-size: 12px; line-height: 20px; }
 .summary strong { color: #ff4d4f; font-size: 18px; line-height: 24px; }
 
 .orders-tools { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 8px 12px; background: #fff; border-bottom: 8px solid var(--page-bg); }
@@ -172,3 +187,8 @@ button, input { letter-spacing: 0; }
 .adm-tag { border-radius: 4px; }
 .adm-search-bar-input-box { border-radius: 6px; }
 @media (max-width: 360px) { .legend { gap: 9px; padding-inline: 10px; } }
+@media (max-width: 360px) {
+  .booking-section { padding-right: 12px; padding-left: 12px; }
+  .schedule-rule { grid-template-columns: minmax(68px, 1fr) minmax(66px, .85fr) 14px minmax(66px, .85fr) 24px; gap: 3px; }
+  .schedule-rule .remove-rule { width: 24px; }
+}
