@@ -76,7 +76,7 @@ function Teachers({ go }) {
   return <div className="page">
     <Header title="名师约课" onBack={() => go('home')} />
     <div className="intro"><Info size={16} />提前预约老师时段；遇到占用可进入等待，收费时才锁定老师时段。</div>
-    <div className="search-panel"><SearchBar placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={() => setFilterOpen(true)}>筛选 <ChevronDown size={14} /></Button></div>
+    <div className="search-panel"><SearchBar className="toolbar-search" placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={() => setFilterOpen(true)}>筛选 <ChevronDown size={14} /></Button></div>
     {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>可约老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
       {visible.map(t => <List.Item
         key={t.name}
@@ -101,23 +101,26 @@ function Board({ go }) {
   const [selected, setSelected] = useState(null)
   const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(2026,8,14+offset+i); return d }), [offset])
   const dayName = ['周日','周一','周二','周三','周四','周五','周六']
-  const events = { '1-0':['agenda','日程','磨课'], '2-2':['course','已排课','数学一对一'], '4-1':['paying','收费中','14:24 · 2人等待'], '6-0':['waiting','3人等待',''] }
+  const dateRange = `${dates[0].getFullYear()}.${String(dates[0].getMonth()+1).padStart(2,'0')}.${String(dates[0].getDate()).padStart(2,'0')} - ${String(dates[2].getMonth()+1).padStart(2,'0')}.${String(dates[2].getDate()).padStart(2,'0')}`
+  const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
+  const events = { '2026-09-14-9':['agenda','日程','磨课'], '2026-09-16-10':['course','已排课','数学一对一'], '2026-09-15-12':['paying','收费中','14:24 · 2人等待'], '2026-09-14-14':['waiting','3人等待',''] }
   const choose = (row, day) => {
-    const event = events[`${row}-${day}`]
+    const date = dateKey(dates[day])
+    const event = events[`${date}-${8+row}`]
     if (event?.[0] === 'paying') return Toast.show('该时段正在收费锁定中，暂不可预约')
-    if (event?.[0] === 'course' || event?.[0] === 'agenda') return Dialog.confirm({ content: `当前时段已有${event[1]}，预约后将进入等待。是否继续？`, confirmText:'继续预约' }).then(ok => ok && setSelected({row,day}))
-    setSelected({row,day})
+    if (event?.[0] === 'course' || event?.[0] === 'agenda') return Dialog.confirm({ content: `当前时段已有${event[1]}，预约后将进入等待。是否继续？`, confirmText:'继续预约' }).then(ok => ok && setSelected({row,day,date}))
+    setSelected({row,day,date})
   }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('teachers')} />
-    <Card className="profile-card"><div className="teacher-row"><div className="avatar">郭</div><div><div className="teacher-name">郭老师</div><div className="teacher-meta">数学、物理 · 初一至初三</div></div></div><div className="profile-note">10年一对一教学经验，擅长中考数学提分及学习习惯培养。</div></Card>
-    <div className="date-nav"><Button fill="none" onClick={() => { setOffset(v=>v-3); setSelected(null) }}><ChevronLeft /></Button><div className="date-label">{dates[0].getFullYear()}.{String(dates[0].getMonth()+1).padStart(2,'0')}.{String(dates[0].getDate()).padStart(2,'0')}</div><Button fill="none" onClick={() => { setOffset(v=>v+3); setSelected(null) }}><ChevronRight /></Button></div>
-    <div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
-    <div className="schedule"><div className="schedule-head"><span />{dates.map((d,i)=><span className={offset===0&&i===0?'today':''} key={d.toISOString()}>{dayName[d.getDay()]}<b>{String(d.getMonth()+1).padStart(2,'0')}.{String(d.getDate()).padStart(2,'0')}</b></span>)}</div>
-      <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const ev=events[`${row}-${day}`];const isSelected=selected?.row===row&&selected?.day===day;return <div className={`slot ${isSelected?'selected':''}`} key={day} onClick={()=>choose(row,day)}>{ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}{isSelected&&!ev&&<div className="slot-selected">已选择<br />{8+row}:00-{9+row}:00</div>}</div>})}</React.Fragment>)}</div>
-      <div className="board-tip">点击空白时段进行选择</div>
+    <Card className="profile-card"><div className="teacher-row"><div className="avatar">郭</div><div className="profile-main"><div className="teacher-name">郭老师</div><div className="teacher-meta">数学、物理 · 初一至初三 · 10年教学经验</div></div></div></Card>
+    <div className="schedule">
+      <div className="date-nav"><Button aria-label="前3天" fill="none" onClick={() => { setOffset(v=>v-3); setSelected(null) }}><ChevronLeft /></Button><div className="date-label"><span>可约日期</span><b>{dateRange}</b></div><Button aria-label="后3天" fill="none" onClick={() => { setOffset(v=>v+3); setSelected(null) }}><ChevronRight /></Button></div>
+      <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{String(d.getMonth()+1).padStart(2,'0')}.{String(d.getDate()).padStart(2,'0')}</b></span>)}</div>
+      <div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
+      <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}{isSelected&&!ev&&<div className="slot-selected">已选择<br />{8+row}:00-{9+row}:00</div>}</div>})}</React.Fragment>)}</div>
     </div>
-    <div className="bottom-action"><Button block color="primary" disabled={!selected} onClick={()=>go('booking')}>{selected?'预约所选时间（1）':'请先选择预约时段'}</Button></div>
+    <div className="bottom-action"><Button block color="primary" disabled={!selected} onClick={()=>go('booking')}>{selected?'预约所选时段（1）':'选择可约时段'}</Button></div>
   </div>
 }
 
@@ -157,7 +160,7 @@ function Orders({ go, orders }) {
   const list=groups[tab].filter(o=>!query||o.name.includes(query))
   return <div className="page"><Header title="我的意向单" onBack={()=>go('teachers')} />
     <Tabs className="orders-tabs" activeKey={tab} onChange={setTab}>{Object.entries(groups).map(([k,v])=><Tabs.Tab title={`${k} ${v.length}`} key={k} />)}</Tabs>
-    <div className="orders-tools"><SearchBar placeholder="搜索学员姓名" value={query} onChange={setQuery} /><Button className="orders-filter-button" onClick={()=>setTeacherOpen(true)}>任课老师 <ChevronDown size={14} /></Button></div>
+    <div className="orders-tools"><SearchBar className="toolbar-search" placeholder="搜索学员姓名" value={query} onChange={setQuery} /><Button className="orders-filter-button" onClick={()=>setTeacherOpen(true)}>任课老师 <ChevronDown size={14} /></Button></div>
     <div className="orders-list">{list.map((o,i)=><Card className="order-card" key={`${o.name}-${i}`} onClick={()=>go('detail',o)}><div className="order-head"><b>{o.name}</b><span className={`order-status order-status-${statusClass(o.status)}`}><Tag color={tagColor(o.status)}>{o.status}</Tag></span></div><div className="order-course">数学一对一 · 郭老师 · 长沙校区</div><div className="order-time">{o.time} · 购买20小时</div>{o.status==='收费中'&&<div className="order-alert"><span>请在倒计时内完成收费</span><b>14:24</b></div>}<div className="order-footer"><div className="order-price">{o.price}</div><div className="order-actions">{['收费中','可收费','等待中'].includes(o.status)&&<Button className="order-cancel" fill="none" size="small" onClick={e=>{e.stopPropagation();Dialog.confirm({content:'取消后将释放预约时段，是否继续？'})}}>取消</Button>}{o.status==='可收费'&&<Button className="order-primary" color="primary" size="small">去收费</Button>}{o.status==='收费中'&&<Button className="order-primary" color="primary" size="small">继续收费</Button>}{['已生效','已过期','已取消'].includes(o.status)&&<Button className="order-detail" fill="none" size="small">查看详情</Button>}</div></div></Card>)}{!list.length&&<div className="empty">暂无符合条件的意向单</div>}</div>
     <Popup visible={teacherOpen} onMaskClick={()=>setTeacherOpen(false)} bodyStyle={{borderRadius:'12px 12px 0 0',padding:16}}><h3>任课老师</h3><List>{['全部老师','郭老师','陈老师','周老师'].map(x=><List.Item key={x} clickable onClick={()=>setTeacherOpen(false)}>{x}</List.Item>)}</List></Popup>
     <BottomTabs page="orders" go={go} />
