@@ -57,15 +57,10 @@ button, input { letter-spacing: 0; }
 .teacher-list .adm-list-item-content-main { min-width: 0; padding: 14px 0; color: #333; font-size: 16px; font-weight: 600; }
 .teacher-list .adm-list-item-description { margin-top: 5px; }
 .teacher-title { display: flex; align-items: center; gap: 7px; }
-.teacher-title .adm-tag { padding: 1px 5px; font-size: 10px; font-weight: 400; line-height: 16px; }
 .teacher-description { display: flex; flex-direction: column; gap: 1px; min-width: 0; color: #777; font-size: 12px; font-weight: 400; line-height: 18px; }
 .teacher-description span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .teacher-list .adm-list-item-content-extra { align-self: stretch; display: flex; align-items: center; padding-left: 12px; }
-.teacher-available { display: flex; flex-direction: column; align-items: flex-end; min-width: 58px; white-space: nowrap; }
-.teacher-available span { display: flex; align-items: center; gap: 3px; color: #777; font-size: 11px; line-height: 16px; }
-.teacher-available svg { color: #1677ff; }
-.teacher-available b { margin-top: 1px; color: #1677ff; font-size: 17px; font-weight: 600; line-height: 22px; }
-.teacher-available i { color: #999; font-size: 11px; font-style: normal; line-height: 16px; }
+.teacher-view-button { display: inline-flex; align-items: center; gap: 3px; min-width: 112px; height: 32px; padding: 0 4px 0 8px; color: #1677ff; font-size: 13px; line-height: 20px; white-space: nowrap; }
 
 .profile-card { margin: 8px 12px; border: 1px solid #f0f0f0; border-radius: 8px; }
 .profile-card .adm-card-body { padding: 10px 12px; }

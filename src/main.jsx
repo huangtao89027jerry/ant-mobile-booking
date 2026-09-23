@@ -14,9 +14,9 @@ import 'antd-mobile/es/global'
 import './styles.css'
 
 const teachers = [
-  { name: '郭老师', subject: '数学、物理', grade: '初一至初三', nextDay: '今天', nextTime: '17:00', slots: 3, status: '可约' },
-  { name: '陈老师', subject: '英语', grade: '小学至初二', nextDay: '明天', nextTime: '16:30', slots: 2, status: '可约' },
-  { name: '周老师', subject: '数学', grade: '初二、初三', nextDay: '周六', nextTime: '10:00', slots: 1, status: '紧张' },
+  { name: '郭老师', subject: '数学、物理', grade: '初一至初三' },
+  { name: '陈老师', subject: '英语', grade: '小学至初二' },
+  { name: '周老师', subject: '数学', grade: '初二、初三' },
 ]
 
 const initialOrders = [
@@ -75,17 +75,15 @@ function Teachers({ go }) {
   const visible = teachers.filter(t => (!query || t.name.includes(query)) && (!subject.length || t.subject.includes(subject[0])))
   return <div className="page">
     <Header title="名师约课" onBack={() => go('home')} />
-    <div className="intro"><Info size={16} />提前预约老师时段；遇到占用可进入等待，收费时才锁定老师时段。</div>
+    <div className="intro"><Info size={16} />先选择老师，再查看当天可预约时间。</div>
     <div className="search-panel"><SearchBar className="toolbar-search" placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={() => setFilterOpen(true)}>筛选 <ChevronDown size={14} /></Button></div>
-    {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>可约老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
+    {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>选择老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
       {visible.map(t => <List.Item
         key={t.name}
-        clickable
         prefix={<div className="avatar">{t.name[0]}</div>}
-        extra={<div className="teacher-available"><span><CalendarDays size={12} />{t.nextDay}</span><b>{t.nextTime}</b><i>{t.slots} 个时段</i></div>}
+        extra={<Button className="teacher-view-button" fill="none" size="small" onClick={e => { e.stopPropagation(); go('board', t) }}>查看可约时间 <ChevronRight size={14} /></Button>}
         description={<div className="teacher-description"><span>{t.subject}</span><span>{t.grade}</span></div>}
-        onClick={() => t.name === '郭老师' ? go('board') : Toast.show(`演示：进入${t.name}可约时间`)}
-      ><span className="teacher-title">{t.name}<Tag color={t.status==='可约'?'success':'warning'}>{t.status}</Tag></span></List.Item>)}
+      ><span className="teacher-title">{t.name}</span></List.Item>)}
     </List></section>}
     {!visible.length && <div className="empty">暂无符合条件的老师</div>}
     <Popup visible={filterOpen} onMaskClick={() => setFilterOpen(false)} bodyStyle={{ borderRadius: '12px 12px 0 0', padding: 16 }}>
@@ -96,14 +94,17 @@ function Teachers({ go }) {
   </div>
 }
 
-function Board({ go }) {
+function Board({ go, teacher }) {
   const [offset, setOffset] = useState(0)
   const [selected, setSelected] = useState(null)
-  const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(2026,8,14+offset+i); return d }), [offset])
+  const currentTeacher = teacher || teachers[0]
+  const baseDate = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
+  const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(baseDate); d.setDate(baseDate.getDate() + offset + i); return d }), [baseDate, offset])
   const dayName = ['周日','周一','周二','周三','周四','周五','周六']
   const dateRange = `${dates[0].getFullYear()}.${String(dates[0].getMonth()+1).padStart(2,'0')}.${String(dates[0].getDate()).padStart(2,'0')} - ${String(dates[2].getMonth()+1).padStart(2,'0')}.${String(dates[2].getDate()).padStart(2,'0')}`
   const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
-  const events = { '2026-09-14-9':['agenda','日程','磨课'], '2026-09-16-10':['course','已排课','数学一对一'], '2026-09-15-12':['paying','收费中','14:24 · 2人等待'], '2026-09-14-14':['waiting','3人等待',''] }
+  const demoDates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); return dateKey(d) }), [baseDate])
+  const events = { [`${demoDates[0]}-9`]:['agenda','日程','磨课'], [`${demoDates[2]}-10`]:['course','已排课','数学一对一'], [`${demoDates[1]}-12`]:['paying','收费中','14:24 · 2人等待'], [`${demoDates[0]}-14`]:['waiting','3人等待',''] }
   const choose = (row, day) => {
     const date = dateKey(dates[day])
     const event = events[`${date}-${8+row}`]
@@ -113,7 +114,7 @@ function Board({ go }) {
   }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('teachers')} />
-    <Card className="profile-card"><div className="teacher-row"><div className="avatar">郭</div><div className="profile-main"><div className="teacher-name">郭老师</div><div className="teacher-meta">数学、物理 · 初一至初三 · 10年教学经验</div></div></div></Card>
+    <Card className="profile-card"><div className="teacher-row"><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}</div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></div></Card>
     <div className="schedule">
       <div className="date-nav"><Button aria-label="前3天" fill="none" onClick={() => { setOffset(v=>v-3); setSelected(null) }}><ChevronLeft /></Button><div className="date-label"><span>可约日期</span><b>{dateRange}</b></div><Button aria-label="后3天" fill="none" onClick={() => { setOffset(v=>v+3); setSelected(null) }}><ChevronRight /></Button></div>
       <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{String(d.getMonth()+1).padStart(2,'0')}.{String(d.getDate()).padStart(2,'0')}</b></span>)}</div>
@@ -180,7 +181,7 @@ function App(){
   const [page,setPage]=useState('home'); const [orders,setOrders]=useState(initialOrders); const [current,setCurrent]=useState(null)
   const go=(next,data)=>{setCurrent(data||current);setPage(next);window.scrollTo(0,0)}
   const createOrder=status=>setOrders(v=>[{status,name:'王小明',time:'周三 17:00-18:00 · 共4次',price:'¥10000'},...v])
-  return <main className="app">{page==='home'&&<Home go={go}/>} {page==='teachers'&&<Teachers go={go}/>} {page==='board'&&<Board go={go}/>} {page==='booking'&&<Booking go={go} createOrder={createOrder}/>} {page==='orders'&&<Orders go={go} orders={orders}/>} {page==='detail'&&<Detail go={go} order={current}/>}</main>
+  return <main className="app">{page==='home'&&<Home go={go}/>} {page==='teachers'&&<Teachers go={go}/>} {page==='board'&&<Board go={go} teacher={current}/>} {page==='booking'&&<Booking go={go} createOrder={createOrder}/>} {page==='orders'&&<Orders go={go} orders={orders}/>} {page==='detail'&&<Detail go={go} order={current}/>}</main>
 }
 
 createRoot(document.getElementById('root')).render(<App />)
