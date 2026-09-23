@@ -224,9 +224,9 @@ function Booking({ go, createOrder }) {
     <section className="booking-section time-section"><div className="section-heading"><div><div className="form-title">上课时间</div><p>按星期和时间生成预约课次</p></div><Button className="add-rule" fill="none" onClick={addRule}><Plus size={16} /><span>添加</span></Button></div>
       <div className="rule-list">{rules.map(rule=><div className="schedule-rule" key={rule.id}>
         <Button className="weekday-value" fill="none" onClick={()=>setWeekdayRuleId(rule.id)}><span className="weekday-label">{rule.days.length ? rule.days.map(day=>weekdayNames[day]).join('、') : '请选择星期'}</span><ChevronDown size={14} /></Button>
-        <label className="time-field"><input aria-label="开始时间" type="time" value={rule.start} onChange={event=>updateRule(rule.id,{start:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>
+        <label className="time-field"><span className="time-value">{rule.start}</span><input aria-label="开始时间" type="time" value={rule.start} onChange={event=>updateRule(rule.id,{start:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>
         <span className="time-separator">至</span>
-        <label className="time-field"><input aria-label="结束时间" type="time" value={rule.end} onChange={event=>updateRule(rule.id,{end:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>
+        <label className="time-field"><span className="time-value">{rule.end}</span><input aria-label="结束时间" type="time" value={rule.end} onChange={event=>updateRule(rule.id,{end:event.target.value})} /><Clock3 size={15} aria-hidden="true" /></label>
         {rules.length > 1 && <Button className="remove-rule" fill="none" aria-label="删除上课时间" onClick={()=>updateRules(rules.filter(item=>item.id!==rule.id))}><X size={16} /></Button>}
       </div>)}</div>
     </section>

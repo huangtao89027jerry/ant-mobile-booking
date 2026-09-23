@@ -124,19 +124,19 @@ button, input { letter-spacing: 0; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; }
 .section-heading .form-title { margin-bottom: 1px; }
 .section-heading p { margin: 0; color: #999; font-size: 12px; line-height: 18px; }
-.add-rule { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0 4px 10px; color: #1677ff; font-size: 13px; line-height: 20px; }
+.add-rule { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 5px; min-width: 68px; height: 32px; padding: 0 10px; border-radius: 6px; background: #f0f7ff; color: #1677ff; font-size: 13px; line-height: 20px; white-space: nowrap; }
 .add-rule svg, .weekday-value svg { display: block; flex: none; }
 .add-rule span { display: block; line-height: 20px; }
 .rule-list { margin-top: 10px; border-top: 1px solid var(--line); }
-.schedule-rule { display: grid; grid-template-columns: minmax(80px, 1fr) minmax(76px, .85fr) 16px minmax(76px, .85fr) 28px; align-items: center; gap: 5px; min-height: 52px; border-bottom: 1px solid var(--line); }
-.schedule-rule .weekday-value { display: inline-flex; align-items: center; justify-content: flex-start; gap: 3px; min-width: 0; padding: 0; color: #333; font-size: 13px; }
+.schedule-rule { display: grid; grid-template-columns: minmax(82px, 1.05fr) minmax(0, 1fr) 14px minmax(0, 1fr) 24px; align-items: center; gap: 6px; min-height: 58px; border-bottom: 1px solid var(--line); }
+.schedule-rule .weekday-value { display: inline-flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; padding: 0 8px; border-radius: 6px; background: #f5f7fa; color: #333; font-size: 13px; }
 .weekday-label { display: block; min-width: 0; overflow: hidden; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
-.time-field { position: relative; display: flex; align-items: center; min-width: 0; height: 36px; }
-.schedule-rule .time-field input[type="time"] { width: 100%; min-width: 0; height: 36px; padding: 0 27px 0 7px; border: 1px solid #e5e5e5; border-radius: 5px; appearance: none; background: #fff; color: #333; font-size: 13px; font-variant-numeric: tabular-nums; }
-.time-field input[type="time"]::-webkit-calendar-picker-indicator { width: 0; margin: 0; opacity: 0; }
-.time-field svg { position: absolute; right: 8px; display: block; color: #8c8c8c; pointer-events: none; }
+.time-field { position: relative; display: flex; align-items: center; min-width: 0; height: 36px; padding: 0 26px 0 8px; overflow: hidden; border: 1px solid #e5e5e5; border-radius: 6px; background: #fff; }
+.time-value { overflow: hidden; color: #333; font-size: 13px; font-variant-numeric: tabular-nums; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.schedule-rule .time-field input[type="time"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.time-field svg { position: absolute; right: 7px; display: block; color: #8c8c8c; pointer-events: none; }
 .time-separator { color: #999; font-size: 12px; text-align: center; }
-.schedule-rule .remove-rule { display: grid; place-items: center; width: 28px; height: 32px; padding: 0; color: #999; }
+.schedule-rule .remove-rule { display: grid; place-items: center; width: 24px; height: 32px; padding: 0; color: #999; }
 .lessons-section { padding-top: 14px; padding-bottom: 18px; }
 .lessons-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #777; }
 .lessons-toggle .form-title { margin: 0; color: #333; text-align: left; }
@@ -208,6 +208,10 @@ button, input { letter-spacing: 0; }
 @media (max-width: 360px) { .legend { gap: 9px; padding-inline: 10px; } }
 @media (max-width: 360px) {
   .booking-section { padding-right: 12px; padding-left: 12px; }
-  .schedule-rule { grid-template-columns: minmax(68px, 1fr) minmax(66px, .85fr) 14px minmax(66px, .85fr) 24px; gap: 3px; }
-  .schedule-rule .remove-rule { width: 24px; }
+  .schedule-rule { grid-template-columns: minmax(76px, 1fr) minmax(0, 1fr) 12px minmax(0, 1fr) 22px; gap: 4px; }
+  .schedule-rule .weekday-value { padding-inline: 6px; font-size: 12px; }
+  .time-field { padding-right: 23px; padding-left: 6px; }
+  .time-field svg { right: 5px; width: 14px; height: 14px; }
+  .time-value { font-size: 12px; }
+  .schedule-rule .remove-rule { width: 22px; }
 }
