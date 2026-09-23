@@ -14,9 +14,9 @@ import 'antd-mobile/es/global'
 import './styles.css'
 
 const teachers = [
-  { name: '郭老师', subject: '数学、物理', grade: '初一至初三' },
-  { name: '陈老师', subject: '英语', grade: '小学至初二' },
-  { name: '周老师', subject: '数学', grade: '初二、初三' },
+  { name: '郭老师', subjects: ['数学','物理'], subject: '数学、物理', grades: ['初一','初二','初三'], grade: '初一至初三' },
+  { name: '陈老师', subjects: ['英语'], subject: '英语', grades: ['小学','初一','初二'], grade: '小学至初二' },
+  { name: '周老师', subjects: ['数学'], subject: '数学', grades: ['初二','初三'], grade: '初二、初三' },
 ]
 
 const initialOrders = [
@@ -71,12 +71,20 @@ function Home({ go }) {
 function Teachers({ go }) {
   const [query, setQuery] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
-  const [subject, setSubject] = useState([])
-  const visible = teachers.filter(t => (!query || t.name.includes(query)) && (!subject.length || t.subject.includes(subject[0])))
+  const emptyFilters = { subject: '全部', grade: '全部', teacher: '全部' }
+  const [filters, setFilters] = useState(emptyFilters)
+  const [draftFilters, setDraftFilters] = useState(emptyFilters)
+  const visible = teachers.filter(t =>
+    (!query || t.name.includes(query)) &&
+    (filters.subject === '全部' || t.subjects.includes(filters.subject)) &&
+    (filters.grade === '全部' || t.grades.includes(filters.grade)) &&
+    (filters.teacher === '全部' || t.name === filters.teacher)
+  )
+  const openFilters = () => { setDraftFilters(filters); setFilterOpen(true) }
   return <div className="page">
     <Header title="名师约课" onBack={() => go('home')} />
     <div className="intro"><Info size={16} />先选择老师，再查看当天可预约时间。</div>
-    <div className="search-panel"><SearchBar className="toolbar-search" placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={() => setFilterOpen(true)}>筛选 <ChevronDown size={14} /></Button></div>
+    <div className="search-panel"><SearchBar className="toolbar-search" placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={openFilters}>筛选 <ChevronDown size={14} /></Button></div>
     {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>选择老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
       {visible.map(t => <List.Item
         key={t.name}
@@ -86,9 +94,12 @@ function Teachers({ go }) {
       ><span className="teacher-title">{t.name}</span></List.Item>)}
     </List></section>}
     {!visible.length && <div className="empty">暂无符合条件的老师</div>}
-    <Popup visible={filterOpen} onMaskClick={() => setFilterOpen(false)} bodyStyle={{ borderRadius: '12px 12px 0 0', padding: 16 }}>
-      <h3>授课科目</h3><Selector columns={3} options={['数学','英语','物理'].map(v => ({ label:v,value:v }))} value={subject} onChange={setSubject} />
-      <Button block color="primary" style={{ marginTop: 18 }} onClick={() => setFilterOpen(false)}>完成</Button>
+    <Popup className="teacher-filter-popup" visible={filterOpen} onMaskClick={() => setFilterOpen(false)} bodyStyle={{ borderRadius: '12px 12px 0 0', padding: 16 }}>
+      <h3>筛选老师</h3>
+      <div className="filter-group"><b>科目</b><Selector columns={4} options={['全部','数学','英语','物理'].map(v => ({ label:v,value:v }))} value={[draftFilters.subject]} onChange={v => setDraftFilters(f => ({...f,subject:v[0]||'全部'}))} /></div>
+      <div className="filter-group"><b>年级</b><Selector columns={4} options={['全部','小学','初一','初二','初三'].map(v => ({ label:v,value:v }))} value={[draftFilters.grade]} onChange={v => setDraftFilters(f => ({...f,grade:v[0]||'全部'}))} /></div>
+      <div className="filter-group"><b>任课老师</b><Selector columns={4} options={['全部',...teachers.map(t=>t.name)].map(v => ({ label:v,value:v }))} value={[draftFilters.teacher]} onChange={v => setDraftFilters(f => ({...f,teacher:v[0]||'全部'}))} /></div>
+      <div className="filter-actions"><Button fill="none" onClick={() => setDraftFilters(emptyFilters)}>重置</Button><Button color="primary" onClick={() => { setFilters(draftFilters); setFilterOpen(false) }}>完成</Button></div>
     </Popup>
     <BottomTabs page="teachers" go={go} />
   </div>

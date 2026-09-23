@@ -61,6 +61,13 @@ button, input { letter-spacing: 0; }
 .teacher-description span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .teacher-list .adm-list-item-content-extra { align-self: stretch; display: flex; align-items: center; padding-left: 12px; }
 .teacher-view-button { display: inline-flex; align-items: center; gap: 3px; min-width: 112px; height: 32px; padding: 0 4px 0 8px; color: #1677ff; font-size: 13px; line-height: 20px; white-space: nowrap; }
+.teacher-filter-popup { --max-height: min(78vh, 620px); }
+.teacher-filter-popup h3 { margin: 2px 0 18px; font-size: 17px; line-height: 24px; }
+.filter-group { margin-bottom: 18px; }
+.filter-group > b { display: block; margin-bottom: 9px; color: #555; font-size: 14px; font-weight: 500; }
+.filter-group .adm-selector { --border-radius: 6px; --checked-color: #1677ff; --checked-text-color: #1677ff; --checked-border: 1px solid #1677ff; }
+.filter-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; padding-top: 2px; }
+.filter-actions .adm-button { height: 40px; font-size: 14px; }
 
 .profile-card { margin: 8px 12px; border: 1px solid #f0f0f0; border-radius: 8px; }
 .profile-card .adm-card-body { padding: 10px 12px; }
