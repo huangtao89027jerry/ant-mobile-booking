@@ -85,9 +85,10 @@ button, input { letter-spacing: 0; }
 .schedule { margin: 0; padding-bottom: 10px; background: #fff; }
 .schedule-head, .schedule-grid { display: grid; grid-template-columns: 44px repeat(3, 1fr); }
 .schedule-head { padding: 6px 0; border-top: 1px solid var(--line); text-align: center; color: #777; font-size: 11px; }
-.schedule-head b { display: block; margin-top: 3px; color: #333; font-size: 14px; line-height: 20px; }
-.schedule-head .day-focus b { display: inline-block; padding: 2px 8px; border-radius: 10px; background: #e6f4ff; color: #1677ff; }
-.schedule-head > span:not(:first-child) { min-height: 48px; padding-top: 2px; }
+.schedule-head b { display: block; margin-top: 2px; color: #333; font-size: 14px; line-height: 20px; }
+.schedule-head .day-focus { border-radius: 8px; background: #f0f7ff; color: #1677ff; }
+.schedule-head .day-focus b { color: inherit; }
+.schedule-head > span:not(:first-child) { display: flex; min-height: 48px; flex-direction: column; align-items: center; justify-content: center; padding: 2px 4px; }
 .schedule .legend { border-top: 1px solid #f5f5f5; }
 .schedule-grid { grid-auto-rows: 56px; }
 .time-label { padding: 7px 7px 0 0; color: #a6b0c0; font-size: 11px; text-align: right; }
@@ -97,8 +98,8 @@ button, input { letter-spacing: 0; }
 .event.agenda { background: #f9f0ff; color: #722ed1; }
 .event.paying { background: #fff1e8; color: #d46b08; }
 .event.waiting { background: #fff7e6; color: #ad6800; }
-.slot.selected { outline: 2px solid #1677ff; outline-offset: -2px; background: #e6f4ff; }
-.slot-selected { padding: 6px; color: #0958d9; font-size: 11px; font-weight: 600; }
+.slot.selected { background: #eaf4ff; box-shadow: inset 3px 0 0 #1677ff; }
+.slot-selected { padding: 8px; color: #0958d9; font-size: 11px; font-weight: 600; line-height: 16px; }
 
 .bottom-action { position: fixed; left: 50%; bottom: 0; z-index: 12; display: flex; gap: 8px; width: min(430px, 100%); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #fff; border-top: 1px solid var(--line); }
 .bottom-action .adm-button { flex: 1; }
