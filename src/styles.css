@@ -65,7 +65,7 @@ button, input { letter-spacing: 0; }
 .teacher-filter-popup h3 { margin: 2px 0 18px; font-size: 17px; line-height: 24px; }
 .filter-group { margin-bottom: 18px; }
 .filter-group > b { display: block; margin-bottom: 9px; color: #555; font-size: 14px; font-weight: 500; }
-.filter-group .adm-selector { --border-radius: 6px; --checked-color: #1677ff; --checked-text-color: #1677ff; --checked-border: 1px solid #1677ff; }
+.filter-group .adm-selector { --border-radius: 6px; --checked-color: #1677ff; --checked-text-color: #fff; --checked-border: 1px solid #1677ff; }
 .filter-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; padding-top: 2px; }
 .filter-actions .adm-button { height: 40px; font-size: 14px; }
 
