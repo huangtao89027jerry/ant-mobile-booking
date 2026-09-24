@@ -256,7 +256,7 @@ function Orders({ go, orders }) {
 function Detail({ go, order }) {
   const o=order||initialOrders[0]
   return <div className="page"><Header title="意向单详情" onBack={()=>go('orders')} /><div className="detail-stack">
-    <Card className="detail-card"><div className="order-head"><b>基本信息</b><Tag color={tagColor(o.status)}>{o.status}</Tag></div><div className="detail-grid"><div><span>意向单号</span><b>YXD260920000001</b></div><div><span>学员</span><b>{o.name}</b></div><div><span>手机号</span><b>138****8821</b></div><div><span>创建时间</span><b>2026-09-20 09:15</b></div></div></Card>
+    <Card className="detail-card"><div className="order-head"><b>基本信息</b><span className={`order-status order-status-${statusClass(o.status)}`}><Tag color={tagColor(o.status)}>{o.status}</Tag></span></div><div className="detail-grid"><div><span>意向单号</span><b>YXD260920000001</b></div><div><span>学员</span><b>{o.name}</b></div><div><span>手机号</span><b>138****8821</b></div><div><span>创建时间</span><b>2026-09-20 09:15</b></div></div></Card>
     <Card className="detail-card"><b>购买信息</b><div className="detail-grid"><div><span>课程</span><b>数学一对一</b></div><div><span>课程单价</span><b>¥500/小时</b></div><div><span>购买数量</span><b>20小时</b></div><div><span>应收金额</span><b style={{color:'#ff3141'}}>¥10,000</b></div></div></Card>
     <Card className="detail-card"><b>预约信息</b><div className="detail-grid"><div><span>任课老师</span><b>郭老师</b></div><div><span>校区</span><b>长沙校区</b></div><div><span>教室</span><b>301教室</b></div><div><span>预约课次</span><b>4次</b></div></div></Card>
   </div></div>
