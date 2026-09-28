@@ -14,9 +14,27 @@ import 'antd-mobile/es/global'
 import './styles.css'
 
 const teachers = [
-  { name: '郭老师', subjects: ['数学','物理'], subject: '数学、物理', grades: ['初一','初二','初三'], grade: '初一至初三' },
-  { name: '陈老师', subjects: ['英语'], subject: '英语', grades: ['小学','初一','初二'], grade: '小学至初二' },
-  { name: '周老师', subjects: ['数学'], subject: '数学', grades: ['初二','初三'], grade: '初二、初三' },
+  {
+    name: '郭老师', subjects: ['数学','物理'], subject: '数学、物理', grades: ['初一','初二','初三'], grade: '初一至初三',
+    years: 12, school: '湖南师范大学 · 数学与应用数学',
+    intro: '擅长把抽象的数学概念放回生活场景里讲，一道压轴题会拆成学生能复述的思考顺序。带完一轮初中会把函数、几何、代数三大块重新串成体系，学生换题不换思路。',
+    honors: ['市级优质课一等奖', '中考命题研究组成员', '5 届毕业班带班经验'],
+    campuses: ['长沙校区','岳麓校区'], courses: ['数学一对一','中考数学冲刺'],
+  },
+  {
+    name: '陈老师', subjects: ['英语'], subject: '英语', grades: ['小学','初一','初二'], grade: '小学至初二',
+    years: 9, school: '广东外语外贸大学 · 英语教育',
+    intro: '主攻小学到初二的阅读与语法衔接，用原版分级读物做输入，把背单词换成读故事。课上要求学生整句输出，逐步过渡到能独立复述段落。',
+    honors: ['省级英语教学技能赛二等奖', '原版阅读课程主设计'],
+    campuses: ['长沙校区'], courses: ['英语一对一','英语阅读专项'],
+  },
+  {
+    name: '周老师', subjects: ['数学'], subject: '数学', grades: ['初二','初三'], grade: '初二、初三',
+    years: 7, school: '中南大学 · 统计学',
+    intro: '专攻初二、初三的拔高与压轴题，把几何辅助线讲成一套可迁移的思考顺序。每次课后会留一道同源变式题，用来确认方法真的被掌握。',
+    honors: ['希望杯优秀教练员', '压轴题专题课主讲'],
+    campuses: ['长沙校区','星沙校区'], courses: ['数学一对一','中考数学冲刺'],
+  },
 ]
 
 const initialOrders = [
@@ -81,6 +99,30 @@ function BottomTabs({ page, go }) {
   </TabBar></div>
 }
 
+function TeacherSheet({ teacher, onClose, onView }) {
+  return <Popup className="teacher-sheet" visible={!!teacher} onMaskClick={onClose} bodyStyle={{ background:'transparent' }}>
+    {teacher&&<div className="sheet-shell">
+      <div className="sheet-head">
+        <div className="sheet-avatar">{teacher.name[0]}</div>
+        <div className="sheet-id">
+          <div className="sheet-name">{teacher.name}<span className="sheet-years">{teacher.years} 年教龄</span></div>
+          <div className="sheet-meta">{teacher.subject} · {teacher.grade}</div>
+          <div className="sheet-school">{teacher.school}</div>
+        </div>
+      </div>
+      <div className="sheet-body">
+        <div className="sheet-block"><h4>名师介绍</h4><p>{teacher.intro}</p></div>
+        <div className="sheet-honors">{teacher.honors.map(honor => <span key={honor}>{honor}</span>)}</div>
+        <div className="sheet-block"><h4>可约范围</h4>
+          <div className="sheet-scope"><span>校区</span><b>{teacher.campuses.join('、')}</b></div>
+          <div className="sheet-scope"><span>课程</span><b>{teacher.courses.join('、')}</b></div>
+        </div>
+      </div>
+      <div className="sheet-foot"><Button block color="primary" onClick={onView}>查看可约时间</Button></div>
+    </div>}
+  </Popup>
+}
+
 function Home({ go }) {
   return <div className="page">
     <div className="home-head"><h1>刘亦菲 - 黎璐教育集团</h1><p>demo.xiaogj.com</p></div>
@@ -98,6 +140,7 @@ function Home({ go }) {
 function Teachers({ go }) {
   const [query, setQuery] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
+  const [sheet, setSheet] = useState(null)
   const emptyFilters = { subject: '全部', grade: '全部', teacher: '全部' }
   const [filters, setFilters] = useState(emptyFilters)
   const [draftFilters, setDraftFilters] = useState(emptyFilters)
@@ -115,12 +158,16 @@ function Teachers({ go }) {
     {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>选择老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
       {visible.map(t => <List.Item
         key={t.name}
+        clickable
+        arrow={false}
+        onClick={() => t.intro ? setSheet(t) : go('board', t)}
         prefix={<div className="avatar">{t.name[0]}</div>}
         extra={<Button className="teacher-view-button" fill="none" size="small" onClick={e => { e.stopPropagation(); go('board', t) }}>查看可约时间 <ChevronRight size={14} /></Button>}
-        description={<div className="teacher-description"><span>{t.subject}</span><span>{t.grade}</span></div>}
+        description={<div className="teacher-description"><span>{t.subject}</span><span>{t.grade}</span>{t.intro&&<span className="teacher-intro-link" onClick={e => { e.stopPropagation(); setSheet(t) }}>名师介绍 <ChevronRight size={12} /></span>}</div>}
       ><span className="teacher-title">{t.name}</span></List.Item>)}
     </List></section>}
     {!visible.length && <div className="empty">暂无符合条件的老师</div>}
+    <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => { const target = sheet; setSheet(null); go('board', target) }} />
     <Popup className="teacher-filter-popup" visible={filterOpen} onMaskClick={() => setFilterOpen(false)} bodyStyle={{ borderRadius: '12px 12px 0 0', padding: 16 }}>
       <h3>筛选老师</h3>
       <div className="filter-group"><b>科目</b><Selector columns={4} options={['全部','数学','英语','物理'].map(v => ({ label:v,value:v }))} value={[draftFilters.subject]} onChange={v => setDraftFilters(f => ({...f,subject:v[0]||'全部'}))} /></div>
@@ -136,6 +183,7 @@ function Board({ go, teacher }) {
   const [viewDate, setViewDate] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d })
   const [selected, setSelected] = useState(null)
   const [monthPickerVisible, setMonthPickerVisible] = useState(false)
+  const [sheet, setSheet] = useState(null)
   const touchStart = useRef(null)
   const suppressClick = useRef(false)
   const currentTeacher = teacher || teachers[0]
@@ -172,7 +220,8 @@ function Board({ go, teacher }) {
   }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('teachers')} />
-    <Card className="profile-card"><div className="teacher-row"><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}</div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></div></Card>
+    <Card className="profile-card"><div className="teacher-row"><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}</div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div>{currentTeacher.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
+    <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
     <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="date-nav"><Button className="month-picker-button" fill="none" onClick={() => setMonthPickerVisible(true)}>{monthLabel}<ChevronDown size={17} /></Button></div>
       <DatePicker
