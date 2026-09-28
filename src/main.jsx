@@ -110,7 +110,7 @@ function Teachers({ go }) {
   const openFilters = () => { setDraftFilters(filters); setFilterOpen(true) }
   return <div className="page">
     <Header title="名师约课" onBack={() => go('home')} />
-    <div className="intro"><Info size={16} />先选择老师，再查看当天可预约时间。</div>
+    <div className="intro"><Info size={16} />提前预约老师时段并生成意向单，时段被占用时可排队等待；点击「去收费」锁定预约时段，收费完成后按预约时间自动生成排课。</div>
     <div className="search-panel"><SearchBar className="toolbar-search" placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={openFilters}>筛选 <ChevronDown size={14} /></Button></div>
     {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>选择老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
       {visible.map(t => <List.Item
