@@ -105,18 +105,15 @@ function TeacherSheet({ teacher, onClose, onView }) {
       <div className="sheet-head">
         <div className="sheet-avatar">{teacher.name[0]}</div>
         <div className="sheet-id">
-          <div className="sheet-name">{teacher.name}<span className="sheet-years">{teacher.years} 年教龄</span></div>
-          <div className="sheet-meta">{teacher.subject} · {teacher.grade}</div>
+          <div className="sheet-name">{teacher.name}</div>
+          <div className="sheet-meta">{teacher.subject} · {teacher.grade} · {teacher.years} 年教龄</div>
           <div className="sheet-school">{teacher.school}</div>
         </div>
       </div>
       <div className="sheet-body">
-        <div className="sheet-block"><h4>名师介绍</h4><p>{teacher.intro}</p></div>
-        <div className="sheet-honors">{teacher.honors.map(honor => <span key={honor}>{honor}</span>)}</div>
-        <div className="sheet-block"><h4>可约范围</h4>
-          <div className="sheet-scope"><span>校区</span><b>{teacher.campuses.join('、')}</b></div>
-          <div className="sheet-scope"><span>课程</span><b>{teacher.courses.join('、')}</b></div>
-        </div>
+        <p className="sheet-intro">{teacher.intro}</p>
+        <p className="sheet-note">荣誉 · {teacher.honors.join(' · ')}</p>
+        <p className="sheet-note">可约 · {teacher.campuses.join('、')} · {teacher.courses.join('、')}</p>
       </div>
       <div className="sheet-foot"><Button block color="primary" onClick={onView}>查看可约时间</Button></div>
     </div>}
@@ -140,7 +137,6 @@ function Home({ go }) {
 function Teachers({ go }) {
   const [query, setQuery] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
-  const [sheet, setSheet] = useState(null)
   const emptyFilters = { subject: '全部', grade: '全部', teacher: '全部' }
   const [filters, setFilters] = useState(emptyFilters)
   const [draftFilters, setDraftFilters] = useState(emptyFilters)
@@ -160,14 +156,13 @@ function Teachers({ go }) {
         key={t.name}
         clickable
         arrow={false}
-        onClick={() => t.intro ? setSheet(t) : go('board', t)}
+        onClick={() => go('board', t)}
         prefix={<div className="avatar">{t.name[0]}</div>}
         extra={<Button className="teacher-view-button" fill="none" size="small" onClick={e => { e.stopPropagation(); go('board', t) }}>查看可约时间 <ChevronRight size={14} /></Button>}
-        description={<div className="teacher-description"><span>{t.subject}</span><span>{t.grade}</span>{t.intro&&<span className="teacher-intro-link" onClick={e => { e.stopPropagation(); setSheet(t) }}>名师介绍 <ChevronRight size={12} /></span>}</div>}
+        description={<div className="teacher-description"><span>{t.subject}</span><span>{t.grade}</span></div>}
       ><span className="teacher-title">{t.name}</span></List.Item>)}
     </List></section>}
     {!visible.length && <div className="empty">暂无符合条件的老师</div>}
-    <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => { const target = sheet; setSheet(null); go('board', target) }} />
     <Popup className="teacher-filter-popup" visible={filterOpen} onMaskClick={() => setFilterOpen(false)} bodyStyle={{ borderRadius: '12px 12px 0 0', padding: 16 }}>
       <h3>筛选老师</h3>
       <div className="filter-group"><b>科目</b><Selector columns={4} options={['全部','数学','英语','物理'].map(v => ({ label:v,value:v }))} value={[draftFilters.subject]} onChange={v => setDraftFilters(f => ({...f,subject:v[0]||'全部'}))} /></div>
