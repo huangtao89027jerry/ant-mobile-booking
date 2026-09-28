@@ -201,6 +201,28 @@ button, input { letter-spacing: 0; }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; margin-top: 13px; }
 .detail-grid span { display: block; margin-bottom: 4px; color: #999; font-size: 11px; }
 .detail-grid b { font-size: 13px; }
+.detail-alert { margin: 10px 12px 0; padding: 10px 12px; border-radius: 8px; background: #fff7e6; color: #ad6800; font-size: 12px; line-height: 18px; }
+.detail-alert b { font-weight: 600; }
+.detail-alert.effective { background: #e6f4ff; color: #0958d9; }
+.detail-alert.expired { background: #f5f5f5; color: #999; }
+.detail-countdown { display: flex; align-items: baseline; justify-content: space-between; margin: 8px 12px 0; padding: 12px; border-radius: 8px; background: #fff; color: #666; font-size: 12px; }
+.detail-countdown b { color: #ff8f1f; font-size: 24px; font-variant-numeric: tabular-nums; line-height: 28px; }
+.detail-lessons { margin-top: 10px; border-top: 1px solid var(--line); }
+.detail-lesson-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; border-bottom: 1px solid var(--line); color: #333; font-size: 13px; line-height: 20px; }
+.detail-lesson-row:last-child { border-bottom: 0; }
+.detail-lesson-slot { flex: none; font-size: 12px; font-style: normal; }
+.detail-lesson-slot.slot-free, .detail-lesson-slot.slot-ok { color: #00a870; }
+.detail-lesson-slot.slot-busy, .detail-lesson-slot.slot-fail { color: #cf1322; }
+.detail-lesson-slot.slot-agenda { color: #d46b08; }
+.detail-lesson-slot.slot-charging, .detail-lesson-slot.slot-locked { color: #1677ff; }
+.detail-summary { display: flex; gap: 14px; margin-top: 12px; font-size: 13px; }
+.detail-timeline { margin-top: 12px; }
+.detail-timeline > div { position: relative; padding: 0 0 14px 14px; border-left: 1px solid var(--line); }
+.detail-timeline > div:last-child { padding-bottom: 0; border-left-color: transparent; }
+.detail-timeline i { position: absolute; left: -4px; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: #d9d9d9; }
+.detail-timeline > div:last-child i { background: #1677ff; }
+.detail-timeline b { display: block; color: #999; font-size: 11px; font-weight: 400; line-height: 16px; }
+.detail-timeline span { font-size: 13px; line-height: 20px; }
 .empty { padding: 56px 20px; color: #999; text-align: center; }
 .tabbar-wrap { position: fixed; bottom: 0; left: 50%; z-index: 10; width: min(430px, 100%); transform: translateX(-50%); background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
 .adm-tab-bar { height: 58px; }

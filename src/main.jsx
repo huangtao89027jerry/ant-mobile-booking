@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   Button, Card, DatePicker, Dialog, List, NavBar, Popup, SearchBar,
@@ -42,6 +42,33 @@ const tagColor = status => ({
 const statusClass = status => ({
   可收费: 'available', 收费中: 'charging', 等待中: 'waiting', 已生效: 'active', 已过期: 'ended', 已取消: 'cancelled'
 }[status])
+
+const weekdayBase = ['周一','周二','周三','周四','周五','周六','周日']
+const buildLessons = time => {
+  const match = /(周[一二三四五六日])\s*(\d{2}:\d{2})-(\d{2}:\d{2})/.exec(time || '')
+  if (!match) return []
+  const count = Number((/共(\d+)次/.exec(time) || [])[1] || 4)
+  const first = new Date(2026, 8, 21 + weekdayBase.indexOf(match[1]))
+  return Array.from({ length: count }, (_, i) => {
+    const day = new Date(first)
+    day.setDate(first.getDate() + i * 7)
+    return `${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')} ${match[1]} ${match[2]}-${match[3]}`
+  })
+}
+const slotState = (status, index) => {
+  if (status === '收费中') return { text: '已锁定', cls: 'locked' }
+  if (status === '可收费') return { text: '空闲', cls: 'free' }
+  const [text, cls] = [['空闲','free'],['排课占用','busy'],['日程占用','agenda'],['收费中','charging']][index % 4]
+  return { text, cls }
+}
+const timelines = {
+  可收费: [['09-20 09:15','创建意向单'],['09-20 09:20','当前状态：可收费']],
+  等待中: [['09-20 09:15','创建意向单'],['09-20 09:18','部分预约课次被占用，进入等待中']],
+  收费中: [['09-20 09:15','创建意向单'],['09-20 10:02','进入收费中，已锁定老师时段']],
+  已生效: [['09-20 09:15','创建意向单'],['09-20 10:02','进入收费中'],['09-20 10:16','收费成功'],['09-20 10:16','自动排课完成，意向单已生效']],
+  已过期: [['09-20 09:15','创建意向单'],['09-20 10:02','进入收费中'],['09-20 10:31','收费倒计时结束，意向单已过期']],
+  已取消: [['09-20 09:15','创建意向单'],['09-20 09:20','手动取消意向单']],
+}
 
 function Header({ title, onBack }) {
   return <NavBar onBack={onBack} backArrow={<ChevronLeft size={22} />}>{title}</NavBar>
@@ -255,11 +282,29 @@ function Orders({ go, orders }) {
 
 function Detail({ go, order }) {
   const o=order||initialOrders[0]
-  return <div className="page"><Header title="意向单详情" onBack={()=>go('orders')} /><div className="detail-stack">
+  const [left,setLeft]=useState(14*60+24)
+  useEffect(()=>{ if(o.status!=='收费中')return; const timer=setInterval(()=>setLeft(v=>v>0?v-1:0),1000); return()=>clearInterval(timer) },[o.status])
+  const lessons = buildLessons(o.time)
+  const live = ['可收费','等待中','收费中'].includes(o.status)
+  const countdown = `${String(Math.floor(left/60)).padStart(2,'0')}:${String(left%60).padStart(2,'0')}`
+  const cancel = () => Dialog.confirm({ content:'取消后将释放该意向单占用的老师时段，是否继续？' })
+  const charge = () => o.status==='可收费'&&Toast.show('二次校验通过，已进入收费中')
+  return <div className="page"><Header title="意向单详情" onBack={()=>go('orders')} />
+    {o.status==='收费中'&&<div className="detail-alert">请及时操作收费！请前往 <b>校管家系统 → 收费管理</b> 完成收费流程，倒计时结束后时段将自动释放。</div>}
+    {o.status==='收费中'&&<div className="detail-countdown"><span>收费剩余时间</span><b>{countdown}</b></div>}
+    {o.status==='已生效'&&<div className="detail-alert effective">收费成功，自动排课处理已完成</div>}
+    {o.status==='已过期'&&<div className="detail-alert expired">因最早预约课次的上课开始时间已到，该意向单已自动过期。</div>}
+    <div className="detail-stack">
     <Card className="detail-card"><div className="order-head"><b>基本信息</b><span className={`order-status order-status-${statusClass(o.status)}`}><Tag color={tagColor(o.status)}>{o.status}</Tag></span></div><div className="detail-grid"><div><span>意向单号</span><b>YXD260920000001</b></div><div><span>学员</span><b>{o.name}</b></div><div><span>手机号</span><b>138****8821</b></div><div><span>创建时间</span><b>2026-09-20 09:15</b></div></div></Card>
     <Card className="detail-card"><b>购买信息</b><div className="detail-grid"><div><span>课程</span><b>数学一对一</b></div><div><span>课程单价</span><b>¥500/小时</b></div><div><span>购买数量</span><b>20小时</b></div><div><span>应收金额</span><b style={{color:'#ff3141'}}>¥10,000</b></div></div></Card>
-    <Card className="detail-card"><b>预约信息</b><div className="detail-grid"><div><span>任课老师</span><b>郭老师</b></div><div><span>校区</span><b>长沙校区</b></div><div><span>教室</span><b>301教室</b></div><div><span>预约课次</span><b>4次</b></div></div></Card>
-  </div></div>
+    <Card className="detail-card"><b>预约信息</b><div className="detail-grid"><div><span>任课老师</span><b>郭老师</b></div><div><span>上课校区</span><b>长沙校区</b></div><div><span>上课教室</span><b>301教室</b></div><div><span>预约课次</span><b>{lessons.length}次</b></div><div><span>预约数量</span><b>{lessons.length}小时</b></div></div>
+      <div className="detail-lessons">{lessons.map((lesson,i)=><div className="detail-lesson-row" key={lesson}><span>{lesson}</span>{live&&<em className={`detail-lesson-slot slot-${slotState(o.status,i).cls}`}>{slotState(o.status,i).text}</em>}</div>)}</div></Card>
+    {o.status==='已生效'&&<Card className="detail-card"><b>自动排课结果</b><div className="detail-summary"><span className="slot-ok">自动排课成功 {lessons.length-1}节</span><span className="slot-fail">失败 1节</span></div>
+      <div className="detail-lessons">{lessons.map((lesson,i)=><div className="detail-lesson-row" key={lesson}><span>{lesson}</span><em className={`detail-lesson-slot slot-${i===1?'fail':'ok'}`}>{i===1?'自动排课失败 · 老师排课冲突':'自动排课成功'}</em></div>)}</div></Card>}
+    <Card className="detail-card"><b>状态记录</b><div className="detail-timeline">{(timelines[o.status]||[]).map(([time,text])=><div key={time+text}><i></i><b>{time}</b><span>{text}</span></div>)}</div></Card>
+    </div>
+    {live&&<div className="bottom-action"><Button onClick={cancel}>取消意向单</Button>{o.status==='可收费'&&<Button color="primary" onClick={charge}>去收费</Button>}</div>}
+  </div>
 }
 
 function App(){
