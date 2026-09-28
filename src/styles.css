@@ -228,9 +228,10 @@ button, input { letter-spacing: 0; }
 .detail-lesson-slot.slot-busy, .detail-lesson-slot.slot-fail { color: #cf1322; }
 .detail-lesson-slot.slot-agenda { color: #d46b08; }
 .detail-lesson-slot.slot-charging, .detail-lesson-slot.slot-locked { color: #1677ff; }
-.detail-lesson-right { display: inline-flex; flex: none; align-items: center; gap: 12px; }
-.lesson-remove { padding: 0; border: 0; background: transparent; color: #8c8c8c; font: inherit; font-size: 12px; line-height: 20px; }
-.lesson-remove:active { color: #595959; }
+.detail-lesson-right { display: inline-flex; flex: none; align-items: center; gap: 6px; }
+.lesson-remove { display: grid; place-items: center; width: 26px; height: 26px; margin-right: -5px; padding: 0; border: 0; background: transparent; color: #c4c4c4; }
+.lesson-remove svg { display: block; }
+.lesson-remove:active { color: #8c8c8c; }
 .detail-tip { margin: 10px 0 0; color: #999; font-size: 12px; line-height: 18px; }
 .detail-summary { display: flex; gap: 14px; margin-top: 12px; font-size: 13px; }
 .detail-timeline { margin-top: 12px; }

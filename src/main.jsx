@@ -8,7 +8,7 @@ import {
   BadgeDollarSign, CalendarDays, CalendarPlus, Check, CheckCircle2, ChevronDown,
   ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck, ClipboardList,
   Clock3, Info, Library, ListChecks, MessageSquareText, Plus, ReceiptText, Search,
-  Sparkles, UserRoundSearch, Users, UsersRound, X
+  Sparkles, Trash2, UserRoundSearch, Users, UsersRound, X
 } from 'lucide-react'
 import 'antd-mobile/es/global'
 import './styles.css'
@@ -356,7 +356,7 @@ function Detail({ go, order, onRemoveLesson }) {
     <Card className="detail-card"><div className="order-head"><b>基本信息</b><span className={`order-status order-status-${statusClass(status)}`}><Tag color={tagColor(status)}>{status}</Tag></span></div><div className="detail-grid"><div><span>意向单号</span><b>YXD260920000001</b></div><div><span>学员</span><b>{o.name}</b></div><div><span>手机号</span><b>138****8821</b></div><div><span>创建时间</span><b>2026-09-20 09:15</b></div></div></Card>
     <Card className="detail-card"><b>购买信息</b><div className="detail-grid"><div><span>课程</span><b>数学一对一</b></div><div><span>课程单价</span><b>¥500/小时</b></div><div><span>购买数量</span><b>20小时</b></div><div><span>应收金额</span><b style={{color:'#ff3141'}}>¥10,000</b></div></div></Card>
     <Card className="detail-card"><b>预约信息</b><div className="detail-grid"><div><span>任课老师</span><b>郭老师</b></div><div><span>上课校区</span><b>长沙校区</b></div><div><span>上课教室</span><b>301教室</b></div><div><span>预约课次</span><b>{lessons.length}次</b></div><div><span>预约数量</span><b>{lessons.length}小时</b></div></div>
-      <div className="detail-lessons">{lessons.map(lesson=><div className="detail-lesson-row" key={lesson.key}><span>{lesson.label}</span><span className="detail-lesson-right">{live&&<em className={`detail-lesson-slot slot-${lesson.slot.cls}`}>{lesson.slot.text}</em>}{status==='等待中'&&lessons.length>1&&<button type="button" className="lesson-remove" onClick={()=>remove(lesson.key)}>删除</button>}</span></div>)}</div>
+      <div className="detail-lessons">{lessons.map(lesson=><div className="detail-lesson-row" key={lesson.key}><span>{lesson.label}</span><span className="detail-lesson-right">{live&&<em className={`detail-lesson-slot slot-${lesson.slot.cls}`}>{lesson.slot.text}</em>}{status==='等待中'&&lessons.length>1&&<button type="button" className="lesson-remove" aria-label="删除该课次" onClick={()=>remove(lesson.key)}><Trash2 size={15} /></button>}</span></div>)}</div>
       {status==='等待中'&&<p className="detail-tip">删除被占用的课次后，全部课次空闲即可去收费。</p>}</Card>
     {status==='已生效'&&<Card className="detail-card"><b>自动排课结果</b><div className="detail-summary"><span className="slot-ok">自动排课成功 {lessons.length-1}节</span><span className="slot-fail">失败 1节</span></div>
       <div className="detail-lessons">{lessons.map((lesson,i)=><div className="detail-lesson-row" key={lesson.key}><span>{lesson.label}</span><em className={`detail-lesson-slot slot-${i===1?'fail':'ok'}`}>{i===1?'自动排课失败 · 老师排课冲突':'自动排课成功'}</em></div>)}</div></Card>}
