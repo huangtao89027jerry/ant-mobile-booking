@@ -234,13 +234,6 @@ button, input { letter-spacing: 0; }
 .lesson-remove:active { color: #8c8c8c; }
 .detail-tip { margin: 10px 0 0; color: #999; font-size: 12px; line-height: 18px; }
 .detail-summary { display: flex; gap: 14px; margin-top: 12px; font-size: 13px; }
-.detail-timeline { margin-top: 12px; }
-.detail-timeline > div { position: relative; padding: 0 0 14px 14px; border-left: 1px solid var(--line); }
-.detail-timeline > div:last-child { padding-bottom: 0; border-left-color: transparent; }
-.detail-timeline i { position: absolute; left: -4px; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: #d9d9d9; }
-.detail-timeline > div:last-child i { background: #1677ff; }
-.detail-timeline b { display: block; color: #999; font-size: 11px; font-weight: 400; line-height: 16px; }
-.detail-timeline span { font-size: 13px; line-height: 20px; }
 .empty { padding: 56px 20px; color: #999; text-align: center; }
 .tabbar-wrap { position: fixed; bottom: 0; left: 50%; z-index: 10; width: min(430px, 100%); transform: translateX(-50%); background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
 .adm-tab-bar { height: 58px; }

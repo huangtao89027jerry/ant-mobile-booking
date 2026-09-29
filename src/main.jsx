@@ -91,15 +91,6 @@ const orderTimeText = order => {
   const base = (/(周[一二三四五六日]\s*\d{2}:\d{2}-\d{2}:\d{2})/.exec(order.time) || [''])[0]
   return `${base} · 共${visibleLessons(order).length}次`
 }
-const timelines = {
-  可收费: [['09-20 09:15','创建意向单'],['09-20 09:20','当前状态：可收费']],
-  等待中: [['09-20 09:15','创建意向单'],['09-20 09:18','部分预约课次被占用，进入等待中']],
-  收费中: [['09-20 09:15','创建意向单'],['09-20 10:02','进入收费中，已锁定老师时段']],
-  已生效: [['09-20 09:15','创建意向单'],['09-20 10:02','进入收费中'],['09-20 10:16','收费成功'],['09-20 10:16','自动排课完成，意向单已生效']],
-  已过期: [['09-20 09:15','创建意向单'],['09-20 10:02','进入收费中'],['09-20 10:31','收费倒计时结束，意向单已过期']],
-  已取消: [['09-20 09:15','创建意向单'],['09-20 09:20','手动取消意向单']],
-}
-
 function Header({ title, onBack }) {
   return <NavBar onBack={onBack} backArrow={<ChevronLeft size={22} />}>{title}</NavBar>
 }
@@ -360,7 +351,6 @@ function Detail({ go, order, onRemoveLesson }) {
       {status==='等待中'&&<p className="detail-tip">删除被占用的课次后，全部课次空闲即可去收费。</p>}</Card>
     {status==='已生效'&&<Card className="detail-card"><b>自动排课结果</b><div className="detail-summary"><span className="slot-ok">自动排课成功 {lessons.length-1}节</span><span className="slot-fail">失败 1节</span></div>
       <div className="detail-lessons">{lessons.map((lesson,i)=><div className="detail-lesson-row" key={lesson.key}><span>{lesson.label}</span><em className={`detail-lesson-slot slot-${i===1?'fail':'ok'}`}>{i===1?'自动排课失败 · 老师排课冲突':'自动排课成功'}</em></div>)}</div></Card>}
-    <Card className="detail-card"><b>状态记录</b><div className="detail-timeline">{(timelines[status]||[]).map(([time,text])=><div key={time+text}><i></i><b>{time}</b><span>{text}</span></div>)}</div></Card>
     </div>
     {live&&<div className="bottom-action"><Button onClick={cancel}>取消意向单</Button>{status==='可收费'&&<Button color="primary" onClick={charge}>去收费</Button>}</div>}
   </div>
