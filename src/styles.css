@@ -72,15 +72,17 @@ button, input { letter-spacing: 0; }
 .schedule-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 74px 24px 86px; color: #bfbfbf; }
 .schedule-empty p { margin: 0; color: #999; font-size: 13px; line-height: 20px; }
 .teacher-picker h3 { margin: 2px 0 12px; font-size: 17px; line-height: 24px; }
-.date-jump-picker h3 { margin: 2px 0 12px; font-size: 17px; line-height: 24px; }
-.jump-tabs { margin-bottom: 12px; }
-.jump-tabs .adm-selector { --border-radius: 8px; --checked-color: #1677ff; --checked-text-color: #fff; --checked-border: 1px solid #1677ff; }
-.jump-tabs .adm-selector-item { height: 34px; font-size: 14px; }
-.jump-list { max-height: min(46vh, 340px); overflow-y: auto; }
-.jump-item { display: flex; width: 100%; align-items: center; justify-content: space-between; height: 46px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #1f2329; font: inherit; font-size: 15px; text-align: left; }
-.jump-item.active { background: #eef5ff; color: #1677ff; font-weight: 600; }
-.jump-item svg { flex: none; color: #1677ff; }
-.jump-item em { color: #8c8c8c; font-size: 12px; font-style: normal; font-weight: 400; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal-head b { font-size: 16px; font-weight: 600; }
+.cal-nav { display: flex; gap: 2px; }
+.cal-nav button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; color: #8c8c8c; }
+.cal-nav button:active { color: #595959; }
+.cal-week { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 2px; color: #8c8c8c; font-size: 12px; text-align: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-cell { display: grid; place-items: center; height: 44px; }
+.cal-day { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #1f2329; font: inherit; font-size: 15px; font-variant-numeric: tabular-nums; }
+.cal-day.today { background: #f0f1f3; }
+.cal-day.selected { background: #1677ff; color: #fff; font-weight: 600; }
 .date-nav-side { flex: 1; min-width: 0; }
 .date-nav-end { display: flex; justify-content: flex-end; }
 .today-button { display: inline-flex; align-items: center; gap: 3px; height: 32px; padding: 0 8px; border: 0; background: transparent; color: #8c8c8c; font: inherit; font-size: 13px; line-height: 18px; }
