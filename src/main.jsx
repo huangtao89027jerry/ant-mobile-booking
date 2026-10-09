@@ -189,9 +189,11 @@ function Board({ go, teacher }) {
   const events = { [`${demoDates[0]}-9`]:['agenda','日程','磨课'], [`${demoDates[2]}-10`]:['course','已排课','数学一对一'], [`${demoDates[1]}-12`]:['paying','收费中','14:24 · 2人等待'], [`${demoDates[0]}-14`]:['waiting','3人等待',''] }
   const weekStart = date => { const d = new Date(date); d.setHours(0,0,0,0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d }
   const thisWeek = weekStart(baseDate)
-  const weekOptions = Array.from({length:8},(_,i) => { const start = new Date(thisWeek); start.setDate(start.getDate() + (i - 3) * 7); const end = new Date(start); end.setDate(end.getDate() + 6); return { key: dateKey(start), start, label: `${start.getMonth()+1}月${start.getDate()}日 - ${end.getMonth()+1}月${end.getDate()}日`, current: i === 3 } })
-  const monthOptions = Array.from({length:10},(_,i) => { const start = new Date(baseDate.getFullYear(), baseDate.getMonth() + i - 3, 1); return { key: `${start.getFullYear()}-${start.getMonth()}`, start, label: `${start.getFullYear()}年${start.getMonth()+1}月`, current: i === 3 } })
+  const weekOptions = Array.from({length:8},(_,i) => { const start = new Date(thisWeek); start.setDate(start.getDate() + (i - 3) * 7); const end = new Date(start); end.setDate(end.getDate() + 6); return { key: dateKey(start), start, label: `${start.getMonth()+1}月${start.getDate()}日 - ${end.getMonth()+1}月${end.getDate()}日`, current: i === 3, active: dateKey(start) === dateKey(weekStart(viewDate)) } })
+  const monthOptions = Array.from({length:10},(_,i) => { const start = new Date(baseDate.getFullYear(), baseDate.getMonth() + i - 3, 1); return { key: `${start.getFullYear()}-${start.getMonth()}`, start, label: `${start.getFullYear()}年${start.getMonth()+1}月`, current: i === 3, active: start.getFullYear() === viewDate.getFullYear() && start.getMonth() === viewDate.getMonth() } })
   const jumpTo = date => { setViewDate(new Date(date)); setSelected(null); setPickerOpen(false) }
+  const onToday = dates.some(date => dateKey(date) === dateKey(baseDate))
+  const backToToday = () => { setViewDate(new Date(baseDate)); setSelected(null) }
   const choose = (row, day) => {
     if (suppressClick.current) return
     const date = dateKey(dates[day])
@@ -221,7 +223,7 @@ function Board({ go, teacher }) {
     <Card className="profile-card"><div className="teacher-row"><button type="button" className="profile-switch" onClick={() => setPickerOpen(true)}>{currentTeacher?<><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}<ChevronDown size={14} /></div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></>:<><div className="avatar avatar-empty"><UserRoundSearch size={19} /></div><div className="profile-main"><div className="teacher-name">请选择老师<ChevronDown size={14} /></div><div className="teacher-meta">选择后可查看该老师的可约时间</div></div></>}</button>{currentTeacher?.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
     <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
     <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-      <div className="date-nav"><Button className="month-picker-button" fill="none" onClick={() => setDatePickerOpen(true)}>{rangeLabel}<ChevronDown size={17} /></Button></div>
+      <div className="date-nav"><span className="date-nav-side" /><Button className="month-picker-button" fill="none" onClick={() => setDatePickerOpen(true)}>{rangeLabel}<ChevronDown size={17} /></Button><span className="date-nav-side date-nav-end">{!onToday && <button type="button" className="today-button" onClick={backToToday}>今天</button>}</span></div>
       <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
       {currentTeacher?<><div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
       <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{isSelected?<div className="slot-selected"><span className="slot-time">{8+row}:00-{9+row}:00</span><button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button></div>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b>{ev[2]&&<span>{ev[2]}</span>}</div>}</div>})}</React.Fragment>)}</div></>
@@ -229,8 +231,8 @@ function Board({ go, teacher }) {
     </div>
     <Popup className="date-jump-picker" visible={datePickerOpen} onMaskClick={() => setDatePickerOpen(false)} bodyStyle={{ borderRadius:'12px 12px 0 0', padding:16 }}>
       <h3>切换日期</h3>
-      <Selector options={[{ label:'按周', value:'week' }, { label:'按月', value:'month' }]} value={[datePickerMode]} onChange={value => setDatePickerMode(value[0] || 'week')} />
-      <div className="jump-list">{(datePickerMode === 'week' ? weekOptions : monthOptions).map(option => <button type="button" className={`jump-item ${option.current ? 'current' : ''}`} key={option.key} onClick={() => jumpTo(option.start)}>{option.label}{option.current && <em>当前</em>}</button>)}</div>
+      <div className="jump-tabs"><Selector columns={2} options={[{ label:'按周', value:'week' }, { label:'按月', value:'month' }]} value={[datePickerMode]} onChange={value => setDatePickerMode(value[0] || 'week')} /></div>
+      <div className="jump-list">{(datePickerMode === 'week' ? weekOptions : monthOptions).map(option => <button type="button" className={`jump-item ${option.active ? 'active' : ''}`} key={option.key} onClick={() => jumpTo(option.start)}><span>{option.label}</span>{option.active ? <Check size={16} /> : option.current && <em>{datePickerMode === 'week' ? '今天' : '本月'}</em>}</button>)}</div>
     </Popup>
     <Popup className="teacher-picker" visible={pickerOpen} onMaskClick={() => setPickerOpen(false)} bodyStyle={{ borderRadius:'12px 12px 0 0', padding:16 }}>
       <h3>选择老师</h3>
