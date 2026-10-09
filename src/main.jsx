@@ -210,8 +210,6 @@ function Board({ go, teacher }) {
     window.setTimeout(() => { suppressClick.current = false }, 400)
     shiftDays(dx < 0 ? 1 : -1)
   }
-  const actionText = !currentTeacher ? '选择老师' : selected ? '预约所选时段（1）' : '选择可约时段'
-  const onAction = () => { if (!currentTeacher) return setPickerOpen(true); if (selected) go('booking') }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('orders')} />
     <Card className="profile-card"><div className="teacher-row"><button type="button" className="profile-switch" onClick={() => setPickerOpen(true)}>{currentTeacher?<><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}<ChevronDown size={14} /></div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></>:<><div className="avatar avatar-empty"><UserRoundSearch size={19} /></div><div className="profile-main"><div className="teacher-name">请选择老师<ChevronDown size={14} /></div><div className="teacher-meta">选择后可查看该老师的可约时间</div></div></>}</button>{currentTeacher?.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
@@ -233,10 +231,9 @@ function Board({ go, teacher }) {
       />
       <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
       {currentTeacher?<><div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
-      <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}{isSelected&&!ev&&<div className="slot-selected">已选时段<br />{8+row}:00-{9+row}:00</div>}</div>})}</React.Fragment>)}</div></>
-      :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p></div>}
+      <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{isSelected?<button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}</div>})}</React.Fragment>)}</div></>
+      :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p><Button size="small" color="primary" onClick={()=>setPickerOpen(true)}>选择老师</Button></div>}
     </div>
-    <div className="bottom-action"><Button block color="primary" disabled={!!currentTeacher&&!selected} onClick={onAction}>{actionText}</Button></div>
     <Popup className="teacher-picker" visible={pickerOpen} onMaskClick={() => setPickerOpen(false)} bodyStyle={{ borderRadius:'12px 12px 0 0', padding:16 }}>
       <h3>选择老师</h3>
       <SearchBar placeholder="搜索任课老师" value={pickerQuery} onChange={setPickerQuery} />
