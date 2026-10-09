@@ -140,58 +140,48 @@ button, input { letter-spacing: 0; }
 .bottom-action { position: fixed; left: 50%; bottom: 0; z-index: 12; display: flex; gap: 8px; width: min(430px, 100%); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #fff; border-top: 1px solid var(--line); }
 .bottom-action .adm-button { flex: 1; }
 .bottom-action .adm-button:disabled { border-color: #e5e5e5; background: #f2f3f5; color: #999; opacity: 1; }
-.booking-section { margin: 0; padding: 16px 18px 8px; border-bottom: 8px solid var(--page-bg); background: #fff; }
-.form-title { margin: 0 0 6px; font-size: 16px; line-height: 24px; font-weight: 600; }
-.booking-section .adm-list { --border-top: none; --border-bottom: none; --padding-left: 0; --padding-right: 0; }
-.booking-section .adm-list-item { padding-left: 0; }
-.booking-section .adm-list-item-content { min-height: 48px; padding-right: 0; border-bottom-color: var(--line); }
-.booking-section .adm-list-item-content-main { flex: 0 0 92px; padding: 12px 0; color: #333; font-size: 14px; line-height: 22px; }
-.booking-section .adm-list-item-content-extra { display: flex; flex: 1; justify-content: flex-end; min-width: 0; padding-left: 12px; color: #666; font-size: 14px; line-height: 22px; text-align: right; }
-.booking-section .adm-list-item-arrow { margin-left: 8px; color: #bfbfbf; }
-.field-value { display: block; min-width: 0; color: #666; white-space: nowrap; }
-.placeholder { color: #999; }
-.course-value { max-width: 196px; overflow: hidden; text-overflow: ellipsis; }
-.booking-section .adm-stepper { --height: 32px; --button-width: 36px; --input-width: 44px; }
-.date-value { padding: 0; border: 0; background: transparent; color: #666; font: inherit; }
-.date-range { display: flex; align-items: center; gap: 8px; }
-.date-range > span { color: #999; }
-.time-section { padding-top: 14px; padding-bottom: 14px; }
-.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.section-heading .form-title { margin-bottom: 1px; }
-.section-heading p { margin: 0; color: #999; font-size: 12px; line-height: 18px; }
-.add-rule { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 4px; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: #1677ff; font: inherit; font-size: 14px; line-height: 20px; white-space: nowrap; }
-.add-rule svg, .weekday-value svg { display: block; flex: none; }
-.add-rule span { display: block; line-height: 20px; }
-.rule-list { margin-top: 10px; border-top: 1px solid var(--line); }
-.schedule-rule { display: grid; grid-template-columns: minmax(82px, 1.05fr) minmax(0, 1fr) 14px minmax(0, 1fr) 24px; align-items: center; gap: 6px; min-height: 58px; border-bottom: 1px solid var(--line); }
-.schedule-rule .weekday-value { display: inline-flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; padding: 0 8px; border: 0; border-radius: 6px; background: #f5f7fa; color: #333; font: inherit; font-size: 13px; text-align: left; }
-.weekday-label { display: block; min-width: 0; overflow: hidden; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
-.time-field { position: relative; display: flex; align-items: center; min-width: 0; height: 36px; padding: 0 26px 0 8px; overflow: hidden; border: 1px solid #e5e5e5; border-radius: 6px; background: #fff; }
-.time-value { overflow: hidden; color: #333; font-size: 13px; font-variant-numeric: tabular-nums; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
-.schedule-rule .time-field input[type="time"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-.time-field svg { position: absolute; right: 7px; display: block; color: #8c8c8c; pointer-events: none; }
-.time-separator { color: #999; font-size: 12px; text-align: center; }
-.schedule-rule .remove-rule { display: grid; place-items: center; width: 24px; height: 32px; padding: 0; color: #999; }
-.lessons-section { padding-top: 14px; padding-bottom: 18px; }
-.lessons-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #777; }
-.lessons-toggle .form-title { margin: 0; color: #333; text-align: left; }
-.lessons-toggle > svg { color: #999; transition: transform .2s ease; }
-.lessons-toggle > svg.expanded { transform: rotate(180deg); }
-.lesson-title-wrap, .lessons-action { display: inline-flex; align-items: center; }
-.lesson-title-wrap { gap: 9px; min-width: 0; }
-.lesson-selection-meta { color: #1677ff; font-size: 12px; line-height: 20px; white-space: nowrap; }
-.lessons-action { flex: none; gap: 2px; color: #8c8c8c; font-size: 12px; line-height: 20px; }
-.booking-lesson-tip { margin: 6px 0 8px; color: #999; font-size: 12px; line-height: 18px; }
-.generated-lessons { margin-top: 8px; border-top: 1px solid var(--line); }
-.lesson-row { position: relative; display: flex; align-items: center; gap: 9px; min-height: 46px; padding: 8px 0; border-bottom: 1px solid var(--line); color: #333; font-size: 13px; line-height: 20px; cursor: pointer; }
-.lesson-check { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.lesson-checkmark { display: grid; place-items: center; flex: none; width: 20px; height: 20px; border: 1px solid #c9cdd4; border-radius: 50%; color: transparent; }
-.lesson-check:checked + .lesson-checkmark { border-color: #1677ff; background: #1677ff; color: #fff; }
-.lesson-check:focus-visible + .lesson-checkmark { outline: 2px solid #91caff; outline-offset: 2px; }
-.lesson-label { flex: 1; min-width: 0; }
-.lesson-row .adm-tag { padding: 3px 7px; font-size: 11px; line-height: 16px; white-space: nowrap; }
-.summary { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 12px; color: #666; font-size: 12px; line-height: 20px; }
-.summary strong { color: #ff4d4f; font-size: 18px; line-height: 24px; }
+.booking-card { margin: 10px 12px; padding: 14px; border-radius: 10px; background: #fff; }
+.booking-card-title { margin-bottom: 8px; font-size: 16px; font-weight: 600; line-height: 24px; }
+.booking-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; border-bottom: 1px solid var(--line); }
+.booking-row.clickable { cursor: pointer; }
+.booking-row:last-child { border-bottom: 0; }
+.booking-label { flex: none; color: #8c8c8c; font-size: 15px; line-height: 22px; }
+.booking-value { display: inline-flex; align-items: center; gap: 2px; min-width: 0; justify-content: flex-end; color: #1f2329; font-size: 15px; line-height: 22px; text-align: right; }
+.booking-value svg { flex: none; color: #bfbfbf; }
+.placeholder-value { color: #bfbfbf; }
+.booking-value .adm-stepper { --height: 36px; --button-width: 32px; --input-width: 44px; --border-radius: 6px; }
+.qty-unit { margin-left: 7px; color: #8c8c8c; font-size: 14px; }
+.date-value { display: inline-flex; align-items: center; gap: 2px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-variant-numeric: tabular-nums; }
+.time-rules { margin-bottom: 10px; }
+.time-rule { display: grid; grid-template-columns: minmax(84px, .9fr) minmax(0, 1.4fr) auto; align-items: center; gap: 8px; }
+.time-rule + .time-rule { margin-top: 10px; }
+.rule-weekday { display: inline-flex; width: 100%; min-width: 0; height: 44px; align-items: center; justify-content: space-between; gap: 4px; padding: 0 10px; border: 1px solid #e9edf2; border-radius: 8px; background: #f7f9fc; color: #1f2329; font: inherit; font-size: 14px; }
+.rule-weekday span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rule-weekday svg { flex: none; color: #8c8c8c; }
+.rule-range { display: flex; height: 44px; min-width: 0; align-items: center; justify-content: center; gap: 2px; padding: 0 10px; border: 1px solid #e9edf2; border-radius: 8px; background: #f7f9fc; }
+.range-field { position: relative; display: flex; min-width: 0; align-items: center; }
+.range-field span { color: #1f2329; font-size: 14px; font-variant-numeric: tabular-nums; }
+.range-field input[type="time"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.range-sep { color: #8c8c8c; font-size: 14px; }
+.rule-remove { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; background: transparent; color: #c4c4c4; }
+.rule-add { display: flex; width: 100%; height: 42px; align-items: center; justify-content: center; gap: 5px; margin-bottom: 4px; padding: 0; border: 1px dashed #a8c8f0; border-radius: 8px; background: #f5f9ff; color: #1677ff; font: inherit; font-size: 14px; }
+.rule-add:active { background: #eaf3ff; }
+.booking-help { margin: 0 0 4px; padding: 9px 10px; border-radius: 8px; background: #f7f9fc; color: #9aa3af; font-size: 12px; line-height: 18px; }
+.lesson-list { margin-bottom: 2px; }
+.lesson-item { position: relative; display: flex; align-items: center; gap: 10px; min-height: 46px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.lesson-item:last-child { border-bottom: 0; }
+.lesson-box { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.lesson-tick { display: grid; place-items: center; flex: none; width: 20px; height: 20px; border: 1px solid #c9cdd4; border-radius: 6px; color: transparent; }
+.lesson-box:checked + .lesson-tick { border-color: #1677ff; background: #1677ff; color: #fff; }
+.lesson-box:focus-visible + .lesson-tick { outline: 2px solid #91caff; outline-offset: 2px; }
+.lesson-time { flex: 1; min-width: 0; color: #1f2329; font-size: 14px; line-height: 20px; }
+.lesson-chip { flex: none; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-style: normal; line-height: 16px; white-space: nowrap; }
+.chip-ok { background: #e7f7ef; color: #00905f; }
+.chip-warn { background: #fff1e6; color: #d4650a; }
+.chip-hold { background: #fff7e0; color: #a8790a; }
+.booking-summary { margin-top: 10px; color: #8c8c8c; font-size: 13px; line-height: 20px; }
+.booking-summary b { color: #1f2329; font-size: 15px; font-weight: 600; }
+.booking-summary .amount { color: #ff6a00; }
 
 .orders-tools { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 8px 12px; background: #fff; border-bottom: 8px solid var(--page-bg); }
 .orders-page .adm-nav-bar { border-bottom: 0; }
@@ -263,11 +253,9 @@ button, input { letter-spacing: 0; }
 .adm-search-bar-input-box { border-radius: 6px; }
 @media (max-width: 360px) { .legend { gap: 9px; padding-inline: 10px; } }
 @media (max-width: 360px) {
-  .booking-section { padding-right: 12px; padding-left: 12px; }
-  .schedule-rule { grid-template-columns: minmax(76px, 1fr) minmax(0, 1fr) 12px minmax(0, 1fr) 22px; gap: 4px; }
-  .schedule-rule .weekday-value { padding-inline: 6px; font-size: 12px; }
-  .time-field { padding-right: 23px; padding-left: 6px; }
-  .time-field svg { right: 5px; width: 14px; height: 14px; }
-  .time-value { font-size: 12px; }
-  .schedule-rule .remove-rule { width: 22px; }
+  .booking-card { margin-right: 10px; margin-left: 10px; padding: 12px; }
+  .booking-label, .booking-value { font-size: 14px; }
+  .time-rule { grid-template-columns: minmax(74px, .85fr) minmax(0, 1.4fr) auto; gap: 6px; }
+  .rule-weekday, .range-field span, .range-sep { font-size: 13px; }
+  .booking-summary b { font-size: 14px; }
 }
