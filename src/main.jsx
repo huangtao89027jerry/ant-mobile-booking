@@ -94,7 +94,8 @@ const orderTimeText = order => {
 const dayStart = date => { const d = new Date(date); d.setHours(0, 0, 0, 0); return d }
 const weekStartOf = date => { const d = dayStart(date); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d }
 const weekEndOf = date => { const d = weekStartOf(date); d.setDate(d.getDate() + 6); return d }
-const clampToWeek = date => { const monday = weekStartOf(date); const offset = Math.min(Math.max(Math.round((dayStart(date) - monday) / 86400000), 0), 4); const d = new Date(monday); d.setDate(d.getDate() + offset); return d }
+const clampToWeekDay = date => { const monday = weekStartOf(date); const offset = Math.min(Math.max(Math.round((dayStart(date) - monday) / 86400000), 0), 6); const d = new Date(monday); d.setDate(d.getDate() + offset); return d }
+const clampToWindow = date => { const monday = weekStartOf(date); const offset = Math.min(Math.max(Math.round((dayStart(date) - monday) / 86400000), 0), 4); const d = new Date(monday); d.setDate(d.getDate() + offset); return d }
 function Header({ title, onBack, right }) {
   return <NavBar onBack={onBack} right={right} backArrow={<ChevronLeft size={22} />}>{title}</NavBar>
 }
@@ -174,7 +175,7 @@ function Teachers({ go }) {
 }
 
 function Board({ go, teacher }) {
-  const [viewDate, setViewDate] = useState(() => clampToWeek(dayStart(new Date())))
+  const [focusDate, setFocusDate] = useState(() => clampToWeekDay(dayStart(new Date())))
   const [selected, setSelected] = useState(null)
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1) })
@@ -185,9 +186,10 @@ function Board({ go, teacher }) {
   const suppressClick = useRef(false)
   const currentTeacher = teacher && teacher.name ? teacher : null
   const baseDate = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
-  const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(viewDate); d.setDate(viewDate.getDate() + i); return d }), [viewDate])
+  const windowStart = useMemo(() => clampToWindow(focusDate), [focusDate])
+  const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(windowStart); d.setDate(windowStart.getDate() + i); return d }), [windowStart])
   const dayName = ['周日','周一','周二','周三','周四','周五','周六']
-  const rangeLabel = `${weekStartOf(viewDate).getMonth() + 1}月${weekStartOf(viewDate).getDate()}日 - ${weekEndOf(viewDate).getMonth() + 1}月${weekEndOf(viewDate).getDate()}日`
+  const rangeLabel = `${weekStartOf(focusDate).getMonth() + 1}月${weekStartOf(focusDate).getDate()}日 - ${weekEndOf(focusDate).getMonth() + 1}月${weekEndOf(focusDate).getDate()}日`
   const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
   const demoDates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); return dateKey(d) }), [baseDate])
   const events = { [`${demoDates[0]}-9`]:['agenda','日程','磨课'], [`${demoDates[2]}-10`]:['course','已排课','数学一对一'], [`${demoDates[1]}-12`]:['paying','收费中','14:24 · 2人等待'], [`${demoDates[0]}-14`]:['waiting','3人等待',''] }
@@ -198,9 +200,10 @@ function Board({ go, teacher }) {
     while (cells.length % 7) cells.push(null)
     return cells
   }, [calMonth])
-  const jumpTo = date => { setViewDate(clampToWeek(date)); setSelected(null); setDatePickerOpen(false) }
+  const jumpTo = date => { setFocusDate(clampToWeekDay(date)); setSelected(null); setDatePickerOpen(false) }
   const onToday = dates.some(date => dateKey(date) === dateKey(baseDate))
-  const backToToday = () => { setViewDate(clampToWeek(baseDate)); setSelected(null) }
+  const backToToday = () => { setFocusDate(clampToWeekDay(baseDate)); setSelected(null) }
+  const focusDay = date => { setFocusDate(clampToWeekDay(date)); setSelected(null) }
   const choose = (row, day) => {
     if (suppressClick.current) return
     const date = dateKey(dates[day])
@@ -210,7 +213,7 @@ function Board({ go, teacher }) {
     setSelected({row,day,date})
   }
   const shiftDays = amount => {
-    setViewDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return clampToWeek(next) })
+    setFocusDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return clampToWeekDay(next) })
     setSelected(null)
   }
   const onTouchStart = event => { const point = event.touches[0]; touchStart.current = { x: point.clientX, y: point.clientY } }
@@ -230,8 +233,8 @@ function Board({ go, teacher }) {
     <Card className="profile-card"><div className="teacher-row"><button type="button" className="profile-switch" onClick={() => setPickerOpen(true)}>{currentTeacher?<><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}<ChevronDown size={14} /></div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></>:<><div className="avatar avatar-empty"><UserRoundSearch size={19} /></div><div className="profile-main"><div className="teacher-name">请选择老师<ChevronDown size={14} /></div><div className="teacher-meta">选择后可查看该老师的可约时间</div></div></>}</button>{currentTeacher?.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
     <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
     <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-      <div className="date-nav"><span className="date-nav-side" /><Button className="month-picker-button" fill="none" onClick={() => { setCalMonth(new Date(viewDate.getFullYear(), viewDate.getMonth(), 1)); setDatePickerOpen(true) }}>{rangeLabel}<ChevronDown size={17} /></Button><span className="date-nav-side date-nav-end">{!onToday && <button type="button" className="today-button" onClick={backToToday}><CalendarDays size={14} />回今日</button>}</span></div>
-      <div className="schedule-head"><span />{dates.map(d=><span className={dateKey(d)===dateKey(viewDate)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
+      <div className="date-nav"><span className="date-nav-side" /><Button className="month-picker-button" fill="none" onClick={() => { setCalMonth(new Date(focusDate.getFullYear(), focusDate.getMonth(), 1)); setDatePickerOpen(true) }}>{rangeLabel}<ChevronDown size={17} /></Button><span className="date-nav-side date-nav-end">{!onToday && <button type="button" className="today-button" onClick={backToToday}><CalendarDays size={14} />回今日</button>}</span></div>
+      <div className="schedule-head"><span />{dates.map(d=><button type="button" className={dateKey(d)===dateKey(focusDate)?'day-focus':''} key={dateKey(d)} onClick={()=>focusDay(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></button>)}</div>
       {currentTeacher?<><div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
       <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{isSelected?<div className="slot-selected"><span className="slot-time">{8+row}:00-{9+row}:00</span><button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button></div>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b>{ev[2]&&<span>{ev[2]}</span>}</div>}</div>})}</React.Fragment>)}</div></>
       :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p><Button size="small" color="primary" onClick={()=>setPickerOpen(true)}>选择老师</Button></div>}
