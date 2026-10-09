@@ -83,8 +83,9 @@ button, input { letter-spacing: 0; }
 .jump-item em { color: #8c8c8c; font-size: 12px; font-style: normal; font-weight: 400; }
 .date-nav-side { flex: 1; min-width: 0; }
 .date-nav-end { display: flex; justify-content: flex-end; }
-.today-button { padding: 5px 10px; border: 0; border-radius: 6px; background: #eef5ff; color: #1677ff; font: inherit; font-size: 13px; line-height: 18px; }
-.today-button:active { background: #ddedff; }
+.today-button { display: inline-flex; align-items: center; gap: 3px; height: 32px; padding: 0 8px; border: 0; background: transparent; color: #8c8c8c; font: inherit; font-size: 13px; line-height: 18px; }
+.today-button svg { display: block; flex: none; }
+.today-button:active { color: #595959; }
 .teacher-picker .adm-search-bar { margin-bottom: 8px; }
 .picker-list { max-height: min(46vh, 340px); margin-bottom: 12px; overflow-y: auto; }
 .picker-item { display: flex; width: 100%; align-items: center; gap: 12px; padding: 11px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: inherit; font: inherit; text-align: left; }
