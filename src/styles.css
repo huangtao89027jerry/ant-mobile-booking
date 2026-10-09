@@ -134,7 +134,7 @@ button, input { letter-spacing: 0; }
 .slot.selected { background: #f2f8ff; box-shadow: inset 2px 0 0 #1677ff; }
 .slot-selected { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
 .slot-time { color: #1677ff; font-size: 10px; font-variant-numeric: tabular-nums; line-height: 13px; }
-.slot-add { display: flex; align-items: center; justify-content: center; height: 22px; padding: 0 10px; border: 1px solid #1677ff; border-radius: 11px; background: #fff; color: #1677ff; font: inherit; font-size: 11px; line-height: 1; }
+.slot-add { display: flex; align-items: center; justify-content: center; height: 22px; padding: 0 10px; border: 1px solid #1677ff; border-radius: 6px; background: #fff; color: #1677ff; font: inherit; font-size: 11px; line-height: 1; }
 .slot-add:active { background: #e8f2ff; }
 
 .bottom-action { position: fixed; left: 50%; bottom: 0; z-index: 12; display: flex; gap: 8px; width: min(430px, 100%); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #fff; border-top: 1px solid var(--line); }
