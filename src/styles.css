@@ -125,6 +125,7 @@ button, input { letter-spacing: 0; }
 .profile-card .teacher-meta { overflow: hidden; margin-top: 2px; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .date-nav { display: flex; align-items: center; justify-content: center; height: 44px; background: #fff; }
 .date-nav .month-picker-button { display: inline-flex; align-items: center; gap: 5px; height: 36px; padding: 0 10px; color: #333; font-size: 16px; font-weight: 600; }
+.date-nav .month-picker-button > span { display: inline-flex; align-items: center; gap: 5px; }
 .date-nav .month-picker-button svg { color: #8c8c8c; }
 .legend { display: flex; gap: 14px; padding: 8px 14px 9px; background: #fbfcfd; color: #8c8c8c; font-size: 11px; }
 .legend span { display: flex; align-items: center; gap: 5px; }
