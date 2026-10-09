@@ -211,8 +211,11 @@ button, input { letter-spacing: 0; }
 .order-status-cancelled::before { background: #ff4d4f; }
 .order-course { margin-top: 5px; font-size: 13px; line-height: 20px; }
 .order-time { overflow: hidden; margin-top: 2px; color: #777; font-size: 12px; line-height: 19px; text-overflow: ellipsis; white-space: nowrap; }
-.order-alert { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 6px 9px; border-radius: 6px; background: #fff7e6; color: #d46b08; font-size: 12px; line-height: 20px; }
-.order-alert b { color: #ff8f1f; font-size: 14px; }
+.order-facts { display: flex; gap: 16px; margin-top: 3px; color: #8c8c8c; font-size: 12px; line-height: 19px; }
+.order-link { display: flex; justify-content: space-between; gap: 10px; margin-top: 9px; padding: 8px 10px; border-radius: 8px; background: #f7f9fc; color: #8c8c8c; font-size: 12px; line-height: 18px; }
+.order-link b { color: #1f2329; font-variant-numeric: tabular-nums; font-weight: 600; }
+.order-expire-tip { margin: 6px 0 0; color: #d4650a; font-size: 11px; line-height: 17px; }
+.order-success { margin: 8px 0 0; color: #00905f; font-size: 12px; line-height: 18px; }
 .order-footer { min-height: 33px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .order-price { font-size: 18px; font-weight: 600; line-height: 25px; }
 .order-actions { display: flex; gap: 6px; }
@@ -229,8 +232,6 @@ button, input { letter-spacing: 0; }
 .detail-alert b { font-weight: 600; }
 .detail-alert.effective { background: #e6f4ff; color: #0958d9; }
 .detail-alert.expired { background: #f5f5f5; color: #999; }
-.detail-countdown { display: flex; align-items: baseline; justify-content: space-between; margin: 8px 12px 0; padding: 12px; border-radius: 8px; background: #fff; color: #666; font-size: 12px; }
-.detail-countdown b { color: #ff8f1f; font-size: 24px; font-variant-numeric: tabular-nums; line-height: 28px; }
 .detail-lessons { margin-top: 10px; border-top: 1px solid var(--line); }
 .detail-lesson-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; border-bottom: 1px solid var(--line); color: #333; font-size: 13px; line-height: 20px; }
 .detail-lesson-row:last-child { border-bottom: 0; }
@@ -244,6 +245,11 @@ button, input { letter-spacing: 0; }
 .lesson-remove svg { display: block; }
 .lesson-remove:active { color: #8c8c8c; }
 .detail-tip { margin: 10px 0 0; color: #999; font-size: 12px; line-height: 18px; }
+.detail-link { padding: 0; border: 0; background: transparent; color: #1677ff; font: inherit; font-size: 13px; }
+.pending-text { color: #d4650a; }
+.count-text { color: #ff8f1f; font-variant-numeric: tabular-nums; }
+.detail-receipt { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.detail-receipt > span { color: #999; font-size: 11px; }
 .detail-summary { display: flex; gap: 14px; margin-top: 12px; font-size: 13px; }
 .empty { padding: 56px 20px; color: #999; text-align: center; }
 .adm-card-body { padding: 14px; }
