@@ -91,6 +91,10 @@ const orderTimeText = order => {
   const base = (/(周[一二三四五六日]\s*\d{2}:\d{2}-\d{2}:\d{2})/.exec(order.time) || [''])[0]
   return `${base} · 共${visibleLessons(order).length}次`
 }
+const dayStart = date => { const d = new Date(date); d.setHours(0, 0, 0, 0); return d }
+const weekStartOf = date => { const d = dayStart(date); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d }
+const weekEndOf = date => { const d = weekStartOf(date); d.setDate(d.getDate() + 6); return d }
+const clampToWeek = date => { const monday = weekStartOf(date); const offset = Math.min(Math.max(Math.round((dayStart(date) - monday) / 86400000), 0), 4); const d = new Date(monday); d.setDate(d.getDate() + offset); return d }
 function Header({ title, onBack, right }) {
   return <NavBar onBack={onBack} right={right} backArrow={<ChevronLeft size={22} />}>{title}</NavBar>
 }
@@ -170,7 +174,7 @@ function Teachers({ go }) {
 }
 
 function Board({ go, teacher }) {
-  const [viewDate, setViewDate] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d })
+  const [viewDate, setViewDate] = useState(() => clampToWeek(dayStart(new Date())))
   const [selected, setSelected] = useState(null)
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1) })
@@ -183,7 +187,7 @@ function Board({ go, teacher }) {
   const baseDate = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
   const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(viewDate); d.setDate(viewDate.getDate() + i); return d }), [viewDate])
   const dayName = ['周日','周一','周二','周三','周四','周五','周六']
-  const rangeLabel = `${dates[0].getMonth() + 1}月${dates[0].getDate()}日 - ${dates[2].getMonth() + 1}月${dates[2].getDate()}日`
+  const rangeLabel = `${weekStartOf(viewDate).getMonth() + 1}月${weekStartOf(viewDate).getDate()}日 - ${weekEndOf(viewDate).getMonth() + 1}月${weekEndOf(viewDate).getDate()}日`
   const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
   const demoDates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(baseDate); d.setDate(baseDate.getDate() + i); return dateKey(d) }), [baseDate])
   const events = { [`${demoDates[0]}-9`]:['agenda','日程','磨课'], [`${demoDates[2]}-10`]:['course','已排课','数学一对一'], [`${demoDates[1]}-12`]:['paying','收费中','14:24 · 2人等待'], [`${demoDates[0]}-14`]:['waiting','3人等待',''] }
@@ -194,9 +198,9 @@ function Board({ go, teacher }) {
     while (cells.length % 7) cells.push(null)
     return cells
   }, [calMonth])
-  const jumpTo = date => { setViewDate(new Date(date)); setSelected(null); setPickerOpen(false) }
+  const jumpTo = date => { setViewDate(clampToWeek(date)); setSelected(null); setDatePickerOpen(false) }
   const onToday = dates.some(date => dateKey(date) === dateKey(baseDate))
-  const backToToday = () => { setViewDate(new Date(baseDate)); setSelected(null) }
+  const backToToday = () => { setViewDate(clampToWeek(baseDate)); setSelected(null) }
   const choose = (row, day) => {
     if (suppressClick.current) return
     const date = dateKey(dates[day])
@@ -206,7 +210,7 @@ function Board({ go, teacher }) {
     setSelected({row,day,date})
   }
   const shiftDays = amount => {
-    setViewDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return next })
+    setViewDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return clampToWeek(next) })
     setSelected(null)
   }
   const onTouchStart = event => { const point = event.touches[0]; touchStart.current = { x: point.clientX, y: point.clientY } }
@@ -227,7 +231,7 @@ function Board({ go, teacher }) {
     <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
     <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="date-nav"><span className="date-nav-side" /><Button className="month-picker-button" fill="none" onClick={() => { setCalMonth(new Date(viewDate.getFullYear(), viewDate.getMonth(), 1)); setDatePickerOpen(true) }}>{rangeLabel}<ChevronDown size={17} /></Button><span className="date-nav-side date-nav-end">{!onToday && <button type="button" className="today-button" onClick={backToToday}><CalendarDays size={14} />回今日</button>}</span></div>
-      <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
+      <div className="schedule-head"><span />{dates.map(d=><span className={dateKey(d)===dateKey(viewDate)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
       {currentTeacher?<><div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
       <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{isSelected?<div className="slot-selected"><span className="slot-time">{8+row}:00-{9+row}:00</span><button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button></div>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b>{ev[2]&&<span>{ev[2]}</span>}</div>}</div>})}</React.Fragment>)}</div></>
       :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p><Button size="small" color="primary" onClick={()=>setPickerOpen(true)}>选择老师</Button></div>}
