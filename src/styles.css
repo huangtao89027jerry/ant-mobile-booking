@@ -17,6 +17,8 @@ button, input { letter-spacing: 0; }
 .page { min-height: 100vh; padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
 .adm-nav-bar { height: 45px; background: #fff; border-bottom: 1px solid var(--line); }
 .adm-nav-bar-title { font-size: 17px; font-weight: 600; }
+.nav-add { display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0; border: 0; background: transparent; color: #1677ff; font: inherit; font-size: 13px; line-height: 20px; white-space: nowrap; }
+.nav-add svg { display: block; flex: none; }
 .icon-button { display: grid; place-items: center; width: 32px; height: 32px; color: #333; }
 
 .home-head { padding: 20px 16px 16px; background: #fff; }
@@ -235,8 +237,6 @@ button, input { letter-spacing: 0; }
 .detail-tip { margin: 10px 0 0; color: #999; font-size: 12px; line-height: 18px; }
 .detail-summary { display: flex; gap: 14px; margin-top: 12px; font-size: 13px; }
 .empty { padding: 56px 20px; color: #999; text-align: center; }
-.tabbar-wrap { position: fixed; bottom: 0; left: 50%; z-index: 10; width: min(430px, 100%); transform: translateX(-50%); background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
-.adm-tab-bar { height: 58px; }
 .adm-card-body { padding: 14px; }
 .adm-button { border-radius: 6px; }
 .adm-tag { border-radius: 4px; }

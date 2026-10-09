@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   Button, Card, DatePicker, Dialog, List, NavBar, Popup, SearchBar,
-  Selector, Space, Stepper, TabBar, Tabs, Tag, Toast
+  Selector, Space, Stepper, Tabs, Tag, Toast
 } from 'antd-mobile'
 import {
   BadgeDollarSign, CalendarDays, CalendarPlus, Check, CheckCircle2, ChevronDown,
-  ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck, ClipboardList,
+  ChevronLeft, ChevronRight, CircleDollarSign, ClipboardCheck,
   Clock3, Info, Library, ListChecks, MessageSquareText, Plus, ReceiptText, Search,
   Sparkles, Trash2, UserRoundSearch, Users, UsersRound, X
 } from 'lucide-react'
@@ -50,7 +50,7 @@ const appEntries = [
   [BadgeDollarSign, '报名收费'], [UsersRound, '班级管理'], [CalendarDays, '我的课表'],
   [CheckCircle2, '上课点名'], [MessageSquareText, '上课点评'], [Sparkles, 'AI点评'],
   [Library, '素材管理'], [Users, '学员管理'], [UserRoundSearch, '意向学员'],
-  [CalendarPlus, '名师约课', true], [ClipboardCheck, '我的审批'], [ReceiptText, '订单管理'],
+  [CalendarPlus, '名师意向单', true], [ClipboardCheck, '我的审批'], [ReceiptText, '订单管理'],
 ]
 
 const tagColor = status => ({
@@ -91,15 +91,8 @@ const orderTimeText = order => {
   const base = (/(周[一二三四五六日]\s*\d{2}:\d{2}-\d{2}:\d{2})/.exec(order.time) || [''])[0]
   return `${base} · 共${visibleLessons(order).length}次`
 }
-function Header({ title, onBack }) {
-  return <NavBar onBack={onBack} backArrow={<ChevronLeft size={22} />}>{title}</NavBar>
-}
-
-function BottomTabs({ page, go }) {
-  return <div className="tabbar-wrap"><TabBar activeKey={page === 'orders' ? 'orders' : 'teachers'} onChange={go}>
-    <TabBar.Item key="teachers" icon={<CalendarPlus size={20} />} title="名师约课" />
-    <TabBar.Item key="orders" icon={<ClipboardList size={20} />} title="我的意向单" />
-  </TabBar></div>
+function Header({ title, onBack, right }) {
+  return <NavBar onBack={onBack} right={right} backArrow={<ChevronLeft size={22} />}>{title}</NavBar>
 }
 
 function TeacherSheet({ teacher, onClose, onView }) {
@@ -130,7 +123,7 @@ function Home({ go }) {
       {[['1','待跟进'],['0','待点名'],['0','待点评'],['19','待审批']].map(x => <div className="todo" key={x[1]}><b>{x[0]}</b><span>{x[1]}</span></div>)}
     </div></Card>
     <Card className="section-card"><div className="section-title">常用功能</div><div className="app-grid">
-      {appEntries.map(([Icon,label,active]) => <button className={`app-entry ${active ? 'highlight' : ''}`} key={label} onClick={() => active && go('teachers')}>
+      {appEntries.map(([Icon,label,active]) => <button className={`app-entry ${active ? 'highlight' : ''}`} key={label} onClick={() => active && go('orders')}>
         <span className="app-icon"><Icon size={21} /></span>{label}
       </button>)}
     </div></Card>
@@ -151,7 +144,7 @@ function Teachers({ go }) {
   )
   const openFilters = () => { setDraftFilters(filters); setFilterOpen(true) }
   return <div className="page">
-    <Header title="名师约课" onBack={() => go('home')} />
+    <Header title="新增预约意向" onBack={() => go('orders')} />
     <div className="intro"><Info size={16} />提前预约老师时段并生成意向单，时段被占用时可排队等待；点击「去收费」锁定预约时段，收费完成后按预约时间自动生成排课。</div>
     <div className="search-panel"><SearchBar className="toolbar-search" placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={openFilters}>筛选 <ChevronDown size={14} /></Button></div>
     {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>选择老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
@@ -173,7 +166,6 @@ function Teachers({ go }) {
       <div className="filter-group"><b>任课老师</b><Selector columns={4} options={['全部',...teachers.map(t=>t.name)].map(v => ({ label:v,value:v }))} value={[draftFilters.teacher]} onChange={v => setDraftFilters(f => ({...f,teacher:v[0]||'全部'}))} /></div>
       <div className="filter-actions"><Button fill="none" onClick={() => setDraftFilters(emptyFilters)}>重置</Button><Button color="primary" onClick={() => { setFilters(draftFilters); setFilterOpen(false) }}>完成</Button></div>
     </Popup>
-    <BottomTabs page="teachers" go={go} />
   </div>
 }
 
@@ -318,12 +310,11 @@ function Orders({ go, orders }) {
   const [tab,setTab]=useState('全部'); const [query,setQuery]=useState(''); const [teacherOpen,setTeacherOpen]=useState(false)
   const groups = {'全部':orders,'进行中':orders.filter(o=>['收费中','可收费','等待中'].includes(orderStatus(o))),'已生效':orders.filter(o=>orderStatus(o)==='已生效'),'已结束':orders.filter(o=>['已过期','已取消'].includes(orderStatus(o)))}
   const list=groups[tab].filter(o=>!query||o.name.includes(query))
-  return <div className="page orders-page"><Header title="我的意向单" onBack={()=>go('teachers')} />
+  return <div className="page orders-page"><Header title="名师意向单" onBack={()=>go('home')} right={<button type="button" className="nav-add" onClick={()=>go('teachers')}>新增预约意向 <Plus size={15} /></button>} />
     <Tabs className="orders-tabs" activeKey={tab} onChange={setTab}>{Object.entries(groups).map(([k,v])=><Tabs.Tab title={`${k} ${v.length}`} key={k} />)}</Tabs>
     <div className="orders-tools"><SearchBar className="toolbar-search" placeholder="搜索学员姓名" value={query} onChange={setQuery} /><Button className="orders-filter-button" onClick={()=>setTeacherOpen(true)}>任课老师 <ChevronDown size={14} /></Button></div>
     <div className="orders-list">{list.map((o,i)=>{const st=orderStatus(o); return <Card className="order-card" key={`${o.name}-${i}`} onClick={()=>go('detail',o.id)}><div className="order-head"><b>{o.name}</b><span className={`order-status order-status-${statusClass(st)}`}><Tag color={tagColor(st)}>{st}</Tag></span></div><div className="order-course">数学一对一 · 郭老师 · 长沙校区</div><div className="order-time">{orderTimeText(o)} · 购买20小时</div>{st==='收费中'&&<div className="order-alert"><span>请在倒计时内完成收费</span><b>14:24</b></div>}<div className="order-footer"><div className="order-price">{o.price}</div><div className="order-actions">{['收费中','可收费','等待中'].includes(st)&&<Button className="order-cancel" fill="none" size="small" onClick={e=>{e.stopPropagation();Dialog.confirm({content:'取消后将释放预约时段，是否继续？'})}}>取消</Button>}{st==='可收费'&&<Button className="order-primary" color="primary" size="small">去收费</Button>}{st==='收费中'&&<Button className="order-primary" color="primary" size="small">继续收费</Button>}{['已生效','已过期','已取消'].includes(st)&&<Button className="order-detail" fill="none" size="small">查看详情</Button>}</div></div></Card>})}{!list.length&&<div className="empty">暂无符合条件的意向单</div>}</div>
     <Popup visible={teacherOpen} onMaskClick={()=>setTeacherOpen(false)} bodyStyle={{borderRadius:'12px 12px 0 0',padding:16}}><h3>任课老师</h3><List>{['全部老师','郭老师','陈老师','周老师'].map(x=><List.Item key={x} clickable onClick={()=>setTeacherOpen(false)}>{x}</List.Item>)}</List></Popup>
-    <BottomTabs page="orders" go={go} />
   </div>
 }
 
