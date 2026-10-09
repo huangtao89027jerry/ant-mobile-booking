@@ -315,7 +315,7 @@ function Booking({ go, createOrder }) {
       <div className="booking-row clickable" onClick={()=>setPopup('room')}><span className="booking-label">上课教室</span><span className={`booking-value ${room?'':'placeholder-value'}`}>{room||'请选择上课教室'}<ChevronRight size={16} /></span></div>
       <div className="booking-row"><span className="booking-label">购买数量</span><span className="booking-value"><Stepper min={1} value={qty} onChange={setQty} /><span className="qty-unit">小时</span></span></div>
     </section>
-    <section className="booking-card"><div className="booking-card-title">意向上课时间<button type="button" className="rule-add" onClick={addRule}><Plus size={15} />增加上课时间</button></div>
+    <section className="booking-card"><div className="booking-card-title">意向上课时间<button type="button" className="rule-add" onClick={addRule}><Plus size={15} />添加</button></div>
       <div className="time-rules">{rules.map(rule=><div className="time-rule" key={rule.id}>
         <button type="button" className="rule-weekday" onClick={()=>setWeekdayRuleId(rule.id)}><span>{rule.days.length ? rule.days.map(day=>weekdayNames[day]).join('、') : '请选择星期'}</span><ChevronDown size={14} /></button>
         <span className="rule-range">
