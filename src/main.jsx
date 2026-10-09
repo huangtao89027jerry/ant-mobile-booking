@@ -144,7 +144,7 @@ function Teachers({ go }) {
   )
   const openFilters = () => { setDraftFilters(filters); setFilterOpen(true) }
   return <div className="page">
-    <Header title="新增预约意向" onBack={() => go('orders')} />
+    <Header title="选择老师" onBack={() => go('board')} />
     <div className="intro"><Info size={16} />提前预约老师时段并生成意向单，时段被占用时可排队等待；点击「去收费」锁定预约时段，收费完成后按预约时间自动生成排课。</div>
     <div className="search-panel"><SearchBar className="toolbar-search" placeholder="搜索任课老师" value={query} onChange={setQuery} /><Button className="filter-button" onClick={openFilters}>筛选 <ChevronDown size={14} /></Button></div>
     {!!visible.length && <section className="teacher-results"><div className="teacher-results-head"><b>选择老师</b><span>共 {visible.length} 位</span></div><List className="teacher-list">
@@ -174,6 +174,8 @@ function Board({ go, teacher }) {
   const [selected, setSelected] = useState(null)
   const [monthPickerVisible, setMonthPickerVisible] = useState(false)
   const [sheet, setSheet] = useState(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [pickerQuery, setPickerQuery] = useState('')
   const touchStart = useRef(null)
   const suppressClick = useRef(false)
   const currentTeacher = teacher || teachers[0]
@@ -209,8 +211,8 @@ function Board({ go, teacher }) {
     shiftDays(dx < 0 ? 1 : -1)
   }
   return <div className="page">
-    <Header title="老师可约时间" onBack={() => go('teachers')} />
-    <Card className="profile-card"><div className="teacher-row"><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}</div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div>{currentTeacher.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
+    <Header title="老师可约时间" onBack={() => go('orders')} />
+    <Card className="profile-card"><div className="teacher-row"><button type="button" className="profile-switch" onClick={() => setPickerOpen(true)}><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}<ChevronDown size={14} /></div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></button>{currentTeacher.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
     <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
     <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="date-nav"><Button className="month-picker-button" fill="none" onClick={() => setMonthPickerVisible(true)}>{monthLabel}<ChevronDown size={17} /></Button></div>
@@ -232,6 +234,12 @@ function Board({ go, teacher }) {
       <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}{isSelected&&!ev&&<div className="slot-selected">已选时段<br />{8+row}:00-{9+row}:00</div>}</div>})}</React.Fragment>)}</div>
     </div>
     <div className="bottom-action"><Button block color="primary" disabled={!selected} onClick={()=>go('booking')}>{selected?'预约所选时段（1）':'选择可约时段'}</Button></div>
+    <Popup className="teacher-picker" visible={pickerOpen} onMaskClick={() => setPickerOpen(false)} bodyStyle={{ borderRadius:'12px 12px 0 0', padding:16 }}>
+      <h3>选择老师</h3>
+      <SearchBar placeholder="搜索任课老师" value={pickerQuery} onChange={setPickerQuery} />
+      <div className="picker-list">{teachers.filter(t => !pickerQuery || t.name.includes(pickerQuery)).map(t => <button type="button" className={`picker-item ${t.name===currentTeacher.name?'active':''}`} key={t.name} onClick={() => { setPickerOpen(false); setSelected(null); go('board', t) }}><span className="avatar">{t.name[0]}</span><span className="picker-main"><b>{t.name}</b><em>{t.subject} · {t.grade}</em></span>{t.name===currentTeacher.name&&<Check size={16} />}</button>)}</div>
+      <Button block fill="none" onClick={() => { setPickerOpen(false); go('teachers') }}>查看全部老师</Button>
+    </Popup>
   </div>
 }
 
@@ -306,11 +314,11 @@ function Booking({ go, createOrder }) {
   </div>
 }
 
-function Orders({ go, orders }) {
+function Orders({ go, orders, onAdd }) {
   const [tab,setTab]=useState('全部'); const [query,setQuery]=useState(''); const [teacherOpen,setTeacherOpen]=useState(false)
   const groups = {'全部':orders,'进行中':orders.filter(o=>['收费中','可收费','等待中'].includes(orderStatus(o))),'已生效':orders.filter(o=>orderStatus(o)==='已生效'),'已结束':orders.filter(o=>['已过期','已取消'].includes(orderStatus(o)))}
   const list=groups[tab].filter(o=>!query||o.name.includes(query))
-  return <div className="page orders-page"><Header title="名师意向单" onBack={()=>go('home')} right={<button type="button" className="nav-add" onClick={()=>go('teachers')}>新增预约意向 <Plus size={15} /></button>} />
+  return <div className="page orders-page"><Header title="名师意向单" onBack={()=>go('home')} right={<button type="button" className="nav-add" onClick={onAdd}>新增预约意向 <Plus size={15} /></button>} />
     <Tabs className="orders-tabs" activeKey={tab} onChange={setTab}>{Object.entries(groups).map(([k,v])=><Tabs.Tab title={`${k} ${v.length}`} key={k} />)}</Tabs>
     <div className="orders-tools"><SearchBar className="toolbar-search" placeholder="搜索学员姓名" value={query} onChange={setQuery} /><Button className="orders-filter-button" onClick={()=>setTeacherOpen(true)}>任课老师 <ChevronDown size={14} /></Button></div>
     <div className="orders-list">{list.map((o,i)=>{const st=orderStatus(o); return <Card className="order-card" key={`${o.name}-${i}`} onClick={()=>go('detail',o.id)}><div className="order-head"><b>{o.name}</b><span className={`order-status order-status-${statusClass(st)}`}><Tag color={tagColor(st)}>{st}</Tag></span></div><div className="order-course">数学一对一 · 郭老师 · 长沙校区</div><div className="order-time">{orderTimeText(o)} · 购买20小时</div>{st==='收费中'&&<div className="order-alert"><span>请在倒计时内完成收费</span><b>14:24</b></div>}<div className="order-footer"><div className="order-price">{o.price}</div><div className="order-actions">{['收费中','可收费','等待中'].includes(st)&&<Button className="order-cancel" fill="none" size="small" onClick={e=>{e.stopPropagation();Dialog.confirm({content:'取消后将释放预约时段，是否继续？'})}}>取消</Button>}{st==='可收费'&&<Button className="order-primary" color="primary" size="small">去收费</Button>}{st==='收费中'&&<Button className="order-primary" color="primary" size="small">继续收费</Button>}{['已生效','已过期','已取消'].includes(st)&&<Button className="order-detail" fill="none" size="small">查看详情</Button>}</div></div></Card>})}{!list.length&&<div className="empty">暂无符合条件的意向单</div>}</div>
@@ -352,7 +360,8 @@ function App(){
   const go=(next,data)=>{setCurrent(data||current);setPage(next);window.scrollTo(0,0)}
   const createOrder=(status,booking={})=>setOrders(v=>[{id:`o${Date.now()}`,status,name:'王小明',time:booking.time||'周三 17:00-18:00 · 共4次',price:booking.price||'¥10000'},...v])
   const removeLesson=(id,key)=>setOrders(v=>v.map(o=>o.id===id?{...o,removed:[...(o.removed||[]),key]}:o))
-  return <main className="app">{page==='home'&&<Home go={go}/>} {page==='teachers'&&<Teachers go={go}/>} {page==='board'&&<Board go={go} teacher={current}/>} {page==='booking'&&<Booking go={go} createOrder={createOrder}/>} {page==='orders'&&<Orders go={go} orders={orders}/>} {page==='detail'&&<Detail go={go} order={orders.find(o=>o.id===current)} onRemoveLesson={removeLesson}/>}</main>
+  const startBooking=()=>go('board', current&&current.name?current:teachers[0])
+  return <main className="app">{page==='home'&&<Home go={go}/>} {page==='teachers'&&<Teachers go={go}/>} {page==='board'&&<Board go={go} teacher={current}/>} {page==='booking'&&<Booking go={go} createOrder={createOrder}/>} {page==='orders'&&<Orders go={go} orders={orders} onAdd={startBooking}/>} {page==='detail'&&<Detail go={go} order={orders.find(o=>o.id===current)} onRemoveLesson={removeLesson}/>}</main>
 }
 
 createRoot(document.getElementById('root')).render(<App />)
