@@ -178,7 +178,7 @@ function Board({ go, teacher }) {
   const [pickerQuery, setPickerQuery] = useState('')
   const touchStart = useRef(null)
   const suppressClick = useRef(false)
-  const currentTeacher = teacher || teachers[0]
+  const currentTeacher = teacher && teacher.name ? teacher : null
   const baseDate = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
   const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(viewDate); d.setDate(viewDate.getDate() + i); return d }), [viewDate])
   const dayName = ['周日','周一','周二','周三','周四','周五','周六']
@@ -210,9 +210,11 @@ function Board({ go, teacher }) {
     window.setTimeout(() => { suppressClick.current = false }, 400)
     shiftDays(dx < 0 ? 1 : -1)
   }
+  const actionText = !currentTeacher ? '选择老师' : selected ? '预约所选时段（1）' : '选择可约时段'
+  const onAction = () => { if (!currentTeacher) return setPickerOpen(true); if (selected) go('booking') }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('orders')} />
-    <Card className="profile-card"><div className="teacher-row"><button type="button" className="profile-switch" onClick={() => setPickerOpen(true)}><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}<ChevronDown size={14} /></div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></button>{currentTeacher.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
+    <Card className="profile-card"><div className="teacher-row"><button type="button" className="profile-switch" onClick={() => setPickerOpen(true)}>{currentTeacher?<><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}<ChevronDown size={14} /></div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></>:<><div className="avatar avatar-empty"><UserRoundSearch size={19} /></div><div className="profile-main"><div className="teacher-name">请选择老师<ChevronDown size={14} /></div><div className="teacher-meta">选择后可查看该老师的可约时间</div></div></>}</button>{currentTeacher?.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
     <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
     <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="date-nav"><Button className="month-picker-button" fill="none" onClick={() => setMonthPickerVisible(true)}>{monthLabel}<ChevronDown size={17} /></Button></div>
@@ -230,14 +232,15 @@ function Board({ go, teacher }) {
         }}
       />
       <div className="schedule-head"><span />{dates.map(d=><span className={selected?.date===dateKey(d)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
-      <div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
-      <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}{isSelected&&!ev&&<div className="slot-selected">已选时段<br />{8+row}:00-{9+row}:00</div>}</div>})}</React.Fragment>)}</div>
+      {currentTeacher?<><div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
+      <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b><br />{ev[2]}</div>}{isSelected&&!ev&&<div className="slot-selected">已选时段<br />{8+row}:00-{9+row}:00</div>}</div>})}</React.Fragment>)}</div></>
+      :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p></div>}
     </div>
-    <div className="bottom-action"><Button block color="primary" disabled={!selected} onClick={()=>go('booking')}>{selected?'预约所选时段（1）':'选择可约时段'}</Button></div>
+    <div className="bottom-action"><Button block color="primary" disabled={!!currentTeacher&&!selected} onClick={onAction}>{actionText}</Button></div>
     <Popup className="teacher-picker" visible={pickerOpen} onMaskClick={() => setPickerOpen(false)} bodyStyle={{ borderRadius:'12px 12px 0 0', padding:16 }}>
       <h3>选择老师</h3>
       <SearchBar placeholder="搜索任课老师" value={pickerQuery} onChange={setPickerQuery} />
-      <div className="picker-list">{teachers.filter(t => !pickerQuery || t.name.includes(pickerQuery)).map(t => <button type="button" className={`picker-item ${t.name===currentTeacher.name?'active':''}`} key={t.name} onClick={() => { setPickerOpen(false); setSelected(null); go('board', t) }}><span className="avatar">{t.name[0]}</span><span className="picker-main"><b>{t.name}</b><em>{t.subject} · {t.grade}</em></span>{t.name===currentTeacher.name&&<Check size={16} />}</button>)}</div>
+      <div className="picker-list">{teachers.filter(t => !pickerQuery || t.name.includes(pickerQuery)).map(t => <button type="button" className={`picker-item ${t.name===currentTeacher?.name?'active':''}`} key={t.name} onClick={() => { setPickerOpen(false); setSelected(null); go('board', t) }}><span className="avatar">{t.name[0]}</span><span className="picker-main"><b>{t.name}</b><em>{t.subject} · {t.grade}</em></span>{t.name===currentTeacher?.name&&<Check size={16} />}</button>)}</div>
       <Button block fill="none" onClick={() => { setPickerOpen(false); go('teachers') }}>查看全部老师</Button>
     </Popup>
   </div>
@@ -360,7 +363,7 @@ function App(){
   const go=(next,data)=>{setCurrent(data||current);setPage(next);window.scrollTo(0,0)}
   const createOrder=(status,booking={})=>setOrders(v=>[{id:`o${Date.now()}`,status,name:'王小明',time:booking.time||'周三 17:00-18:00 · 共4次',price:booking.price||'¥10000'},...v])
   const removeLesson=(id,key)=>setOrders(v=>v.map(o=>o.id===id?{...o,removed:[...(o.removed||[]),key]}:o))
-  const startBooking=()=>go('board', current&&current.name?current:teachers[0])
+  const startBooking=()=>{setCurrent(null);setPage('board');window.scrollTo(0,0)}
   return <main className="app">{page==='home'&&<Home go={go}/>} {page==='teachers'&&<Teachers go={go}/>} {page==='board'&&<Board go={go} teacher={current}/>} {page==='booking'&&<Booking go={go} createOrder={createOrder}/>} {page==='orders'&&<Orders go={go} orders={orders} onAdd={startBooking}/>} {page==='detail'&&<Detail go={go} order={orders.find(o=>o.id===current)} onRemoveLesson={removeLesson}/>}</main>
 }
 

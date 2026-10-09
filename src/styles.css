@@ -68,6 +68,9 @@ button, input { letter-spacing: 0; }
 .profile-switch { display: flex; flex: 1; min-width: 0; align-items: center; gap: 12px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; }
 .profile-switch .teacher-name { display: flex; align-items: center; gap: 4px; }
 .profile-switch svg { flex: none; color: #bfbfbf; }
+.avatar-empty { background: #f5f5f5; color: #bfbfbf; }
+.schedule-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 74px 24px 86px; color: #bfbfbf; }
+.schedule-empty p { margin: 0; color: #999; font-size: 13px; line-height: 20px; }
 .teacher-picker h3 { margin: 2px 0 12px; font-size: 17px; line-height: 24px; }
 .teacher-picker .adm-search-bar { margin-bottom: 8px; }
 .picker-list { max-height: min(46vh, 340px); margin-bottom: 12px; overflow-y: auto; }
