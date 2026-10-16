@@ -180,12 +180,14 @@ function Board({ go, teacher }) {
   const [sheet, setSheet] = useState(null)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerQuery, setPickerQuery] = useState('')
-  const stripRef = useRef(null)
+  const headTrackRef = useRef(null)
+  const gridTrackRef = useRef(null)
   const gesture = useRef(null)
   const suppressClick = useRef(false)
   const currentTeacher = teacher && teacher.name ? teacher : null
   const baseDate = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
   const dates = useMemo(() => Array.from({length:3},(_,i) => { const d = new Date(viewDate); d.setDate(viewDate.getDate() + i); return d }), [viewDate])
+  const bufferDays = useMemo(() => Array.from({length:5},(_,i) => { const d = new Date(viewDate); d.setDate(d.getDate() + i - 1); return d }), [viewDate])
   const dayName = ['周日','周一','周二','周三','周四','周五','周六']
   const rangeLabel = `${weekStartOf(viewDate).getMonth() + 1}月${weekStartOf(viewDate).getDate()}日 - ${weekEndOf(viewDate).getMonth() + 1}月${weekEndOf(viewDate).getDate()}日`
   const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
@@ -201,27 +203,29 @@ function Board({ go, teacher }) {
   const jumpTo = date => { setViewDate(dayStart(date)); setSelected(null); setDatePickerOpen(false) }
   const onToday = dates.some(date => dateKey(date) === dateKey(baseDate))
   const backToToday = () => { setViewDate(dayStart(baseDate)); setSelected(null) }
-  const choose = (row, day) => {
+  const choose = (row, date) => {
     if (suppressClick.current) return
-    const date = dateKey(dates[day])
     const event = events[`${date}-${8+row}`]
     if (event?.[0] === 'paying') return Toast.show('该时段正在收费锁定中，暂不可预约')
-    if (event?.[0] === 'course' || event?.[0] === 'agenda') return Dialog.confirm({ content: `当前时段已有${event[1]}，预约后将进入等待。是否继续？`, confirmText:'继续预约' }).then(ok => ok && setSelected({row,day,date}))
-    setSelected({row,day,date})
+    if (event?.[0] === 'course' || event?.[0] === 'agenda') return Dialog.confirm({ content: `当前时段已有${event[1]}，预约后将进入等待。是否继续？`, confirmText:'继续预约' }).then(ok => ok && setSelected({row,date}))
+    setSelected({row,date})
   }
   const shiftDays = amount => {
     setViewDate(current => { const next = new Date(current); next.setDate(next.getDate() + amount); return next })
     setSelected(null)
   }
-  const stripWidth = () => stripRef.current?.offsetWidth || 320
+  const trackEls = () => [headTrackRef.current, gridTrackRef.current].filter(Boolean)
+  const setTrackTransform = value => {
+    trackEls().forEach(el => { el.style.transition = 'none'; el.style.transform = value })
+  }
+  const animateTracks = (from, to, duration) => trackEls().map(el => el.animate([{ transform: from }, { transform: to }], { duration, easing: 'ease-out' }))
   const onTouchStart = event => {
     const point = event.touches[0]
     gesture.current = { x: point.clientX, y: point.clientY, dx: 0, axis: null }
   }
   const onTouchMove = event => {
     const state = gesture.current
-    const el = stripRef.current
-    if (!state || !el) return
+    if (!state || !trackEls().length) return
     const point = event.touches[0]
     const dx = point.clientX - state.x
     const dy = point.clientY - state.y
@@ -231,34 +235,28 @@ function Board({ go, teacher }) {
     }
     if (state.axis !== 'x') return
     state.dx = dx
-    el.style.transition = 'none'
-    el.style.transform = `translateX(${dx}px)`
+    setTrackTransform(`translateX(calc(-20% + ${dx}px))`)
   }
   const onTouchEnd = () => {
     const state = gesture.current
     gesture.current = null
-    const el = stripRef.current
-    if (!el) return
-    if (!state || state.axis !== 'x') { el.style.transform = 'translateX(0px)'; return }
+    if (!trackEls().length) return
+    if (!state || state.axis !== 'x') { setTrackTransform('translateX(-20%)'); return }
     const dx = state.dx
+    const from = `translateX(calc(-20% + ${dx}px))`
     if (Math.abs(dx) < 40) {
-      el.animate([{ transform: `translateX(${dx}px)` }, { transform: 'translateX(0px)' }], { duration: 160, easing: 'ease-out' })
-      el.style.transform = 'translateX(0px)'
+      animateTracks(from, 'translateX(-20%)', 160)
+      setTrackTransform('translateX(-20%)')
       return
     }
     const dir = dx < 0 ? 1 : -1
+    const to = dir > 0 ? 'translateX(-40%)' : 'translateX(0%)'
     suppressClick.current = true
-    window.setTimeout(() => { suppressClick.current = false }, 420)
-    const width = stripWidth()
-    const out = el.animate([{ transform: `translateX(${dx}px)` }, { transform: `translateX(${-dir * width}px)` }], { duration: 160, easing: 'ease-out' })
-    out.onfinish = () => {
+    window.setTimeout(() => { suppressClick.current = false }, 460)
+    Promise.all(animateTracks(from, to, 170).map(animation => animation.finished)).then(() => {
       shiftDays(dir)
-      el.style.transition = 'none'
-      el.style.transform = `translateX(${dir * width}px)`
-      const incoming = el.animate([{ transform: `translateX(${dir * width}px)` }, { transform: 'translateX(0px)' }], { duration: 180, easing: 'ease-out' })
-      el.style.transform = 'translateX(0px)'
-      incoming.onfinish = () => { el.style.transition = '' }
-    }
+      setTrackTransform('translateX(-20%)')
+    })
   }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('orders')} />
@@ -266,12 +264,16 @@ function Board({ go, teacher }) {
     <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
     <div className="schedule" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd}>
       <div className="date-nav"><span className="date-nav-side" /><Button className="month-picker-button" fill="none" onClick={() => { setCalMonth(new Date(viewDate.getFullYear(), viewDate.getMonth(), 1)); setDatePickerOpen(true) }}>{rangeLabel}<ChevronDown size={17} /></Button><span className="date-nav-side date-nav-end">{!onToday && <button type="button" className="today-button" onClick={backToToday}><CalendarDays size={14} />回今日</button>}</span></div>
-      {currentTeacher&&<div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>}
-      <div className="schedule-strip" ref={stripRef}>
-        <div className="schedule-head"><span />{dates.map(d=><span className={dateKey(d)===dateKey(baseDate)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
-        {currentTeacher?<div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{isSelected?<div className="slot-selected"><span className="slot-time">{8+row}:00-{9+row}:00</span><button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button></div>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b>{ev[2]&&<span>{ev[2]}</span>}</div>}</div>})}</React.Fragment>)}</div>
-        :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p><Button size="small" color="primary" onClick={()=>setPickerOpen(true)}>选择老师</Button></div>}
+      <div className="day-head-row">
+        <span className="axis-spacer" />
+        <div className="day-head-viewport"><div className="day-head-track" ref={headTrackRef}>{bufferDays.map(d=><span className="day-head" key={dateKey(d)}><span className={`day-head-inner ${dateKey(d)===dateKey(baseDate)?'day-focus':''}`}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span></span>)}</div></div>
       </div>
+      {currentTeacher&&<div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>}
+      {currentTeacher?<div className="grid-row">
+        <div className="time-axis">{Array.from({length:10},(_,row)=><div className="time-label" key={row}>{8+row}:00</div>)}</div>
+        <div className="slot-viewport"><div className="slot-track" ref={gridTrackRef}>{bufferDays.map(d=><div className="day-col" key={dateKey(d)}>{Array.from({length:10},(_,row)=>{const date=dateKey(d);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={row} onClick={() => choose(row,date)}>{isSelected?<div className="slot-selected"><span className="slot-time">{8+row}:00-{9+row}:00</span><button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button></div>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b>{ev[2]&&<span>{ev[2]}</span>}</div>}</div>})}</div>)}</div></div>
+      </div>
+      :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p><Button size="small" color="primary" onClick={()=>setPickerOpen(true)}>选择老师</Button></div>}
     </div>
     <Popup className="date-jump-picker" visible={datePickerOpen} onMaskClick={() => setDatePickerOpen(false)} bodyStyle={{ borderRadius:'16px 16px 0 0', padding:'16px 16px 20px' }}>
       <div className="cal-head"><b>{calMonth.getFullYear()}年{calMonth.getMonth() + 1}月</b><span className="cal-nav"><button type="button" aria-label="上个月" onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))}><ChevronLeft size={20} /></button><button type="button" aria-label="下个月" onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))}><ChevronRight size={20} /></button></span></div>
