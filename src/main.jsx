@@ -180,7 +180,8 @@ function Board({ go, teacher }) {
   const [sheet, setSheet] = useState(null)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerQuery, setPickerQuery] = useState('')
-  const touchStart = useRef(null)
+  const stripRef = useRef(null)
+  const gesture = useRef(null)
   const suppressClick = useRef(false)
   const currentTeacher = teacher && teacher.name ? teacher : null
   const baseDate = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
@@ -209,31 +210,68 @@ function Board({ go, teacher }) {
     setSelected({row,day,date})
   }
   const shiftDays = amount => {
-    setViewDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return next })
+    setViewDate(current => { const next = new Date(current); next.setDate(next.getDate() + amount); return next })
     setSelected(null)
   }
-  const onTouchStart = event => { const point = event.touches[0]; touchStart.current = { x: point.clientX, y: point.clientY } }
-  const onTouchEnd = event => {
-    if (!touchStart.current) return
-    const point = event.changedTouches[0]
-    const dx = point.clientX - touchStart.current.x
-    const dy = point.clientY - touchStart.current.y
-    touchStart.current = null
-    if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy)) return
+  const stripWidth = () => stripRef.current?.offsetWidth || 320
+  const onTouchStart = event => {
+    const point = event.touches[0]
+    gesture.current = { x: point.clientX, y: point.clientY, dx: 0, axis: null }
+  }
+  const onTouchMove = event => {
+    const state = gesture.current
+    const el = stripRef.current
+    if (!state || !el) return
+    const point = event.touches[0]
+    const dx = point.clientX - state.x
+    const dy = point.clientY - state.y
+    if (!state.axis) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+      state.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+    }
+    if (state.axis !== 'x') return
+    state.dx = dx
+    el.style.transition = 'none'
+    el.style.transform = `translateX(${dx}px)`
+  }
+  const onTouchEnd = () => {
+    const state = gesture.current
+    gesture.current = null
+    const el = stripRef.current
+    if (!el) return
+    if (!state || state.axis !== 'x') { el.style.transform = 'translateX(0px)'; return }
+    const dx = state.dx
+    if (Math.abs(dx) < 40) {
+      el.animate([{ transform: `translateX(${dx}px)` }, { transform: 'translateX(0px)' }], { duration: 160, easing: 'ease-out' })
+      el.style.transform = 'translateX(0px)'
+      return
+    }
+    const dir = dx < 0 ? 1 : -1
     suppressClick.current = true
-    window.setTimeout(() => { suppressClick.current = false }, 400)
-    shiftDays(dx < 0 ? 1 : -1)
+    window.setTimeout(() => { suppressClick.current = false }, 420)
+    const width = stripWidth()
+    const out = el.animate([{ transform: `translateX(${dx}px)` }, { transform: `translateX(${-dir * width}px)` }], { duration: 160, easing: 'ease-out' })
+    out.onfinish = () => {
+      shiftDays(dir)
+      el.style.transition = 'none'
+      el.style.transform = `translateX(${dir * width}px)`
+      const incoming = el.animate([{ transform: `translateX(${dir * width}px)` }, { transform: 'translateX(0px)' }], { duration: 180, easing: 'ease-out' })
+      el.style.transform = 'translateX(0px)'
+      incoming.onfinish = () => { el.style.transition = '' }
+    }
   }
   return <div className="page">
     <Header title="老师可约时间" onBack={() => go('orders')} />
     <Card className="profile-card"><div className="teacher-row"><button type="button" className="profile-switch" onClick={() => setPickerOpen(true)}>{currentTeacher?<><div className="avatar">{currentTeacher.name[0]}</div><div className="profile-main"><div className="teacher-name">{currentTeacher.name}<ChevronDown size={14} /></div><div className="teacher-meta">{currentTeacher.subject} · {currentTeacher.grade}</div></div></>:<><div className="avatar avatar-empty"><UserRoundSearch size={19} /></div><div className="profile-main"><div className="teacher-name">请选择老师<ChevronDown size={14} /></div><div className="teacher-meta">选择后可查看该老师的可约时间</div></div></>}</button>{currentTeacher?.intro&&<Button className="profile-intro-button" fill="none" size="small" onClick={() => setSheet(currentTeacher)}>名师介绍 <ChevronRight size={13} /></Button>}</div></Card>
     <TeacherSheet teacher={sheet} onClose={() => setSheet(null)} onView={() => setSheet(null)} />
-    <div className="schedule" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div className="schedule" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd}>
       <div className="date-nav"><span className="date-nav-side" /><Button className="month-picker-button" fill="none" onClick={() => { setCalMonth(new Date(viewDate.getFullYear(), viewDate.getMonth(), 1)); setDatePickerOpen(true) }}>{rangeLabel}<ChevronDown size={17} /></Button><span className="date-nav-side date-nav-end">{!onToday && <button type="button" className="today-button" onClick={backToToday}><CalendarDays size={14} />回今日</button>}</span></div>
-      <div className="schedule-head"><span />{dates.map(d=><span className={dateKey(d)===dateKey(baseDate)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
-      {currentTeacher?<><div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>
-      <div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{isSelected?<div className="slot-selected"><span className="slot-time">{8+row}:00-{9+row}:00</span><button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button></div>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b>{ev[2]&&<span>{ev[2]}</span>}</div>}</div>})}</React.Fragment>)}</div></>
-      :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p><Button size="small" color="primary" onClick={()=>setPickerOpen(true)}>选择老师</Button></div>}
+      {currentTeacher&&<div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>}
+      <div className="schedule-strip" ref={stripRef}>
+        <div className="schedule-head"><span />{dates.map(d=><span className={dateKey(d)===dateKey(baseDate)?'day-focus':''} key={dateKey(d)}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span>)}</div>
+        {currentTeacher?<div className="schedule-grid">{Array.from({length:10},(_,row)=><React.Fragment key={row}><div className="time-label">{8+row}:00</div>{[0,1,2].map(day=>{const date=dateKey(dates[day]);const ev=events[`${date}-${8+row}`];const isSelected=selected?.date===date&&selected?.row===row;return <div className={`slot ${isSelected?'selected':''}`} key={date} onClick={() => choose(row,day)}>{isSelected?<div className="slot-selected"><span className="slot-time">{8+row}:00-{9+row}:00</span><button type="button" className="slot-add" onClick={event=>{event.stopPropagation();go('booking')}}>新增意向</button></div>:ev&&<div className={`event ${ev[0]}`}><b>{ev[1]}</b>{ev[2]&&<span>{ev[2]}</span>}</div>}</div>})}</React.Fragment>)}</div>
+        :<div className="schedule-empty"><UserRoundSearch size={26} /><p>先选择老师，再挑选可约时段</p><Button size="small" color="primary" onClick={()=>setPickerOpen(true)}>选择老师</Button></div>}
+      </div>
     </div>
     <Popup className="date-jump-picker" visible={datePickerOpen} onMaskClick={() => setDatePickerOpen(false)} bodyStyle={{ borderRadius:'16px 16px 0 0', padding:'16px 16px 20px' }}>
       <div className="cal-head"><b>{calMonth.getFullYear()}年{calMonth.getMonth() + 1}月</b><span className="cal-nav"><button type="button" aria-label="上个月" onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))}><ChevronLeft size={20} /></button><button type="button" aria-label="下个月" onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))}><ChevronRight size={20} /></button></span></div>

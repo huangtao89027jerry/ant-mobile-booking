@@ -123,16 +123,17 @@ button, input { letter-spacing: 0; }
 .profile-main { min-width: 0; }
 .profile-card .teacher-name { font-size: 15px; line-height: 20px; }
 .profile-card .teacher-meta { overflow: hidden; margin-top: 2px; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.date-nav { display: flex; align-items: center; justify-content: center; height: 44px; background: #fff; }
+.date-nav { display: flex; align-items: center; justify-content: center; height: 44px; background: #fff; border-bottom: 1px solid #f2f4f7; }
 .date-nav .month-picker-button { display: inline-flex; align-items: center; gap: 5px; height: 36px; padding: 0 10px; color: #333; font-size: 16px; font-weight: 600; }
 .date-nav .month-picker-button > span { display: inline-flex; align-items: center; gap: 5px; }
 .date-nav .month-picker-button svg { color: #8c8c8c; }
 .legend { display: flex; gap: 14px; padding: 8px 14px 9px; background: #fbfcfd; color: #8c8c8c; font-size: 11px; }
 .legend span { display: flex; align-items: center; gap: 5px; }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
-.schedule { margin: 0; padding-bottom: 10px; background: #fff; }
+.schedule { margin: 0; padding-bottom: 10px; overflow: hidden; background: #fff; }
+.schedule-strip { will-change: transform; }
 .schedule-head, .schedule-grid { display: grid; grid-template-columns: 44px repeat(3, 1fr); }
-.schedule-head { padding: 8px 0 6px; border-top: 1px solid #f2f4f7; text-align: center; color: #8c8c8c; font-size: 12px; }
+.schedule-head { padding: 8px 0 6px; text-align: center; color: #8c8c8c; font-size: 12px; }
 .schedule-head > span:not(:first-child) { display: flex; min-height: 54px; flex-direction: column; align-items: center; justify-content: center; margin: 0 6px; padding: 3px 4px; }
 .schedule-head b { display: block; margin-top: 3px; color: #1f2329; font-size: 17px; font-weight: 600; line-height: 22px; }
 .schedule-head .day-focus { border-radius: 10px; background: #eef5ff; color: #1677ff; }
