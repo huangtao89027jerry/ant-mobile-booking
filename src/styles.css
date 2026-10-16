@@ -131,7 +131,8 @@ button, input { letter-spacing: 0; }
 .legend span { display: flex; align-items: center; gap: 5px; }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
 .schedule { margin: 0; padding-bottom: 10px; overflow: hidden; background: #fff; }
-.day-head-row, .grid-row { display: flex; }
+.day-head-row { display: flex; padding: 8px 0; }
+.grid-row { display: flex; }
 .axis-spacer, .time-axis { flex: 0 0 44px; }
 .day-head-viewport, .slot-viewport { flex: 1; min-width: 0; overflow: hidden; }
 .day-head-track, .slot-track { display: flex; width: calc(100% * 5 / 3); transform: translateX(-20%); will-change: transform; }
