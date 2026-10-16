@@ -94,7 +94,6 @@ const orderTimeText = order => {
 const dayStart = date => { const d = new Date(date); d.setHours(0, 0, 0, 0); return d }
 const weekStartOf = date => { const d = dayStart(date); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d }
 const weekEndOf = date => { const d = weekStartOf(date); d.setDate(d.getDate() + 6); return d }
-const clampToWindow = date => { const monday = weekStartOf(date); const offset = Math.min(Math.max(Math.round((dayStart(date) - monday) / 86400000), 0), 4); const d = new Date(monday); d.setDate(d.getDate() + offset); return d }
 function Header({ title, onBack, right }) {
   return <NavBar onBack={onBack} right={right} backArrow={<ChevronLeft size={22} />}>{title}</NavBar>
 }
@@ -174,7 +173,7 @@ function Teachers({ go }) {
 }
 
 function Board({ go, teacher }) {
-  const [viewDate, setViewDate] = useState(() => clampToWindow(dayStart(new Date())))
+  const [viewDate, setViewDate] = useState(() => dayStart(new Date()))
   const [selected, setSelected] = useState(null)
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1) })
@@ -198,9 +197,9 @@ function Board({ go, teacher }) {
     while (cells.length % 7) cells.push(null)
     return cells
   }, [calMonth])
-  const jumpTo = date => { setViewDate(clampToWindow(date)); setSelected(null); setDatePickerOpen(false) }
+  const jumpTo = date => { setViewDate(dayStart(date)); setSelected(null); setDatePickerOpen(false) }
   const onToday = dates.some(date => dateKey(date) === dateKey(baseDate))
-  const backToToday = () => { setViewDate(clampToWindow(baseDate)); setSelected(null) }
+  const backToToday = () => { setViewDate(dayStart(baseDate)); setSelected(null) }
   const choose = (row, day) => {
     if (suppressClick.current) return
     const date = dateKey(dates[day])
@@ -210,7 +209,7 @@ function Board({ go, teacher }) {
     setSelected({row,day,date})
   }
   const shiftDays = amount => {
-    setViewDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return clampToWindow(next) })
+    setViewDate(current => { const next = new Date(current); next.setDate(current.getDate() + amount); return next })
     setSelected(null)
   }
   const onTouchStart = event => { const point = event.touches[0]; touchStart.current = { x: point.clientX, y: point.clientY } }
