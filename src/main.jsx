@@ -267,7 +267,7 @@ function Board({ go, teacher }) {
       {currentTeacher&&<div className="legend"><span><i className="dot" style={{background:'#69a7ff'}} />已排课</span><span><i className="dot" style={{background:'#a77bea'}} />日程</span><span><i className="dot" style={{background:'#ff9c6e'}} />收费中</span><span><i className="dot" style={{background:'#ffc53d'}} />有人等待</span></div>}
       <div className="day-head-row">
         <span className="axis-spacer" />
-        <div className="day-head-viewport"><div className="day-head-track" ref={headTrackRef}>{bufferDays.map(d=><span className="day-head" key={dateKey(d)}><span className={`day-head-inner ${dateKey(d)===dateKey(baseDate)?'day-focus':''}`}>{dayName[d.getDay()]}<b>{d.getDate()}</b></span></span>)}</div></div>
+        <div className="day-head-viewport"><div className="day-head-track" ref={headTrackRef}>{bufferDays.map(d=><span className="day-head" key={dateKey(d)}><span className={`day-head-inner ${dateKey(d)===dateKey(baseDate)?'day-focus':''}`}>{dateKey(d)===dateKey(baseDate)&&<em className="day-today-flag">今</em>}{dayName[d.getDay()]}<b>{d.getDate()}</b></span></span>)}</div></div>
       </div>
       {currentTeacher?<div className="grid-row">
         <div className="time-axis">{Array.from({length:10},(_,row)=><div className="time-label" key={row}>{8+row}:00</div>)}</div>
