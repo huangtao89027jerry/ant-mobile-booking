@@ -144,7 +144,7 @@ button, input { letter-spacing: 0; }
 .time-axis { display: flex; flex-direction: column; }
 .day-col { display: flex; flex-direction: column; }
 .schedule { touch-action: pan-y; }
-.schedule .legend { border-top: 1px solid #f4f6f8; }
+.schedule .legend { border-bottom: 1px solid #f4f6f8; }
 .time-label { height: 56px; padding: 8px 8px 0 0; color: #b3bcc9; font-size: 11px; font-variant-numeric: tabular-nums; text-align: right; }
 .slot { position: relative; height: 56px; border-top: 1px solid #f5f7fa; border-left: 1px solid #f0f2f5; }
 .event { position: absolute; inset: 3px; display: flex; flex-direction: column; justify-content: center; gap: 1px; padding: 5px 7px; border-radius: 7px; font-size: 10px; line-height: 1.35; }
