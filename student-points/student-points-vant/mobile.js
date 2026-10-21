@@ -32,6 +32,7 @@
       const newRuleReason = ref('');
       const newRuleError = ref('');
       const scores = reactive({});
+      const touchedScores = reactive({});
       const reasons = reactive({});
       const balanceAnimations = reactive({});
       let balanceFrame = 0;
@@ -56,6 +57,7 @@
       const allVisible = computed(() => visible.value.length > 0 && visible.value.every(s => selected.value.includes(s.id)));
       const someVisible = computed(() => !allVisible.value && visible.value.some(s => selected.value.includes(s.id)));
       const invalid = rule => scores[rule.id] === '' || scores[rule.id] === undefined || !Number.isFinite(Number(scores[rule.id])) || Number(scores[rule.id]) < 0;
+      const scoreError = rule => Boolean(touchedScores[rule.id] && invalid(rule));
       const incomplete = computed(() => chosenRules.value.some(invalid));
       const perPerson = computed(() => chosenRules.value.reduce((sum, rule) => sum + (invalid(rule) ? 0 : direction.value * Number(scores[rule.id])), 0));
       const canSubmit = computed(() => targets.value.length > 0 && chosenRules.value.length > 0 && !incomplete.value && !showRulePicker.value);
@@ -120,6 +122,7 @@
         targets.value = [...ids];
         single.value = isSingle;
         ruleIds.value = [];
+        Object.keys(touchedScores).forEach(id => delete touchedScores[id]);
         showRulePicker.value = false;
         available.value.forEach(rule => { scores[rule.id] = rule.value; reasons[rule.id] = rule.reason || ''; });
         error.value = '';
@@ -161,6 +164,7 @@
       function removeRule(rule) {
         if (busy.value) return;
         ruleIds.value = ruleIds.value.filter(id => id !== rule.id);
+        delete touchedScores[rule.id];
       }
       function closeEditor() {
         if (busy.value) return;
@@ -198,9 +202,9 @@
         clearBalanceAnimation();
       });
       return { data, selected, query, classId, selectedOnly, showEditor, showRecords, direction, targets,
-        ruleIds, showRulePicker, draftRuleIds, ruleQuery, creatingRule, newRuleName, newRuleType, newRuleValue, newRuleReason, newRuleError, scores, reasons, busy, verifying, error, host, mounted,
+        ruleIds, showRulePicker, draftRuleIds, ruleQuery, creatingRule, newRuleName, newRuleType, newRuleValue, newRuleReason, newRuleError, scores, touchedScores, reasons, busy, verifying, error, host, mounted,
         directionText, libraryRules, chosenRules, chosenStudents, visible, allVisible, someVisible, incomplete,
-        perPerson, canSubmit, format, delta, groupName, allowed, invalid, balanceAnimations, animateBalances, select, toggleStudent, toggleAll,
+        perPerson, canSubmit, format, delta, groupName, allowed, invalid, scoreError, balanceAnimations, animateBalances, select, toggleStudent, toggleAll,
         open, openRulePicker, openRuleForm, saveRule, toggleDraftRule, applyRuleSelection, removeRule, closeEditor, submit };
     },
     template: `
@@ -244,17 +248,18 @@
               <div v-for="rule in chosenRules" :key="rule.id" class="vp-rule is-active">
                 <div class="vp-rule-top">
                   <van-cell :title="rule.name" :border="false" />
-                  <van-field v-model="scores[rule.id]" class="vp-rule-score" type="number" inputmode="decimal" input-align="right" :border="false" :disabled="busy" placeholder="分值" :error="invalid(rule)" :aria-label="rule.name+directionText+'分值'" :aria-invalid="invalid(rule)">
-                    <template #left-icon><span class="vp-sign" :class="{'vp-negative':direction<0}">{{direction>0?'+':'−'}}</span></template><template #extra>分</template>
-                  </van-field>
                   <van-button class="vp-rule-remove" size="small" plain :disabled="busy" :aria-label="'移除'+rule.name" @click="removeRule(rule)">移除</van-button>
                 </div>
-                <p v-if="invalid(rule)" class="vp-rule-error" role="alert">请填写有效的非负分值</p>
-                <van-field v-model="reasons[rule.id]" class="vp-rule-reason" :border="false" placeholder="添加原因（选填）" :disabled="busy" maxlength="100" :aria-label="rule.name+'原因（选填）'" />
+                <div class="vp-rule-fields">
+                  <van-field v-model="scores[rule.id]" class="vp-rule-score" :class="{'is-invalid':scoreError(rule)}" :label="directionText+'分值'" label-align="top" type="number" inputmode="decimal" :border="false" :disabled="busy" placeholder="请输入" :error="scoreError(rule)" :error-message="scoreError(rule)?(scores[rule.id]===''?'请填写分值':'请输入 0 或正数'):''" :aria-label="rule.name+directionText+'分值'" :aria-invalid="scoreError(rule)" @blur="touchedScores[rule.id]=true">
+                    <template #extra>分</template>
+                  </van-field>
+                  <van-field v-model="reasons[rule.id]" class="vp-rule-reason" label="原因（选填）" label-align="top" :border="false" placeholder="请输入原因" :disabled="busy" maxlength="100" :aria-label="rule.name+'原因（选填）'" />
+                </div>
               </div>
               <div class="vp-add-rule"><van-button type="primary" plain block icon="plus" :disabled="busy" @click="openRulePicker">{{chosenRules.length?'添加积分项':'选择积分项'}}</van-button></div>
             </van-cell-group>
-            <div class="vp-calculation"><div><span>{{targets.length>1?'每位学员':'本次'}}{{directionText}}</span><strong :class="{'vp-negative':direction<0}">{{incomplete?'待完善':delta(perPerson)+' 分'}}</strong></div><div v-if="targets.length>1"><span>整批合计</span><b>{{incomplete?'待完善':delta(perPerson*targets.length)+' 分'}}</b></div><p>{{targets.length}} 人 · {{chosenRules.length}} 个积分项</p></div>
+            <div v-if="chosenRules.length" class="vp-calculation"><div><span>{{targets.length>1?'每位学员':'本次'}}{{directionText}}</span><strong :class="{'vp-negative':direction<0&&!incomplete, 'vp-summary-pending':incomplete}">{{incomplete?'待完善':delta(perPerson)+' 分'}}</strong></div><div v-if="targets.length>1"><span>整批合计</span><strong :class="{'vp-negative':direction<0&&!incomplete, 'vp-summary-pending':incomplete}">{{incomplete?'待完善':delta(perPerson*targets.length)+' 分'}}</strong></div><p>{{targets.length}} 人 · {{chosenRules.length}} 个积分项</p></div>
             <van-notice-bar v-if="error" wrapable :scrollable="false" color="var(--van-danger-color)" background="var(--van-red-light)" :text="error" role="alert" />
           </div>
           <footer class="vp-confirm van-safe-area-bottom"><div class="vp-confirm-summary">{{verifying?'正在核实，请勿重复操作':incomplete?'请完善分值':chosenRules.length?(targets.length>1?'每人 ':'本次 ')+delta(perPerson)+' 分':'请选择积分项'}}</div><van-button type="primary" block :color="direction<0?'var(--van-danger-color)':undefined" :disabled="!canSubmit" :loading="busy" :loading-text="verifying?'正在核实…':'正在提交…'" @click="submit">确认给 {{targets.length}} 人{{directionText}}</van-button></footer>
