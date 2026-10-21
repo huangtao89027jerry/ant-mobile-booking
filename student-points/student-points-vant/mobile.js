@@ -27,7 +27,9 @@
       const ruleQuery = ref('');
       const creatingRule = ref(false);
       const newRuleName = ref('');
+      const newRuleType = ref('fixed');
       const newRuleValue = ref('');
+      const newRuleReason = ref('');
       const newRuleError = ref('');
       const scores = reactive({});
       const reasons = reactive({});
@@ -49,11 +51,11 @@
       }));
       const allVisible = computed(() => visible.value.length > 0 && visible.value.every(s => selected.value.includes(s.id)));
       const someVisible = computed(() => !allVisible.value && visible.value.some(s => selected.value.includes(s.id)));
-      const invalid = rule => !Number.isFinite(Number(scores[rule.id])) || Number(scores[rule.id]) <= 0;
+      const invalid = rule => scores[rule.id] === '' || scores[rule.id] === undefined || !Number.isFinite(Number(scores[rule.id])) || Number(scores[rule.id]) < 0;
       const incomplete = computed(() => chosenRules.value.some(invalid));
       const perPerson = computed(() => chosenRules.value.reduce((sum, rule) => sum + (invalid(rule) ? 0 : direction.value * Number(scores[rule.id])), 0));
       const canSubmit = computed(() => targets.value.length > 0 && chosenRules.value.length > 0 && !incomplete.value && !showRulePicker.value);
-      const format = value => Number.isInteger(Number(value)) ? String(Number(value)) : Number(value).toFixed(1);
+      const format = value => String(Number(Number(value).toFixed(8)));
       const delta = value => `${value > 0 ? '+' : value < 0 ? '−' : ''}${format(Math.abs(value))}`;
       const groupName = id => data.value.classes.find(group => group.id === id)?.name || '';
       const allowed = dir => data.value.permission === 'both' || (dir > 0 ? data.value.permission === 'plus' : data.value.permission === 'minus');
@@ -77,7 +79,7 @@
         single.value = isSingle;
         ruleIds.value = [];
         showRulePicker.value = false;
-        available.value.forEach(rule => { scores[rule.id] = rule.value; reasons[rule.id] = ''; });
+        available.value.forEach(rule => { scores[rule.id] = rule.value; reasons[rule.id] = rule.reason || ''; });
         error.value = '';
         showEditor.value = true;
       }
@@ -89,17 +91,19 @@
         showRulePicker.value = true;
       }
       function openRuleForm() {
-        newRuleName.value = ruleQuery.value.trim().slice(0, 30);
+        newRuleName.value = '';
+        newRuleType.value = 'fixed';
         newRuleValue.value = '';
+        newRuleReason.value = '';
         newRuleError.value = '';
         creatingRule.value = true;
       }
       function saveRule() {
         try {
-          const rule = bridge.createRule(newRuleName.value, direction.value, newRuleValue.value);
+          const rule = bridge.createRule(newRuleName.value, direction.value, newRuleType.value, newRuleValue.value, newRuleReason.value);
           refresh();
           scores[rule.id] = rule.value;
-          reasons[rule.id] = '';
+          reasons[rule.id] = rule.reason;
           draftRuleIds.value.push(rule.id);
           ruleQuery.value = '';
           creatingRule.value = false;
@@ -147,7 +151,7 @@
       });
       onBeforeUnmount(() => window.removeEventListener('points:refresh', refresh));
       return { data, selected, query, classId, selectedOnly, showEditor, showRecords, direction, targets,
-        ruleIds, showRulePicker, draftRuleIds, ruleQuery, creatingRule, newRuleName, newRuleValue, newRuleError, scores, reasons, busy, verifying, error, host, mounted,
+        ruleIds, showRulePicker, draftRuleIds, ruleQuery, creatingRule, newRuleName, newRuleType, newRuleValue, newRuleReason, newRuleError, scores, reasons, busy, verifying, error, host, mounted,
         directionText, libraryRules, chosenRules, chosenStudents, visible, allVisible, someVisible, incomplete,
         perPerson, canSubmit, format, delta, groupName, allowed, invalid, select, toggleStudent, toggleAll,
         open, openRulePicker, openRuleForm, saveRule, toggleDraftRule, applyRuleSelection, removeRule, closeEditor, submit };
@@ -198,7 +202,7 @@
                   </van-field>
                   <van-button class="vp-rule-remove" size="small" plain :disabled="busy" :aria-label="'移除'+rule.name" @click="removeRule(rule)">移除</van-button>
                 </div>
-                <p v-if="invalid(rule)" class="vp-rule-error" role="alert">请输入大于 0 的分值</p>
+                <p v-if="invalid(rule)" class="vp-rule-error" role="alert">请填写有效的非负分值</p>
                 <van-field v-model="reasons[rule.id]" class="vp-rule-reason" :border="false" placeholder="添加原因（选填）" :disabled="busy" maxlength="100" :aria-label="rule.name+'原因（选填）'" />
               </div>
               <div class="vp-add-rule"><van-button type="primary" plain block icon="plus" :disabled="busy" @click="openRulePicker">{{chosenRules.length?'添加积分项':'选择积分项'}}</van-button></div>
@@ -209,23 +213,25 @@
           <footer class="vp-confirm van-safe-area-bottom"><div class="vp-confirm-summary">{{verifying?'正在核实，请勿重复操作':incomplete?'请完善分值':chosenRules.length?(targets.length>1?'每人 ':'本次 ')+delta(perPerson)+' 分':'请选择积分项'}}</div><van-button type="primary" block :color="direction<0?'var(--van-danger-color)':undefined" :disabled="!canSubmit" :loading="busy" :loading-text="verifying?'正在核实…':'正在提交…'" @click="submit">确认给 {{targets.length}} 人{{directionText}}</van-button></footer>
         </van-popup>
         <van-popup v-if="mounted" v-model:show="showRulePicker" :teleport="host" position="bottom" round class="vp-rule-picker" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="'选择'+directionText+'项'">
-          <van-nav-bar :title="(creatingRule?'新增':'选择')+directionText+'项'" :left-text="creatingRule?'返回':'取消'" @click-left="creatingRule ? creatingRule=false : showRulePicker=false" />
+          <van-nav-bar :title="creatingRule?'新增'+directionText+'规则':'选择'+directionText+'项'" :left-text="creatingRule?'返回':'取消'" @click-left="creatingRule ? creatingRule=false : showRulePicker=false" />
           <template v-if="creatingRule">
             <div class="vp-library-scroll vp-rule-form">
               <van-cell-group :border="false">
-                <van-field v-model="newRuleName" label="名称" placeholder="请输入积分项名称" required maxlength="30" />
-                <van-field v-model="newRuleValue" label="默认分值" type="number" inputmode="decimal" placeholder="可留空"><template #left-icon><span class="vp-sign" :class="{'vp-negative':direction<0}">{{direction>0?'+':'−'}}</span></template><template #extra>分</template></van-field>
+                <van-field v-model="newRuleName" label="规则名称" placeholder="请输入规则名称" required />
+                <van-field :label="directionText+'分值类型'"><template #input><van-radio-group v-model="newRuleType" direction="horizontal"><van-radio name="fixed" icon-size="18px">固定分值</van-radio><van-radio name="unlimited" icon-size="18px">不限分值</van-radio></van-radio-group></template></van-field>
+                <van-field v-if="newRuleType==='fixed'" v-model="newRuleValue" :label="'默认'+directionText+'分值'" required type="number" inputmode="decimal" placeholder="请输入默认分值"><template #left-icon><span class="vp-sign" :class="{'vp-negative':direction<0}">{{direction>0?'+':'−'}}</span></template><template #extra>分</template></van-field>
+                <van-field v-model="newRuleReason" label="原因" type="textarea" :autosize="{ minHeight: 82 }" placeholder="请输入原因" />
               </van-cell-group>
-              <p class="vp-rule-hint">留空时，每次操作需填写分值。保存后加入积分库并自动勾选。</p>
+              <p class="vp-rule-hint">保存后返回规则列表并自动勾选，再应用到本次操作。积分在主弹窗点击确定后生效。</p>
               <p v-if="newRuleError" class="vp-new-rule-error" role="alert">{{newRuleError}}</p>
             </div>
-            <footer class="vp-picker-footer van-safe-area-bottom"><van-button @click="creatingRule=false">返回列表</van-button><van-button type="primary" @click="saveRule">保存并选中</van-button></footer>
+            <footer class="vp-picker-footer van-safe-area-bottom"><van-button @click="creatingRule=false">返回规则列表</van-button><van-button type="primary" @click="saveRule">保存并选中</van-button></footer>
           </template>
           <template v-else>
           <van-search v-model="ruleQuery" placeholder="搜索积分项" aria-label="搜索积分库" clearable show-action><template #action><van-button type="primary" plain size="small" icon="plus" @click="openRuleForm">新增</van-button></template></van-search>
           <div class="vp-library-scroll">
             <van-cell-group :border="false">
-              <van-cell v-for="rule in libraryRules" :key="rule.id" :title="rule.name" :value="rule.value === '' ? '填写分值' : (direction>0?'+':'−')+format(rule.value)+' 分'" clickable @click="toggleDraftRule(rule)">
+              <van-cell v-for="rule in libraryRules" :key="rule.id" :title="rule.name" :value="rule.value === '' ? '不限分值' : (direction>0?'+':'−')+format(rule.value)+' 分'" clickable @click="toggleDraftRule(rule)">
                 <template #icon><van-checkbox :model-value="draftRuleIds.includes(rule.id)" shape="square" icon-size="20px" :aria-label="rule.name" @click.stop="toggleDraftRule(rule)" /></template>
               </van-cell>
             </van-cell-group>

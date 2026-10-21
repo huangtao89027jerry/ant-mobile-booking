@@ -875,7 +875,7 @@
     const studentById = id => students.find(item => item.id === id);
     const ruleById = id => rules.find(item => item.id === id);
     const allowed = direction => permission === 'both' || (permission === 'plus' ? direction > 0 : direction < 0);
-    const formatScore = value => Number.isInteger(Number(value)) ? String(Number(value)) : Number(value).toFixed(1);
+    const formatScore = value => String(Number(Number(value).toFixed(8)));
     const formatDelta = value => `${value > 0 ? '+' : value < 0 ? '−' : ''}${formatScore(Math.abs(value))}`;
     const selectedDialogStudents = () => dialogState ? students.filter(student => dialogState.selected.has(student.id)) : [];
     const selectedDialogRules = () => dialogState ? rules.filter(rule => dialogState.ruleIds.has(rule.id)) : [];
@@ -1126,18 +1126,16 @@
     function renderLibraryOptions() {
       const picker = dialogState.rulePicker;
       const matches = rules.filter(rule => rule.dir === dialogState.direction && rule.name.includes(picker.query.trim()));
-      return matches.length ? matches.map(rule => `<label class="rule-library-option"><input type="checkbox" data-library-rule="${rule.id}" ${picker.ids.has(rule.id) ? 'checked' : ''}><span>${escapeHtml(rule.name)}</span><small>${rule.value === '' ? '填写分值' : `${rule.dir > 0 ? '+' : '−'}${formatScore(rule.value)} 分`}</small></label>`).join('') : '<div class="rule-library-empty"><p>没有合适的积分项？</p><button class="button button-quiet" type="button" data-dialog-action="new-library-rule">＋ 新增积分项</button></div>';
+      return matches.length ? matches.map(rule => `<label class="rule-library-option"><input type="checkbox" data-library-rule="${rule.id}" ${picker.ids.has(rule.id) ? 'checked' : ''}><span>${escapeHtml(rule.name)}</span><small>${rule.value === '' ? '不限分值' : `${rule.dir > 0 ? '+' : '−'}${formatScore(rule.value)} 分`}</small></label>`).join('') : '<div class="rule-library-empty"><p>没有合适的积分项？</p><button class="button button-quiet" type="button" data-dialog-action="new-library-rule">＋ 新增积分项</button></div>';
     }
 
-    function createLibraryRule(name, direction, value) {
+    function createLibraryRule(name, direction, type, value, reason) {
       if (!allowed(direction)) throw new Error('当前账号没有此操作权限');
       name = name.trim();
-      if (!name) throw new Error('请输入积分项名称');
-      if (name.length > 30) throw new Error('名称最多 30 个字');
-      if (rules.some(rule => rule.dir === direction && rule.name === name)) throw new Error('同名积分项已存在，请从库中选择');
-      const blank = String(value).trim() === '';
-      if (!blank && (!Number.isFinite(Number(value)) || Number(value) <= 0)) throw new Error('请输入大于 0 的默认分值');
-      const rule = { id: `custom-${Date.now()}-${rules.length}`, name, dir: direction, value: blank ? '' : Number(value) };
+      if (!name) throw new Error('请填写规则名称。');
+      const unlimited = type === 'unlimited';
+      if (!unlimited && (String(value).trim() === '' || !Number.isFinite(Number(value)) || Number(value) < 0)) throw new Error('请填写有效的默认分值。');
+      const rule = { id: `custom-${Date.now()}-${rules.length}`, name, dir: direction, value: unlimited ? '' : Number(value), reason: reason.trim() };
       rules.push(rule);
       window.dispatchEvent(new Event('points:refresh'));
       return { ...rule };
@@ -1145,8 +1143,10 @@
 
     function openLibraryRuleForm() {
       dialogState.rulePicker.creating = true;
-      dialogState.rulePicker.name = dialogState.rulePicker.query.trim().slice(0, 30);
+      dialogState.rulePicker.name = '';
+      dialogState.rulePicker.type = 'fixed';
       dialogState.rulePicker.value = '';
+      dialogState.rulePicker.reason = '';
       dialogState.rulePicker.error = '';
       renderDialog('[data-new-rule="name"]');
     }
@@ -1154,7 +1154,9 @@
     function saveLibraryRule() {
       const picker = dialogState.rulePicker;
       try {
-        const rule = createLibraryRule(picker.name, dialogState.direction, picker.value);
+        const rule = createLibraryRule(picker.name, dialogState.direction, picker.type, picker.value, picker.reason);
+        dialogState.scores[rule.id] = String(rule.value);
+        dialogState.reasons[rule.id] = rule.reason;
         picker.ids.add(rule.id);
         picker.creating = false;
         picker.query = '';
@@ -1171,14 +1173,16 @@
       const label = dialogState.direction > 0 ? '加分' : '减分';
       return `<div class="rule-library-layer" data-library-backdrop>
         <section class="rule-library-panel" role="dialog" aria-modal="true" aria-labelledby="ruleLibraryTitle">
-          <header class="rule-library-title"><h2 id="ruleLibraryTitle">${picker.creating ? '新增' : '选择'}${label}项</h2><button class="close-button" type="button" data-dialog-action="cancel-rules" aria-label="${picker.creating ? '返回规则列表' : '关闭积分库'}">×</button></header>
+          <header class="rule-library-title"><h2 id="ruleLibraryTitle">${picker.creating ? `新增${label}规则` : `选择${label}项`}</h2><button class="close-button" type="button" data-dialog-action="cancel-rules" aria-label="${picker.creating ? '返回规则列表' : '关闭积分库'}">×</button></header>
           ${picker.creating ? `<div class="rule-library-form">
-            <label for="libraryRuleName">积分项名称<span>*</span></label><input id="libraryRuleName" data-new-rule="name" maxlength="30" placeholder="请输入名称" value="${escapeHtml(picker.name)}">
-            <label for="libraryRuleValue">默认${label}分值</label><div class="rule-library-score"><span>${dialogState.direction > 0 ? '+' : '−'}</span><input id="libraryRuleValue" data-new-rule="value" type="number" inputmode="decimal" min="0.1" step="0.1" placeholder="可留空" value="${escapeHtml(picker.value)}"><span>分</span></div>
-            <p>留空时，每次操作需填写分值。保存后加入积分库并自动勾选。</p>
+            <label for="libraryRuleName">规则名称<span>*</span></label><input id="libraryRuleName" data-new-rule="name" placeholder="请输入规则名称" value="${escapeHtml(picker.name)}">
+            <label for="libraryRuleType">${label}分值类型</label><select id="libraryRuleType" data-new-rule-type><option value="fixed" ${picker.type === 'fixed' ? 'selected' : ''}>固定分值</option><option value="unlimited" ${picker.type === 'unlimited' ? 'selected' : ''}>不限分值</option></select>
+            ${picker.type === 'fixed' ? `<label for="libraryRuleValue">默认${label}分值<span>*</span></label><div class="rule-library-score"><span>${dialogState.direction > 0 ? '+' : '−'}</span><input id="libraryRuleValue" data-new-rule="value" type="number" inputmode="decimal" min="0" step="any" placeholder="请输入默认分值" value="${escapeHtml(picker.value)}"><span>分</span></div>` : ''}
+            <label for="libraryRuleReason">原因</label><textarea id="libraryRuleReason" data-new-rule="reason" placeholder="请输入原因">${escapeHtml(picker.reason)}</textarea>
+            <p>保存后返回规则列表并自动勾选，再应用到本次操作。积分在主弹窗点击确定后生效。</p>
             ${picker.error ? `<div class="rule-library-error" role="alert" tabindex="-1">${escapeHtml(picker.error)}</div>` : ''}
           </div>` : `<div class="rule-library-search"><input type="search" data-rule-search placeholder="搜索积分项" aria-label="搜索积分库" value="${escapeHtml(picker.query)}"><button class="button button-quiet" type="button" data-dialog-action="new-library-rule">＋ 新增</button></div><div class="rule-library-options">${renderLibraryOptions()}</div>`}
-          <footer class="rule-library-footer">${picker.creating ? '<span></span><button class="button" type="button" data-dialog-action="cancel-rules">返回列表</button><button class="button button-primary" type="button" data-dialog-action="save-library-rule">保存并选中</button>' : `<span data-library-count>已选 ${picker.ids.size} 项</span><button class="button" type="button" data-dialog-action="cancel-rules">取消</button><button class="button button-primary" type="button" data-dialog-action="apply-rules">确认选择</button>`}</footer>
+          <footer class="rule-library-footer">${picker.creating ? '<span></span><button class="button" type="button" data-dialog-action="cancel-rules">返回规则列表</button><button class="button button-primary" type="button" data-dialog-action="save-library-rule">保存并选中</button>' : `<span data-library-count>已选 ${picker.ids.size} 项</span><button class="button" type="button" data-dialog-action="cancel-rules">取消</button><button class="button button-primary" type="button" data-dialog-action="apply-rules">确认选择</button>`}</footer>
         </section>
       </div>`;
     }
@@ -1186,14 +1190,14 @@
     function scoreError(rule) {
       const value = dialogState.scores[rule.id];
       if (value === '' || value === undefined) return '请填写分值';
-      return !Number.isFinite(Number(value)) || Number(value) <= 0 ? '请输入大于 0 的分值' : '';
+      return !Number.isFinite(Number(value)) || Number(value) < 0 ? '请输入有效的非负分值' : '';
     }
 
     function renderRuleFields(rule) {
       const error = scoreError(rule);
       return `
         <div class="rule-fields ${error ? 'bad' : ''}">
-          <div class="score-field"><div class="score-input"><span class="score-sign" aria-hidden="true">${rule.dir > 0 ? '+' : '−'}</span><input id="score-${rule.id}" data-score-rule="${rule.id}" type="number" inputmode="decimal" min="0.1" step="0.1" placeholder="分值" aria-label="${escapeHtml(rule.name)}${rule.dir > 0 ? '加分' : '减分'}分值" aria-invalid="${Boolean(error)}" aria-describedby="score-error-${rule.id}" value="${escapeHtml(dialogState.scores[rule.id] ?? '')}" ${dialogState.busy ? 'disabled' : ''}><span>分</span></div><small class="score-error" id="score-error-${rule.id}" ${error ? '' : 'hidden'}>${error}</small></div>
+          <div class="score-field"><div class="score-input"><span class="score-sign" aria-hidden="true">${rule.dir > 0 ? '+' : '−'}</span><input id="score-${rule.id}" data-score-rule="${rule.id}" type="number" inputmode="decimal" min="0" step="any" placeholder="分值" aria-label="${escapeHtml(rule.name)}${rule.dir > 0 ? '加分' : '减分'}分值" aria-invalid="${Boolean(error)}" aria-describedby="score-error-${rule.id}" value="${escapeHtml(dialogState.scores[rule.id] ?? '')}" ${dialogState.busy ? 'disabled' : ''}><span>分</span></div><small class="score-error" id="score-error-${rule.id}" ${error ? '' : 'hidden'}>${error}</small></div>
           <input id="reason-${rule.id}" data-reason-rule="${rule.id}" type="text" value="${escapeHtml(dialogState.reasons[rule.id] || '')}" placeholder="原因（选填）" aria-label="${escapeHtml(rule.name)}原因（选填）" ${dialogState.busy ? 'disabled' : ''}>
         </div>
       `;
@@ -1202,7 +1206,7 @@
     function ensureRuleDefaults() {
       selectedDialogRules().forEach(rule => {
         if (dialogState.scores[rule.id] === undefined) dialogState.scores[rule.id] = String(rule.value);
-        if (dialogState.reasons[rule.id] === undefined) dialogState.reasons[rule.id] = '';
+        if (dialogState.reasons[rule.id] === undefined) dialogState.reasons[rule.id] = rule.reason || '';
       });
     }
 
@@ -1394,6 +1398,11 @@
 
     modalLayer.addEventListener('change', event => {
       if (!dialogState) return;
+      if (event.target.matches('[data-new-rule-type]') && dialogState.rulePicker?.creating) {
+        dialogState.rulePicker.type = event.target.value;
+        renderDialog('[data-new-rule-type]');
+        return;
+      }
       if (event.target.matches('[data-library-rule]') && dialogState.rulePicker) {
         const ruleId = event.target.dataset.libraryRule;
         if (event.target.checked) dialogState.rulePicker.ids.add(ruleId);

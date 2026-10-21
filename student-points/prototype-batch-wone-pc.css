@@ -174,7 +174,8 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell .rule-library-form { display: grid; gap: 10px; overflow: auto; padding: 20px 24px; }
 .app-shell .rule-library-form label { color: var(--color-text); font-size: 14px; }
 .app-shell .rule-library-form label span { margin-left: 4px; color: var(--color-text-danger); }
-.app-shell .rule-library-form input { width: 100%; min-width: 0; height: 32px; padding: 4px 10px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-background-surface); color: var(--color-text); font: inherit; }
+.app-shell .rule-library-form :is(input, select, textarea) { width: 100%; min-width: 0; height: 32px; padding: 4px 10px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-background-surface); color: var(--color-text); font: inherit; }
+.app-shell .rule-library-form textarea { min-height: 82px; resize: vertical; }
 .app-shell .rule-library-form label:not(:first-child) { margin-top: 8px; }
 .app-shell .rule-library-score { display: flex; align-items: center; gap: 8px; }
 .app-shell .rule-library-score > span { color: var(--color-text-subtle); font-size: 14px; }
