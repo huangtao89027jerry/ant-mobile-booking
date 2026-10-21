@@ -1059,19 +1059,20 @@
 
             <div class="form-row">
               <label class="form-label">积分项<strong>*</strong></label>
-              <div class="form-value">
+              <section class="form-value points-editor" aria-labelledby="ruleInstruction">
                 <div class="rule-selector-head">
                   <span id="ruleInstruction">积分项<small class="selected-rule-count">已选 ${selectedDialogRules().length} 项</small></span>
+                  <button class="button button-quiet" type="button" data-dialog-action="pick-rules" ${dialogState.busy ? 'disabled' : ''}><span aria-hidden="true">＋</span>${selectedDialogRules().length ? '添加积分项' : '选择积分项'}</button>
                 </div>
-                <div class="rule-selection">${selectedDialogRules().length ? `<div class="rule-table-head" aria-hidden="true"><span>积分项</span><span>${directionLabel}分值</span><span>原因（选填）</span><span>操作</span></div>` : ''}${renderRuleOptions()}<div class="rule-add-row"><button class="button button-quiet" type="button" data-dialog-action="pick-rules" ${dialogState.busy ? 'disabled' : ''}><span aria-hidden="true">＋</span>${selectedDialogRules().length ? '添加积分项' : '选择积分项'}</button></div></div>
-              </div>
-            </div>
+                <div class="rule-selection">${selectedDialogRules().length ? `<div class="rule-table-head" aria-hidden="true"><span>积分项</span><span>${directionLabel}分值</span><span>原因（选填）</span><span>操作</span></div>` : ''}${renderRuleOptions()}</div>
 
-            <div class="calculation" aria-live="polite">
+                <div class="calculation" aria-live="polite">
               ${chosen.length === 1
                 ? `<div><span>本次${directionLabel}</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div>`
                 : `<div><span>每位学员${directionLabel}</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div><div><span>整批${directionLabel}</span><strong data-summary="total">${incomplete ? '待完善' : `${formatDelta(total)} 分`}</strong></div>`}
               ${chosen.length > 1 ? `<small>${chosen.length} 人 × ${selectedDialogRules().length} 条积分项</small>` : ''}
+                </div>
+              </section>
             </div>
             ${error}
           </div>

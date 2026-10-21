@@ -139,12 +139,14 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell.desktop .student-summary span { color: var(--color-text-subtle); }
 .app-shell.desktop .scope-note { margin: 4px 0 0; color: var(--color-text-subtlest); font-size: 12px; line-height: 20px; }
 .app-shell.desktop .student-summary strong { font-weight: 600; }
-.app-shell.desktop .dialog .form-row { display: block; margin-bottom: 16px; }
+.app-shell.desktop .dialog .form-row { display: block; margin-bottom: 0; }
 .app-shell.desktop .dialog .form-label { display: none; }
-.app-shell.desktop .rule-selector-head { justify-content: space-between; }
+.app-shell.desktop .points-editor { border: 1px solid var(--color-border-subtle); border-radius: 4px; overflow: hidden; }
+.app-shell.desktop .rule-selector-head { justify-content: space-between; min-height: 52px; padding: 10px 12px; }
 .app-shell.desktop .rule-selector-head > span { color: var(--color-text); font-size: 14px; font-weight: 600; }
-.app-shell.desktop .rule-selector-head .button { font-size: 12px; padding-right: 0; }
-.app-shell.desktop .rule-selection { margin-top: 8px; border: 0; border-top: 1px solid var(--color-border-subtle); border-bottom: 1px solid var(--color-border-subtle); border-radius: 0; overflow: hidden; }
+.app-shell.desktop .rule-selector-head .button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0; border: 0; background: transparent; color: var(--color-text-brand-accessible); font-size: 14px; font-weight: 400; }
+.app-shell.desktop .rule-selection { margin: 0; border: 0; border-top: 1px solid var(--color-border-subtle); border-radius: 0; overflow: hidden; }
+.app-shell.desktop .points-editor:not(:has(.rule-option)) :is(.rule-selection, .calculation, .selected-rule-count) { display: none; }
 .app-shell.desktop :is(.rule-table-head, .rule-option) { grid-template-columns: var(--points-columns); gap: 16px; }
 .app-shell.desktop .rule-table-head { display: grid; align-items: center; min-height: 40px; padding: 8px 12px; color: var(--color-text-subtle); background: var(--color-background-neutral-subtle); border-bottom: 1px solid var(--color-border-subtle); font-size: 12px; }
 .app-shell.desktop .rule-option { min-height: 48px; padding: 8px 12px; }
@@ -200,7 +202,7 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell.desktop .dialog[data-direction="minus"] .direction-mark,
 .app-shell.desktop .dialog[data-direction="minus"] .score-input .score-sign,
 .app-shell.desktop .dialog[data-direction="minus"] .calculation strong { color: var(--color-text-danger); }
-.app-shell.desktop .dialog .calculation { margin: 0; min-height: 36px; padding: 0; gap: 8px 20px; align-items: center; flex-wrap: wrap; border: 0; border-radius: 0; background: transparent; }
+.app-shell.desktop .dialog .calculation { margin: 0; min-height: 48px; padding: 8px 12px; gap: 8px 20px; align-items: center; flex-wrap: wrap; border: 0; border-top: 1px solid var(--color-border-subtle); border-radius: 0; background: var(--color-background-neutral-subtle); }
 .app-shell.desktop .calculation div { gap: 8px; }
 .app-shell.desktop .calculation strong { font-size: 20px; line-height: 28px; }
 .app-shell.desktop .calculation div:nth-child(2) { margin-left: 0; padding-left: 20px; border-left: 1px solid var(--color-border-subtle); }
@@ -212,6 +214,7 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell.desktop .dialog-message.info { background: var(--color-background-warning-subtle); border-color: var(--color-border-warningSubtle); }
 .app-shell.desktop .dialog-message.info::before { color: var(--color-text-inverse); }
 .app-shell.desktop .dialog-footer { min-height: 64px; padding: 15px 24px; gap: 8px; }
+.app-shell.desktop .dialog-footer .submit-summary { display: none; }
 .app-shell.desktop .dialog-footer .button { min-height: 32px; }
 .app-shell.desktop .dialog-footer [data-dialog-action="close"] { min-width: 72px; }
 .app-shell.desktop .toast {
