@@ -716,7 +716,7 @@
     .app-shell.mobile .submit-summary { flex: 0 0 100%; text-align: center; }
   </style>
   <link rel="stylesheet" href="prototype-batch-wone-tokens.css">
-  <link rel="stylesheet" href="prototype-batch-wone-pc.css">
+  <link rel="stylesheet" href="prototype-batch-wone-pc.css?v=rule-value-align-20261021">
   <link rel="stylesheet" href="prototype-batch-mobile.css">
   <link id="pointsVantStyles" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@4.9.21/lib/index.css" media="not all" onerror="this.onerror=null;this.href='https://unpkg.com/vant@4.9.21/lib/index.css'">
   <link rel="stylesheet" href="student-points-vant/mobile.css?v=balance-animation-20261021">
@@ -1178,7 +1178,7 @@
           ${picker.creating ? `<div class="rule-library-form">
             <label for="libraryRuleName">规则名称<span>*</span></label><input id="libraryRuleName" data-new-rule="name" placeholder="请输入规则名称" value="${escapeHtml(picker.name)}">
             <label for="libraryRuleType">${label}分值类型</label><select id="libraryRuleType" data-new-rule-type><option value="fixed" ${picker.type === 'fixed' ? 'selected' : ''}>固定分值</option><option value="unlimited" ${picker.type === 'unlimited' ? 'selected' : ''}>不限分值</option></select>
-            ${picker.type === 'fixed' ? `<label for="libraryRuleValue">默认${label}分值<span>*</span></label><div class="rule-library-score"><span>${dialogState.direction > 0 ? '+' : '−'}</span><input id="libraryRuleValue" data-new-rule="value" type="number" inputmode="decimal" min="0" step="any" placeholder="请输入默认分值" value="${escapeHtml(picker.value)}"><span>分</span></div>` : ''}
+            ${picker.type === 'fixed' ? `<label for="libraryRuleValue">默认${label}分值<span>*</span></label><div class="rule-library-score"><input id="libraryRuleValue" data-new-rule="value" type="number" inputmode="decimal" min="0" step="any" placeholder="请输入默认分值" value="${escapeHtml(picker.value)}"><span>分</span></div>` : ''}
             <label for="libraryRuleReason">原因</label><textarea id="libraryRuleReason" data-new-rule="reason" placeholder="请输入原因">${escapeHtml(picker.reason)}</textarea>
             <p>保存后返回规则列表并自动勾选，再应用到本次操作。积分在主弹窗点击确定后生效。</p>
             ${picker.error ? `<div class="rule-library-error" role="alert" tabindex="-1">${escapeHtml(picker.error)}</div>` : ''}
