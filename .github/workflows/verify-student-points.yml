@@ -1,0 +1,77 @@
+name: Verify student points publication
+
+on:
+  push:
+    branches: [gh-pages]
+    paths:
+      - student-points/**
+      - .github/workflows/verify-student-points.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verify-student-points
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the published page and local assets
+        id: publication
+        env:
+          SITE_URL: https://huangtao89027jerry.github.io/ant-mobile-booking/student-points
+        shell: bash
+        run: |
+          files=(index.html prototype-batch-wone-tokens.css prototype-batch-wone-pc.css prototype-batch-mobile.css student-points-vant/mobile.css student-points-vant/mobile.js)
+          check_dir=$(mktemp -d)
+          published=false
+          for attempt in $(seq 1 18); do
+            matched=true
+            for file in "${files[@]}"; do
+              if ! curl --fail --silent --show-error --location --connect-timeout 10 --max-time 20 "$SITE_URL/$file?verify=$GITHUB_SHA-$attempt" -o "$check_dir/response"; then
+                matched=false
+                break
+              fi
+              if ! cmp --silent "student-points/$file" "$check_dir/response"; then
+                echo "Waiting for the latest $file"
+                matched=false
+                break
+              fi
+            done
+            if [ "$matched" = true ]; then
+              published=true
+              break
+            fi
+            sleep 15
+          done
+          echo "published=$published" >> "$GITHUB_OUTPUT"
+          export PUBLISHED="$published"
+          python3 - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          with open('publication-status.json', 'w') as output:
+              json.dump({
+                  'published': os.environ['PUBLISHED'] == 'true',
+                  'commit': os.environ['GITHUB_SHA'],
+                  'checked_at': datetime.now(timezone.utc).isoformat(),
+                  'site_url': os.environ['SITE_URL'] + '/',
+                  'run_url': os.environ['GITHUB_SERVER_URL'] + '/' + os.environ['GITHUB_REPOSITORY'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID'],
+                  'checks': 'HTTP success and exact content match for the page and five local assets'
+              }, output, indent=2)
+          PY
+      - name: Record the verification result
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add publication-status.json
+          git commit -m "Record student points publication verification"
+          git push origin "HEAD:refs/heads/student-points-publication-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Require successful publication
+        if: steps.publication.outputs.published != 'true'
+        run: exit 1
