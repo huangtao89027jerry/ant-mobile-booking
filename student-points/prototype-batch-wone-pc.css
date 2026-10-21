@@ -1,0 +1,218 @@
+/* PC visual adaptation only. Mobile retains its independent layout and tokens. */
+body:has(.app-shell.desktop) {
+  --ant-primary: var(--color-background-brand-bold);
+  --ant-primary-hover: var(--color-background-brand-bold-hovered);
+  --ant-primary-active: var(--color-background-brand-bold-pressed);
+  --ant-primary-bg: var(--color-background-brand-subtle);
+  --ant-primary-border: var(--color-border-brandSubtle);
+  --ant-warning: var(--color-text-warning);
+  --ant-error: var(--color-text-danger);
+  --ant-text: var(--color-text);
+  --ant-text-secondary: var(--color-text-subtle);
+  --ant-text-tertiary: var(--color-text-subtlest);
+  --ant-text-quaternary: var(--color-text-disabled);
+  --ant-border: var(--color-border);
+  --ant-border-secondary: var(--color-border-subtle);
+  --ant-fill-tertiary: var(--color-background-neutral-subtle);
+  --ant-bg-layout: var(--color-background-page);
+  --ant-bg-container: var(--color-background-surface);
+  --bg: var(--color-background-page);
+  --surface: var(--color-background-surface);
+  --surface-soft: var(--color-background-neutral-subtle);
+  --ink: var(--color-text);
+  --ink-soft: var(--color-text-subtle);
+  --muted: var(--color-text-subtlest);
+  --line: var(--color-border-subtle);
+  --line-strong: var(--color-border);
+  --accent: var(--color-background-brand-bold);
+  --accent-hover: var(--color-background-brand-bold-hovered);
+  --accent-soft: var(--color-background-brand-subtle);
+  --danger: var(--color-text-danger);
+  --danger-soft: var(--color-background-danger-subtle);
+  --warning: var(--color-text-warning);
+  --warning-soft: var(--color-background-warning-subtle);
+  --shadow: 0 12px 32px var(--color-shadow);
+  --sans: -apple-system, "BlinkMacSystemFont", "Helvetica Neue", "Helvetica", "Arial", "PingFang SC", "Hiragino Sans GB", "Microsoft Yahei", "STHeiti", "SimSun", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --mono: "DIN Alternate", "Arial Narrow", "Helvetica Neue", "Arial", sans-serif;
+  min-width: 1280px;
+  font: 14px/22px var(--sans);
+}
+
+body:has(.app-shell.desktop) .scene-wrap { padding: 32px 40px; }
+body:has(.app-shell.desktop) :is(button, input, select, textarea) {
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(.2, 0, 0, 1);
+}
+body:has(.app-shell.desktop) :is(input, select, textarea) { border-radius: 4px; }
+body:has(.app-shell.desktop) :is(input:not([type="checkbox"]), select, textarea) { background: var(--color-background-surface); }
+body:has(.app-shell.desktop) :is(input, select, textarea)::placeholder { color: var(--color-text-placeholder); }
+body:has(.app-shell.desktop) :is(input, select, textarea):hover { border-color: var(--color-border-brandLight); }
+body:has(.app-shell.desktop) :is(input, select, textarea):focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--color-border-focused);
+}
+body:has(.app-shell.desktop) :is(button, input[type="checkbox"]):focus-visible {
+  outline: 2px solid var(--color-border-focused);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+body:has(.app-shell.desktop) input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--color-background-brand-bold); }
+body:has(.app-shell.desktop) .button {
+  min-height: 32px;
+  padding: 4px 16px;
+  border-radius: 4px;
+  box-shadow: none;
+  line-height: 22px;
+}
+body:has(.app-shell.desktop) .button:not(.button-primary, .button-danger-solid):hover:not(:disabled) {
+  color: var(--color-text-brand-accessible);
+  border-color: var(--color-border-brand);
+}
+body:has(.app-shell.desktop) .button-quiet { color: var(--color-text-brand-accessible); border-color: transparent; padding-inline: 8px; }
+body:has(.app-shell.desktop) .button-quiet:hover:not(:disabled) { border-color: transparent; }
+body:has(.app-shell.desktop) .button-primary { color: var(--color-text-inverse); }
+body:has(.app-shell.desktop) .button-primary:hover:not(:disabled) { color: var(--color-text-inverse); }
+body:has(.app-shell.desktop) .button-primary:active:not(:disabled) { color: var(--color-text-inverse); }
+body:has(.app-shell.desktop) .button-danger { color: var(--color-text-danger); border-color: var(--color-border-danger); }
+body:has(.app-shell.desktop) .button-danger:hover:not(:disabled) { color: var(--color-text-danger-hovered); border-color: var(--color-border-dangerLight); }
+body:has(.app-shell.desktop) .button-danger-solid { color: var(--color-text-inverse); background: var(--color-background-danger-bold); border-color: var(--color-border-danger); }
+body:has(.app-shell.desktop) .button-danger-solid:hover:not(:disabled) { color: var(--color-text-inverse); background: var(--color-background-danger-bold-hovered); border-color: var(--color-border-dangerLight); }
+body:has(.app-shell.desktop) .button-danger-solid:active:not(:disabled) { color: var(--color-text-inverse); background: var(--color-background-danger-bold-pressed); border-color: var(--color-background-danger-bold-pressed); }
+body:has(.app-shell.desktop) .button:disabled {
+  color: var(--color-text-disabled);
+  background: var(--color-background-neutral-subtle);
+  border-color: var(--color-border);
+}
+body:has(.app-shell.desktop) .button-primary:disabled { color: var(--color-text-inverse); background: var(--color-background-brand-bold-hovered); border-color: var(--color-border-brandLight); }
+body:has(.app-shell.desktop) .button-danger-solid:disabled { color: var(--color-text-inverse); background: var(--color-background-danger-bold-hovered); border-color: var(--color-border-dangerLight); }
+body:has(.app-shell.desktop) :is(.demo-logo, .demo-control select) { border-radius: 4px; }
+body:has(.app-shell.desktop) .demo-logo { color: var(--color-text-inverse); font-weight: 600; }
+
+.app-shell.desktop { max-width: 1200px; min-width: 1200px; min-height: 760px; border-radius: 4px; box-shadow: none; }
+.app-shell.desktop .brand-mark { color: var(--color-text-inverse); border-radius: 4px; }
+.app-shell.desktop .app-content { padding: 24px; }
+.app-shell.desktop .page-heading { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.app-shell.desktop .page-heading p { margin-top: 4px; }
+.app-shell.desktop .summary-strip { min-height: 48px; margin-top: 16px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.app-shell.desktop .summary-item strong { font-size: 20px; }
+.app-shell.desktop .directory { grid-template-columns: 200px minmax(0, 1fr); border-radius: 4px; }
+.app-shell.desktop .class-filter { border-radius: 4px; }
+.app-shell.desktop .class-filter.active { color: var(--color-text-brand-accessible); }
+.app-shell.desktop .student-toolbar { min-height: 64px; padding: 16px; }
+.app-shell.desktop .student-toolbar h2 { font-size: 14px; }
+.app-shell.desktop .selection-toolbar { min-height: 56px; padding: 12px 16px; gap: 8px; }
+.app-shell.desktop .selection-count { padding-left: 12px; border-left: 1px solid var(--color-border-subtle); }
+.app-shell.desktop :is(.student-pane, .dialog, .dialog-body) { background: var(--color-background-surface); }
+.app-shell.desktop :is(.student-table-head, .student-row) {
+  grid-template-columns: 24px minmax(130px, 1fr) minmax(160px, 1fr) 90px 90px 120px;
+  min-height: 40px;
+  padding: 4px 12px;
+  gap: 12px;
+}
+.app-shell.desktop .student-table-head { height: 40px; background: var(--color-background-neutral-subtle); }
+.app-shell.desktop .student-row { background: var(--color-background-surface); }
+.app-shell.desktop .student-row:hover { background: var(--color-background-neutral-subtle); }
+.app-shell.desktop .student-class { display: block; }
+.app-shell.desktop .student-row .recent-change { display: block; }
+.app-shell.desktop .student-id strong { font-weight: 400; }
+.app-shell.desktop .avatar { width: 28px; height: 28px; }
+body:has(.app-shell.desktop) .student-actions .button { min-height: 24px; padding: 2px 8px; border-color: transparent; background: transparent; color: var(--color-text-subtle); font-size: 12px; line-height: 20px; }
+body:has(.app-shell.desktop) .student-actions .button-primary { color: var(--color-text-brand-accessible); }
+body:has(.app-shell.desktop) .student-actions .button:hover:not(:disabled) { border-color: transparent; color: var(--color-text-brand-accessible); background: var(--color-background-brand-subtle); }
+body:has(.app-shell.desktop) .student-actions [data-student-direction="-1"]:hover:not(:disabled) { color: var(--color-text-danger); background: var(--color-background-danger-subtle); }
+body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--color-text-disabled); background: transparent; }
+.app-shell.desktop :is(.recent-panel, .new-rule-box) { border-radius: 4px; }
+.app-shell.desktop .recent-head { min-height: 40px; padding-inline: 12px; background: var(--color-background-neutral-subtle); }
+.app-shell.desktop .recent-item { min-height: 40px; padding: 8px 12px; border-color: var(--color-border-subtle); }
+.app-shell.desktop .modal-layer { background: var(--color-overlay-emphasis); }
+.app-shell.desktop .dialog { --points-columns: minmax(140px, 1fr) 112px minmax(140px, 1fr) 40px; width: 760px; max-width: calc(100vw - 32px); border-radius: 4px; animation-duration: 180ms; }
+.app-shell.desktop .dialog-title { height: 74px; min-height: 74px; flex-shrink: 0; padding: 0 24px; }
+.app-shell.desktop .dialog-title :is(h1, h2) { margin: 0; color: var(--color-text); font-size: 16px; line-height: 26px; font-weight: 600; }
+.app-shell.desktop .close-button { font-size: 16px; margin-right: 0; }
+.app-shell.desktop .dialog-body { padding: 24px; }
+.app-shell.desktop .operation-scope { margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; background: var(--color-background-neutral-subtle); }
+.app-shell.desktop .operation-scope .student-summary { display: flex; align-items: flex-start; margin: 0; gap: 12px; font-size: 14px; }
+.app-shell.desktop .student-summary strong { padding-top: 2px; line-height: 24px; }
+.app-shell.desktop .student-name-tags { flex: 1; min-width: 0; margin: 0; gap: 6px; }
+.app-shell.desktop .student-name-tag { padding: 1px 8px; font-size: 12px; line-height: 22px; }
+.app-shell.desktop .student-summary span { color: var(--color-text-subtle); }
+.app-shell.desktop .scope-note { margin: 4px 0 0; color: var(--color-text-subtlest); font-size: 12px; line-height: 20px; }
+.app-shell.desktop .student-summary strong { font-weight: 600; }
+.app-shell.desktop .dialog .form-row { display: block; margin-bottom: 16px; }
+.app-shell.desktop .dialog .form-label { display: none; }
+.app-shell.desktop .rule-selector-head { justify-content: space-between; }
+.app-shell.desktop .rule-selector-head > span { color: var(--color-text); font-size: 14px; font-weight: 600; }
+.app-shell.desktop .rule-selector-head .button { font-size: 12px; padding-right: 0; }
+.app-shell.desktop .rule-selection { margin-top: 8px; border: 0; border-top: 1px solid var(--color-border-subtle); border-bottom: 1px solid var(--color-border-subtle); border-radius: 0; overflow: hidden; }
+.app-shell.desktop :is(.rule-table-head, .rule-option) { grid-template-columns: var(--points-columns); gap: 16px; }
+.app-shell.desktop .rule-table-head { display: grid; align-items: center; min-height: 40px; padding: 8px 12px; color: var(--color-text-subtle); background: var(--color-background-neutral-subtle); border-bottom: 1px solid var(--color-border-subtle); font-size: 12px; }
+.app-shell.desktop .rule-option { min-height: 56px; padding: 6px 12px; }
+.app-shell.desktop .rule-option:last-child { border-bottom: 0; }
+.app-shell.desktop .rule-fields { display: contents; }
+.app-shell.desktop .rule-copy strong { font-size: 14px; font-weight: 400; }
+.app-shell.desktop .rule-option.active .rule-copy strong { font-weight: 600; }
+.app-shell.desktop .rule-option.active .rule-copy small { display: none; }
+.app-shell.desktop .rule-copy small { font-size: 12px; line-height: 20px; }
+.app-shell.desktop .rule-fields input { background: var(--color-background-surface); }
+.app-shell.desktop .selected-rule-count { margin-left: 8px; color: var(--color-text-subtlest); font-size: 12px; font-weight: 400; }
+.app-shell.desktop .rule-table-head span:last-child { text-align: right; }
+.app-shell.desktop .rule-option .rule-remove { min-width: 40px; padding: 0; border: 0; color: var(--color-text-subtle); font-size: 12px; }
+.app-shell.desktop .rule-add-row { padding: 0 12px; }
+.app-shell.desktop .rule-option + .rule-add-row { border-top: 1px solid var(--color-border-subtle); }
+.app-shell.desktop .rule-add-row .button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0; border: 0; background: transparent; color: var(--color-text-brand-accessible); font-size: 14px; font-weight: 400; }
+.app-shell.desktop .rule-add-row .button span { font-size: 16px; line-height: 1; }
+.app-shell .rule-library-layer { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--color-overlay-emphasis); }
+.app-shell .rule-library-panel { display: flex; flex-direction: column; width: 520px; max-width: 100%; max-height: min(560px, calc(100dvh - 80px)); overflow: hidden; border-radius: 4px; background: var(--color-background-surface); box-shadow: 0 12px 32px #0003; }
+.app-shell .rule-library-title { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--color-border-subtle); }
+.app-shell .rule-library-title h2 { margin: 0; color: var(--color-text); font-size: 16px; font-weight: 600; }
+.app-shell .rule-library-title .close-button { flex-shrink: 0; }
+.app-shell .rule-library-search { padding: 16px 24px 8px; }
+.app-shell .rule-library-search input { width: 100%; height: 32px; padding: 4px 10px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-background-surface); color: var(--color-text); font: inherit; }
+.app-shell .rule-library-search input:focus-visible { outline: 2px solid var(--color-border-focused); outline-offset: 1px; }
+.app-shell .rule-library-options { flex: 1; min-height: 0; overflow: auto; padding: 0 24px 8px; }
+.app-shell .rule-library-option { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 0; border-bottom: 1px solid var(--color-border-subtle); cursor: pointer; }
+.app-shell .rule-library-option:last-child { border-bottom: 0; }
+.app-shell .rule-library-option input { width: 16px; height: 16px; margin: 0; flex-shrink: 0; accent-color: var(--color-text-brand-accessible); }
+.app-shell .rule-library-option span { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.app-shell .rule-library-option small { flex-shrink: 0; color: var(--color-text-subtle); font-size: 12px; }
+.app-shell .rule-library-empty { padding: 24px 0; color: var(--color-text-subtlest); text-align: center; }
+.app-shell .rule-library-footer { display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--color-border-subtle); }
+.app-shell .rule-library-footer > span { margin-right: auto; color: var(--color-text-subtle); font-size: 12px; }
+.app-shell .rule-library-footer .button { min-height: 32px; }
+.app-shell.desktop .direction-mark,
+.app-shell.desktop .dialog .score-input .score-sign { color: var(--color-text-brand-accessible); }
+.app-shell.desktop .dialog[data-direction="minus"] .direction-mark,
+.app-shell.desktop .dialog[data-direction="minus"] .score-input .score-sign,
+.app-shell.desktop .dialog[data-direction="minus"] .calculation strong { color: var(--color-text-danger); }
+.app-shell.desktop .dialog .calculation { margin: 0; min-height: 56px; padding: 4px 0 0; gap: 8px 24px; flex-wrap: wrap; border: 0; border-radius: 0; background: transparent; }
+.app-shell.desktop .calculation div { gap: 12px; }
+.app-shell.desktop .calculation strong { font-size: 20px; line-height: 28px; }
+.app-shell.desktop .calculation div:nth-child(2) { margin-left: auto; }
+.app-shell.desktop .calculation div:nth-child(2) strong { color: var(--color-text); font-size: 16px; }
+.app-shell.desktop .dialog .calculation small { flex-basis: 100%; margin-left: 0; font-size: 12px; }
+.app-shell.desktop .new-rule-box { background: var(--color-background-neutral-subtle); }
+.app-shell.desktop .dialog-message { margin-left: 0; border-radius: 4px; background: var(--color-background-danger-subtle); border-color: var(--color-border-dangerSubtle); }
+.app-shell.desktop .dialog-message::before { color: var(--color-text-inverse); }
+.app-shell.desktop .dialog-message.info { background: var(--color-background-warning-subtle); border-color: var(--color-border-warningSubtle); }
+.app-shell.desktop .dialog-message.info::before { color: var(--color-text-inverse); }
+.app-shell.desktop .dialog-footer { min-height: 64px; padding: 15px 24px; gap: 8px; }
+.app-shell.desktop .dialog-footer .button { min-height: 32px; }
+.app-shell.desktop .dialog-footer [data-dialog-action="close"] { min-width: 72px; }
+.app-shell.desktop .toast {
+  top: 80px;
+  bottom: auto;
+  width: 380px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: var(--color-border-successSubtle);
+  border-radius: 4px;
+  box-shadow: none;
+}
+.app-shell.desktop .toast.error { color: var(--color-text-danger); background: var(--color-background-danger-subtle); border-color: var(--color-border-dangerSubtle); }
+.app-shell.desktop .student-table-head span:nth-child(3),
+.app-shell.desktop .student-table-head span:nth-child(5) { display: block; }
+/* Preserve the mobile heading if the demo device changes while a PC dialog is open. */
+.app-shell.mobile .dialog-title h1 { margin: 0; color: var(--ant-text); font-size: 16px; line-height: 24px; font-weight: 600; }

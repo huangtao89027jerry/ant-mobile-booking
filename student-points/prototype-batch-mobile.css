@@ -1,0 +1,158 @@
+/* Student points mobile layout. Desktop rules remain in their own stylesheet. */
+.mobile-page-title { display: none; }
+.app-shell.mobile {
+  --ant-primary: var(--color-background-brand-bold);
+  --ant-primary-hover: var(--color-background-brand-bold-pressed);
+  --ant-primary-active: var(--color-background-brand-bold-pressed);
+  --ant-primary-bg: var(--color-background-brand-subtle);
+  --ant-error: var(--color-text-danger);
+  --ant-border: var(--color-border);
+  --ant-border-secondary: var(--color-border-subtle);
+  --ant-text: var(--color-text);
+  --ant-text-secondary: var(--color-text-subtle);
+  --ant-text-tertiary: var(--color-text-subtlest);
+  --ant-bg-container: var(--color-background-surface);
+  --ant-bg-layout: var(--color-background-page);
+  --accent: var(--color-background-brand-bold);
+  --accent-soft: var(--color-background-brand-subtle);
+  --danger: var(--color-text-danger);
+  --danger-soft: var(--color-background-danger-subtle);
+  --surface: var(--color-background-surface);
+  --surface-soft: var(--color-background-neutral-subtle);
+  --ink: var(--color-text);
+  --ink-soft: var(--color-text-subtle);
+  --muted: var(--color-text-subtlest);
+  --line: var(--color-border-subtle);
+  --line-strong: var(--color-border);
+  display: flex;
+  flex-direction: column;
+  width: 390px;
+  height: min(844px, calc(100dvh - 128px));
+  min-height: 0;
+  max-height: none;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  color: var(--color-text);
+  background: var(--color-background-page);
+  box-shadow: 0 12px 32px var(--color-shadow);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 22px;
+}
+.app-shell.mobile::before { display: none; }
+.app-shell.mobile .app-header { height: 52px; min-height: 52px; flex: 0 0 52px; padding: 0 16px; }
+.app-shell.mobile .app-header :is(.brand, .breadcrumb) { display: none; }
+.app-shell.mobile .mobile-page-title { display: block; font-size: 17px; font-weight: 600; }
+.app-shell.mobile .app-content { flex: 1; height: auto; min-height: 0; padding: 12px; overflow: auto; overscroll-behavior: contain; }
+.app-shell.mobile .page-heading { display: none; }
+.app-shell.mobile .summary-strip { min-height: 56px; margin: 0 0 12px; padding: 12px; justify-content: space-between; gap: 8px; border: 0; border-radius: 8px; }
+.app-shell.mobile .summary-item { gap: 4px; white-space: nowrap; }
+.app-shell.mobile .summary-item span { font-size: 12px; }
+.app-shell.mobile .summary-item strong { font-size: 20px; }
+.app-shell.mobile .directory { margin-top: 0; }
+.app-shell.mobile .class-rail { display: block; margin-bottom: 12px; padding: 0; border: 0; overflow-x: auto; }
+.app-shell.mobile #classFilters { display: flex; width: max-content; gap: 8px; }
+.app-shell.mobile .class-filter { min-height: 44px; margin: 0; padding: 0 12px; border: 1px solid var(--color-border-subtle); border-radius: 6px; background: var(--color-background-surface); color: var(--color-text-subtle); white-space: nowrap; font-size: 13px; }
+.app-shell.mobile .class-filter.active { border: 1px solid var(--color-border-brandSubtle); color: var(--color-text-brand-accessible); background: var(--color-background-brand-subtle); }
+.app-shell.mobile .student-pane { overflow: visible; border-radius: 8px; }
+.app-shell.mobile .student-toolbar { display: block; padding: 12px; border-bottom: 0; }
+.app-shell.mobile .student-toolbar h2 { font-size: 14px; line-height: 22px; }
+.app-shell.mobile .search-box { display: block; width: 100%; margin-top: 8px; }
+.app-shell.mobile .search-box input { height: 44px; font-size: 16px; border-radius: 6px; }
+.app-shell.mobile .search-box svg { top: 14px; }
+.app-shell.mobile .selection-toolbar { position: sticky; top: -1px; z-index: 2; gap: 0 4px; padding: 0 12px 12px; border-radius: 8px 8px 0 0; background: var(--color-background-surface); }
+.app-shell.mobile .select-visible { min-height: 44px; margin-right: auto; gap: 6px; font-size: 12px; }
+.app-shell.mobile .select-visible span { font-size: 0; }
+.app-shell.mobile .select-visible span::after { content: '全选'; font-size: 12px; }
+.app-shell.mobile .selection-count { font-size: 12px; }
+.app-shell.mobile .selection-toolbar .selection-link { min-height: 44px; padding: 0 6px; color: var(--color-text-brand-accessible); }
+.app-shell.mobile .selection-toolbar .selection-link:disabled { color: var(--color-text-disabled); background: transparent; border-color: transparent; }
+.app-shell.mobile .selection-actions { flex: 0 0 100%; gap: 8px; margin: 0; }
+.app-shell.mobile .selection-actions .button { flex: 1; min-height: 44px; font-size: 14px; }
+.app-shell.mobile .selected-students { padding: 8px 12px; gap: 6px; }
+.app-shell.mobile .selected-student { max-width: 100%; min-width: 0; padding-left: 8px; }
+.app-shell.mobile .selected-student > span { min-width: 0; overflow-wrap: anywhere; }
+.app-shell.mobile .selected-student small { display: block; margin-left: 0; font-size: 11px; }
+.app-shell.mobile .selected-student button { flex: 0 0 44px; width: 44px; height: 44px; }
+.app-shell.mobile .student-row { min-height: 112px; padding: 8px 12px; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 0 8px; }
+.app-shell.mobile .student-row:has(input:checked) { background: var(--color-background-brand-subtle); }
+.app-shell.mobile .student-select { width: 44px; height: 44px; margin-left: -8px; cursor: pointer; }
+.app-shell.mobile :is(.student-select, .select-visible, .rule-choice) input { width: 20px; height: 20px; flex: 0 0 20px; accent-color: var(--color-background-brand-bold); }
+.app-shell.mobile .student-id { min-height: 48px; }
+.app-shell.mobile .student-id .avatar { display: none; }
+.app-shell.mobile .student-id strong { font-size: 15px; font-weight: 600; }
+.app-shell.mobile .student-id small { font-size: 12px; line-height: 18px; white-space: normal; }
+.app-shell.mobile .student-row .student-balance { font-size: 20px; line-height: 28px; }
+.app-shell.mobile .student-balance small { font-size: 12px; }
+.app-shell.mobile .student-row .student-actions { justify-content: flex-end; gap: 8px; }
+.app-shell.mobile .student-actions .button { min-width: 64px; min-height: 44px; padding: 0 12px; border-color: transparent; color: var(--color-text-subtle); background: transparent; box-shadow: none; }
+.app-shell.mobile .student-actions .button-primary { color: var(--color-text-brand-accessible); }
+.app-shell.mobile .student-actions .button:hover:not(:disabled) { color: var(--color-text-brand-accessible); background: var(--color-background-brand-subtle); border-color: transparent; }
+.app-shell.mobile .student-actions [data-student-direction="-1"]:hover:not(:disabled) { color: var(--color-text-danger); background: var(--color-background-danger-subtle); }
+.app-shell.mobile .student-actions .button:disabled { color: var(--color-text-disabled); }
+.app-shell.mobile .recent-head { padding: 12px; gap: 4px; flex-wrap: wrap; }
+.app-shell.mobile .recent-head h2 { flex-basis: 100%; font-size: 14px; }
+.app-shell.mobile .recent-item { grid-template-columns: 60px minmax(0, 1fr) 56px; padding: 10px 12px; font-size: 12px; }
+.app-shell.mobile .app-note { font-size: 11px; }
+.app-shell.mobile .modal-layer { inset: 0; padding: 0; background: var(--color-background-surface); }
+.app-shell.mobile:has(.modal-layer:not([hidden])) .app-content { overflow: hidden; }
+.app-shell.mobile .dialog { width: 100%; height: 100%; min-height: 0; max-height: 100%; border-radius: 0; box-shadow: none; animation: none; }
+.app-shell.mobile .dialog-title { flex: 0 0 56px; min-height: 56px; padding: 0 12px 0 16px; gap: 8px; }
+.app-shell.mobile .dialog-title > div { min-width: 0; gap: 8px; }
+.app-shell.mobile .dialog-title :is(h1, h2) { font-size: 17px; line-height: 24px; overflow-wrap: anywhere; }
+.app-shell.mobile .close-button { flex: 0 0 44px; width: 44px; height: 44px; margin: 0 0 0 auto; font-size: 24px; }
+.app-shell.mobile .dialog-body { flex: 1 1 0; min-height: 0; padding: 16px; overflow: auto; overscroll-behavior: contain; scroll-padding-block: 12px; }
+.app-shell.mobile .operation-scope { margin-bottom: 12px; padding: 10px 12px; border-radius: 6px; background: var(--color-background-neutral-subtle); }
+.app-shell.mobile .operation-scope .student-summary { display: flex; align-items: flex-start; gap: 8px; margin: 0; }
+.app-shell.mobile .student-summary strong { font-size: 12px; line-height: 26px; }
+.app-shell.mobile .student-name-tags { flex: 1; min-width: 0; max-height: 78px; gap: 6px; margin: 0; }
+.app-shell.mobile .student-name-tag { padding: 1px 6px; font-size: 12px; line-height: 22px; }
+.app-shell.mobile .scope-note { margin: 6px 0 0; font-size: 12px; line-height: 18px; }
+.app-shell.mobile .form-row { margin-bottom: 12px; }
+.app-shell.mobile .form-label { display: none; }
+.app-shell.mobile .rule-selector-head { flex-wrap: wrap; justify-content: space-between; gap: 0 8px; }
+.app-shell.mobile .rule-selector-head > span { font-size: 14px; font-weight: 600; color: var(--color-text); }
+.app-shell.mobile .rule-selector-head .button { min-height: 44px; padding: 0; font-size: 12px; color: var(--color-text-brand-accessible); }
+.app-shell.mobile .rule-selection { display: block; margin-top: 4px; }
+.app-shell.mobile .rule-option { display: block; margin-bottom: 8px; padding: 8px 12px; border: 1px solid var(--color-border-subtle); border-radius: 6px; background: var(--color-background-surface); }
+.app-shell.mobile .rule-option.active { border-color: var(--color-border-brandSubtle); }
+.app-shell.mobile .rule-choice { min-height: 44px; gap: 8px; }
+.app-shell.mobile .rule-copy strong { font-size: 14px; font-weight: 400; white-space: normal; }
+.app-shell.mobile .rule-copy small { font-size: 12px; line-height: 18px; }
+.app-shell.mobile .rule-option.active .rule-copy strong { font-weight: 600; }
+.app-shell.mobile .rule-option.active .rule-copy small { display: none; }
+.app-shell.mobile .rule-fields { grid-template-columns: 96px minmax(0, 1fr); gap: 8px; margin-top: 4px; padding-bottom: 4px; }
+.app-shell.mobile .rule-fields input { height: 44px; min-width: 0; font-size: 16px; border-radius: 6px; }
+.app-shell.mobile .rule-fields .score-input span { top: 11px; }
+.app-shell.mobile .rule-fields.bad .score-input input { border-color: var(--color-border-danger); }
+.app-shell.mobile .score-error { font-size: 12px; }
+.app-shell.mobile .new-rule-box { margin-top: 8px; padding: 12px; border-radius: 6px; }
+.app-shell.mobile .new-rule-grid { display: flex; flex-direction: column; gap: 8px; }
+.app-shell.mobile .new-rule-grid :is(input, select) { width: 100%; min-width: 0; height: 44px; padding: 0 10px; font-size: 16px; }
+.app-shell.mobile .new-rule-actions { flex-wrap: wrap; gap: 8px; }
+.app-shell.mobile .new-rule-actions span { flex: 0 0 100%; }
+.app-shell.mobile .new-rule-actions .button { flex: 1; min-height: 44px; }
+.app-shell.mobile .calculation { margin: 0; padding: 12px 0 0; min-height: 0; gap: 8px 12px; border: 0; border-top: 1px solid var(--color-border-subtle); border-radius: 0; background: transparent; }
+.app-shell.mobile .calculation div { justify-content: space-between; flex: 1 1 100%; }
+.app-shell.mobile .calculation strong { font-size: 18px; line-height: 26px; }
+.app-shell.mobile .calculation small { font-size: 12px; }
+.app-shell.mobile .dialog-message { margin: 12px 0 0; border-radius: 6px; overflow-wrap: anywhere; }
+.app-shell.mobile .dialog-footer { display: grid; grid-template-columns: 80px minmax(0, 1fr); flex: 0 0 auto; gap: 8px; min-height: 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--color-background-surface); }
+.app-shell.mobile .submit-summary { grid-column: 1 / -1; margin: 0; text-align: left; font-size: 12px; line-height: 20px; }
+.app-shell.mobile .dialog-footer .button { min-width: 0; min-height: 44px; padding: 0 8px; font-size: 14px; }
+.app-shell.mobile .button-danger-solid { color: var(--color-text-inverse); background: var(--color-background-danger-bold); border-color: var(--color-border-danger); }
+.app-shell.mobile .button-danger-solid:hover:not(:disabled) { color: var(--color-text-inverse); background: var(--color-background-danger-bold-pressed); border-color: var(--color-background-danger-bold-pressed); }
+.app-shell.mobile .button-danger:hover:not(:disabled) { color: var(--color-text-danger); border-color: var(--color-border-danger); }
+.app-shell.mobile .button:disabled { color: var(--color-text-disabled); background: var(--color-background-neutral-subtle); border-color: var(--color-border-subtle); box-shadow: none; }
+.app-shell.mobile .direction-mark, .app-shell.mobile .dialog .score-input .score-sign { color: var(--color-text-brand-accessible); }
+.app-shell.mobile .dialog[data-direction="minus"] .direction-mark,
+.app-shell.mobile .dialog[data-direction="minus"] .score-input .score-sign { color: var(--color-text-danger); }
+.app-shell.mobile .toast { left: 12px; right: 12px; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; max-width: none; transform: translateY(8px); }
+.app-shell.mobile .toast.show { transform: translateY(0); }
+.app-shell.mobile :is(button, input, select):focus-visible { outline: 2px solid var(--color-border-focused); outline-offset: 2px; box-shadow: none; }
+.app-shell.mobile :is(input, select):focus { outline: none; border-color: var(--color-border-focused); box-shadow: none; }
+@media (max-width: 580px) {
+  body:has(.app-shell.mobile) { height: var(--points-mobile-viewport, 100dvh); min-height: 0; overflow: hidden; }
+  body:has(.app-shell.mobile) .demo-bar { display: none; }
+  body:has(.app-shell.mobile) .scene-wrap { display: flex; flex: 1; min-height: 0; padding: 0; overflow: hidden; }
+  .app-shell.mobile { width: 100%; height: 100%; min-height: 0; max-height: none; border: 0; border-radius: 0; box-shadow: none; }
+}

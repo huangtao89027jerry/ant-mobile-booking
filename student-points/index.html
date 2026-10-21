@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>学员积分 · WOne PC 批量登记原型</title>
+  <style>
+    :root {
+      --bg: #e9edf2;
+      --surface: #ffffff;
+      --surface-soft: #f6f8fb;
+      --ink: #383b40;
+      --ink-soft: #687282;
+      --muted: #9398a2;
+      --line: #e2e6ed;
+      --line-strong: #d9dce4;
+      --accent: #2878e9;
+      --accent-hover: #1e6cdf;
+      --accent-soft: #edf5ff;
+      --danger: #b04b42;
+      --danger-soft: #fff2ef;
+      --warning: #8c682e;
+      --warning-soft: #f8f2e7;
+      --shadow: 0 14px 44px rgba(40, 62, 89, .18);
+      --sans: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+      --mono: "SFMono-Regular", "JetBrains Mono", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { color-scheme: light; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      color: var(--ink);
+      background: var(--bg);
+      font: 14px/1.5 var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .48; }
+    button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid rgba(40, 120, 233, .22);
+      outline-offset: 1px;
+    }
+
+    [hidden] { display: none !important; }
+    .muted { color: var(--muted); }
+    .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+    .demo-bar {
+      min-height: 58px;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      background: #fff;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .demo-title {
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .demo-title b { font-size: 14px; font-weight: 600; }
+    .demo-title span { color: var(--muted); font-size: 12px; }
+    .demo-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--accent);
+      font-weight: 700;
+    }
+
+    .demo-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .demo-control { display: flex; align-items: center; gap: 6px; color: var(--ink-soft); font-size: 12px; }
+    .demo-control select {
+      height: 32px;
+      padding: 0 28px 0 9px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+    }
+
+    .button {
+      min-height: 38px;
+      padding: 0 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      color: var(--ink);
+      background: #fff;
+      transition: border-color .16s ease, background-color .16s ease, transform .12s ease;
+    }
+
+    .button:hover:not(:disabled) { border-color: var(--accent); }
+    .button:active:not(:disabled) { transform: translateY(1px); }
+    .button-primary { color: #fff; background: var(--accent); border-color: var(--accent); }
+    .button-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .button-quiet { min-height: 30px; padding: 0 8px; color: var(--accent); background: transparent; border-color: transparent; }
+    .button-quiet:hover:not(:disabled) { background: var(--accent-soft); border-color: transparent; }
+    .button-danger { color: var(--danger); }
+    .button-danger:hover:not(:disabled) { border-color: var(--danger); }
+
+    .scene-wrap {
+      min-height: calc(100dvh - 58px);
+      padding: 28px 20px 42px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .app-shell {
+      position: relative;
+      width: min(1160px, 100%);
+      min-height: 760px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid #d7dde6;
+      border-radius: 8px;
+      box-shadow: 0 18px 52px rgba(37, 56, 82, .14);
+    }
+
+    .app-header {
+      height: 62px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 5px;
+      color: #fff;
+      background: var(--accent);
+      font-size: 12px;
+    }
+    .breadcrumb { padding-left: 16px; border-left: 1px solid var(--line-strong); color: var(--ink-soft); }
+    .app-header-spacer { flex: 1; }
+    .account { display: flex; align-items: center; gap: 10px; color: var(--ink-soft); font-size: 13px; }
+    .account-avatar { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: var(--accent); background: var(--accent-soft); }
+
+    .app-content { padding: 28px; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    .page-heading h1 { margin: 0; font-size: 25px; line-height: 1.25; font-weight: 600; letter-spacing: -.02em; }
+    .page-heading p { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+
+    .summary-strip {
+      margin-top: 24px;
+      min-height: 66px;
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      gap: 38px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+    }
+    .summary-item { display: flex; align-items: baseline; gap: 8px; }
+    .summary-item span { color: var(--ink-soft); font-size: 12px; }
+    .summary-item strong { font: 600 20px/1 var(--mono); }
+    .summary-item strong.accent { color: var(--accent); }
+    .summary-hint { margin-left: auto; color: var(--muted); font-size: 12px; }
+
+    .directory {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 196px minmax(0, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .class-rail { padding: 16px 0; background: #f8f9fb; border-right: 1px solid var(--line); }
+    .rail-title { padding: 0 16px 10px; color: var(--muted); font-size: 12px; }
+    .class-filter {
+      width: 100%;
+      min-height: 40px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--ink-soft);
+      background: transparent;
+      border-left: 3px solid transparent;
+      text-align: left;
+    }
+    .class-filter:hover { color: var(--accent); background: #f2f7fe; }
+    .class-filter.active { color: var(--accent); background: var(--accent-soft); border-left-color: var(--accent); }
+    .class-filter em { color: var(--muted); font: normal 12px var(--mono); }
+
+    .student-pane { min-width: 0; background: #fff; }
+    .student-toolbar { min-height: 58px; padding: 10px 16px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--line); }
+    .student-toolbar h2 { margin: 0 auto 0 0; font-size: 15px; font-weight: 600; }
+    .search-box { position: relative; width: 220px; }
+    .search-box input { width: 100%; height: 34px; padding: 0 12px 0 34px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink); background: #fff; }
+    .search-box svg { position: absolute; left: 10px; top: 9px; width: 16px; height: 16px; color: var(--muted); fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+    .student-table-head, .student-row {
+      display: grid;
+      grid-template-columns: 32px minmax(170px, 1fr) minmax(170px, 1fr) 130px 120px 132px;
+      align-items: center;
+      gap: 16px;
+    }
+    .student-table-head { min-height: 42px; padding: 0 18px; color: var(--muted); background: #f6f8fb; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .student-row { min-height: 58px; padding: 9px 18px; border-bottom: 1px solid #edf0f4; }
+    .student-row:last-child { border-bottom: 0; }
+    .student-row:hover { background: #fbfcfe; }
+    .student-select { display: grid; place-items: center; }
+    .student-select input, .select-visible input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+    .student-actions { display: flex; justify-content: flex-end; gap: 6px; }
+    .student-actions .button { min-height: 30px; padding: 0 9px; }
+    .selection-toolbar { min-height: 48px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+    .select-visible { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 13px; cursor: pointer; }
+    .selection-count { color: var(--muted); font-size: 12px; }
+    .selection-actions { margin-left: auto; display: flex; gap: 8px; }
+    .student-id { min-width: 0; display: flex; align-items: center; gap: 10px; }
+    .avatar { flex: 0 0 auto; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; color: var(--accent); background: var(--accent-soft); font-size: 13px; font-weight: 600; }
+    .student-id strong { display: block; font-size: 14px; font-weight: 500; }
+    .student-id small { display: none; color: var(--muted); font-size: 11px; }
+    .student-class { color: var(--ink-soft); }
+    .student-balance { font: 600 15px var(--mono); }
+    .student-balance small { margin-left: 3px; color: var(--muted); font: 11px var(--sans); }
+    .recent-change { color: var(--muted); font-size: 12px; text-align: right; }
+    .recent-change.plus { color: var(--accent); }
+    .recent-change.minus { color: var(--danger); }
+
+    .empty-state { padding: 54px 20px; text-align: center; color: var(--muted); }
+    .empty-state strong { display: block; margin-bottom: 4px; color: var(--ink-soft); font-weight: 500; }
+
+    .recent-panel { margin-top: 22px; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+    .recent-head { min-height: 46px; padding: 0 16px; display: flex; align-items: center; gap: 10px; background: #f6f8fb; border-bottom: 1px solid var(--line); }
+    .recent-head h2 { margin: 0 auto 0 0; font-size: 14px; font-weight: 600; }
+    .recent-head span { color: var(--muted); font-size: 12px; }
+    .recent-item { min-height: 43px; padding: 8px 16px; display: grid; grid-template-columns: 100px minmax(150px, 1fr) 90px 110px; gap: 12px; align-items: center; border-bottom: 1px solid #edf0f4; font-size: 13px; }
+    .recent-item:last-child { border-bottom: 0; }
+    .recent-item em { color: var(--muted); font: normal 11px var(--mono); text-align: right; }
+    .delta-plus { color: var(--accent); font-family: var(--mono); }
+    .delta-minus { color: var(--danger); font-family: var(--mono); }
+
+    .app-note { margin: 16px 0 0; color: var(--muted); font-size: 12px; text-align: right; }
+
+    .modal-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(25, 35, 49, .54);
+    }
+
+    .dialog {
+      width: min(860px, calc(100vw - 36px));
+      max-height: min(88dvh, 820px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 18px 58px rgba(20, 31, 46, .30);
+      animation: dialog-in .18s ease-out both;
+    }
+    @keyframes dialog-in { from { opacity: 0; transform: translateY(8px) scale(.99); } }
+
+    .dialog-title {
+      min-height: 64px;
+      padding: 13px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: #fff;
+      background: var(--accent);
+    }
+    .dialog-title h2 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 600; }
+    .close-button { margin-left: auto; width: 36px; height: 36px; display: grid; place-items: center; color: #d9e9ff; background: transparent; border-radius: 4px; font-size: 28px; line-height: 1; }
+    .close-button:hover:not(:disabled) { color: #fff; background: rgba(255,255,255,.13); }
+
+    .dialog-body { padding: 24px 34px 20px; overflow: auto; background: #fff; }
+    .form-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: start; gap: 18px; margin-bottom: 22px; }
+    .form-label { padding-top: 9px; text-align: right; color: var(--ink-soft); font-size: 14px; }
+    .form-label strong { color: var(--danger); font-weight: 500; }
+    .form-value { min-width: 0; }
+
+    .rule-choice input { width: 16px; height: 16px; margin: 0; flex: 0 0 auto; accent-color: var(--accent); }
+    .rule-option span { min-width: 0; flex: 1; }
+    .rule-option strong { display: block; overflow: hidden; color: var(--ink); font-size: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+    .rule-option small { display: block; color: var(--muted); font-size: 11px; }
+
+    .score-input { position: relative; }
+    .score-input input { padding-right: 30px; font-family: var(--mono); }
+    .score-input span { position: absolute; right: 10px; top: 9px; color: var(--muted); font-size: 12px; }
+    .new-rule-box { margin-top: 10px; padding: 14px; background: #f8fafc; border: 1px solid var(--line); border-radius: 4px; }
+    .new-rule-grid { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: 10px; }
+    .new-rule-grid .wide { grid-column: 1 / -1; }
+    .new-rule-actions { margin-top: 9px; display: flex; align-items: center; gap: 10px; }
+    .new-rule-actions span { flex: 1; color: var(--danger); font-size: 12px; }
+
+    .calculation {
+      margin: 0 0 0 90px;
+      min-height: 58px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      background: #f6f9fd;
+      border: 1px solid #dbe8f9;
+      border-radius: 4px;
+    }
+    .calculation div { display: flex; align-items: baseline; gap: 7px; }
+    .calculation span { color: var(--ink-soft); font-size: 12px; }
+    .calculation strong { color: var(--accent); font: 600 16px var(--mono); }
+    .calculation small { margin-left: auto; color: var(--muted); font-size: 11px; }
+
+    .dialog-message { margin: 14px 0 0 90px; padding: 10px 12px; color: var(--danger); background: var(--danger-soft); border: 1px solid #f0d3ce; border-radius: 4px; font-size: 13px; }
+    .dialog-message.info { color: var(--warning); background: var(--warning-soft); border-color: #eadcc2; }
+
+    .dialog-footer { min-height: 64px; padding: 12px 22px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; background: #f3f5f8; border-top: 1px solid var(--line); }
+    .footer-summary { margin-right: auto; color: var(--ink-soft); font-size: 12px; }
+    .footer-summary b { color: var(--ink); }
+    .dialog-footer .button { min-width: 96px; min-height: 40px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 100;
+      max-width: calc(100vw - 32px);
+      padding: 10px 16px;
+      color: #fff;
+      background: #3b4655;
+      border-radius: 4px;
+      box-shadow: 0 10px 30px rgba(18, 27, 39, .24);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 8px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast.error { background: #8e4039; }
+
+    .app-shell.mobile {
+      width: 390px;
+      height: 780px;
+      min-height: 780px;
+      max-height: 780px;
+      border: 8px solid #343b46;
+      border-radius: 34px;
+      box-shadow: 0 18px 52px rgba(33, 47, 65, .22);
+    }
+    .app-shell.mobile::before { content: ""; position: absolute; top: 8px; left: 50%; z-index: 5; width: 118px; height: 22px; border-radius: 0 0 14px 14px; background: #343b46; transform: translateX(-50%); }
+    .app-shell.mobile .app-header { height: 66px; padding: 22px 14px 0; gap: 10px; }
+    .app-shell.mobile .brand { font-size: 13px; }
+    .app-shell.mobile .brand-mark, .app-shell.mobile .account span:first-child { display: none; }
+    .app-shell.mobile .breadcrumb { padding-left: 0; border-left: 0; font-size: 13px; }
+    .app-shell.mobile .account-avatar { width: 26px; height: 26px; }
+    .app-shell.mobile .app-content { height: calc(780px - 16px - 66px); padding: 18px 14px 26px; overflow: auto; background: #f4f6f8; }
+    .app-shell.mobile .page-heading { display: block; }
+    .app-shell.mobile .page-heading h1 { font-size: 22px; }
+    .app-shell.mobile .page-heading p { margin-top: 6px; line-height: 1.55; }
+    .app-shell.mobile .summary-strip { margin-top: 16px; min-height: 58px; padding: 11px 12px; gap: 14px; overflow: hidden; }
+    .app-shell.mobile .summary-item { gap: 4px; }
+    .app-shell.mobile .summary-item span { font-size: 11px; }
+    .app-shell.mobile .summary-item strong { font-size: 17px; }
+    .app-shell.mobile .summary-hint { display: none; }
+    .app-shell.mobile .directory { margin-top: 14px; display: block; border: 0; overflow: visible; background: transparent; }
+    .app-shell.mobile .class-rail { padding: 0 0 12px; display: flex; gap: 8px; overflow-x: auto; background: transparent; border: 0; scrollbar-width: none; }
+    .app-shell.mobile .class-rail::-webkit-scrollbar { display: none; }
+    .app-shell.mobile .rail-title { display: none; }
+    .app-shell.mobile .class-filter { width: auto; min-height: 32px; padding: 0 11px; flex: 0 0 auto; border: 1px solid var(--line-strong); border-radius: 16px; background: #fff; font-size: 12px; }
+    .app-shell.mobile .class-filter.active { border-color: var(--accent); border-left: 1px solid var(--accent); }
+    .app-shell.mobile .class-filter em { margin-left: 3px; }
+    .app-shell.mobile .student-pane { border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+    .app-shell.mobile .student-toolbar { min-height: 54px; padding: 9px 11px; }
+    .app-shell.mobile .search-box { width: 145px; }
+    .app-shell.mobile .student-table-head { display: none; }
+    .app-shell.mobile .student-row { min-height: 64px; padding: 10px 12px; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; }
+    .app-shell.mobile .student-id { grid-row: 1 / 3; }
+    .app-shell.mobile .student-id small { display: block; }
+    .app-shell.mobile .student-class { display: none; }
+    .app-shell.mobile .student-balance { align-self: end; text-align: right; }
+    .app-shell.mobile .recent-change { align-self: start; text-align: right; }
+    .app-shell.mobile .recent-panel { margin-top: 14px; }
+    .app-shell.mobile .recent-item { padding: 9px 12px; grid-template-columns: 70px minmax(0, 1fr) 65px; gap: 8px; }
+    .app-shell.mobile .recent-item em { display: none; }
+    .app-shell.mobile .app-note { margin-top: 14px; text-align: left; line-height: 1.6; }
+    .app-shell.mobile .modal-layer { position: absolute; padding: 0; }
+    .app-shell.mobile .dialog { width: 100%; height: 100%; max-height: none; border-radius: 0; }
+    .app-shell.mobile .dialog-title { min-height: 70px; padding: 24px 16px 12px; }
+    .app-shell.mobile .dialog-title h2 { font-size: 18px; }
+    .app-shell.mobile .close-button { width: 34px; height: 34px; }
+    .app-shell.mobile .dialog-body { flex: 1; padding: 16px 14px 22px; }
+    .app-shell.mobile .form-row { display: block; margin-bottom: 20px; }
+    .app-shell.mobile .form-label { padding: 0 0 7px; text-align: left; font-size: 13px; }
+    .app-shell.mobile .calculation { margin-left: 0; padding: 10px 12px; gap: 15px; flex-wrap: wrap; }
+    .app-shell.mobile .calculation small { width: 100%; margin-left: 0; }
+    .app-shell.mobile .dialog-message { margin-left: 0; }
+    .app-shell.mobile .dialog-footer { min-height: 68px; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); }
+    .app-shell.mobile .footer-summary { display: none; }
+    .app-shell.mobile .dialog-footer .button { flex: 1; min-width: 0; min-height: 44px; }
+    .app-shell.mobile .new-rule-grid { grid-template-columns: 1fr; }
+    .app-shell.mobile .new-rule-grid .wide { grid-column: auto; }
+    .app-shell.mobile .toast { position: absolute; bottom: 18px; }
+
+    @media (max-width: 820px) {
+      .demo-bar { padding-inline: 14px; }
+      .demo-title span { display: none; }
+      .scene-wrap { padding: 16px 12px 28px; }
+      .app-shell.desktop { min-height: 0; }
+      .app-shell.desktop .directory { grid-template-columns: 160px minmax(0, 1fr); }
+      .app-shell.desktop .student-table-head, .app-shell.desktop .student-row { grid-template-columns: 28px minmax(120px, 1fr) 90px 124px; }
+      .app-shell.desktop .student-table-head span:nth-child(3), .app-shell.desktop .student-table-head span:nth-child(5),
+      .app-shell.desktop .student-class, .app-shell.desktop .recent-change { display: none; }
+      .app-shell.desktop .dialog-body { padding-inline: 22px; }
+    }
+
+    @media (max-width: 580px) {
+      body { display: flex; flex-direction: column; }
+      .demo-controls { width: 100%; }
+      .demo-control { flex: 1; }
+      .demo-control select { width: 100%; }
+      .demo-title { width: 100%; }
+      .scene-wrap { min-height: 0; padding: 0; flex: 1; }
+      .app-shell.mobile { width: 100%; height: 100%; min-height: 0; max-height: none; border: 0; border-radius: 0; }
+      .app-shell.mobile .app-content { height: calc(100% - 66px); }
+    }
+  </style>
+  <style id="antd-design-system">
+    /* Ant Design 5 tokens: primary #1677ff, 14px base, 6px controls, 8px containers. */
+    :root {
+      --ant-primary: #1677ff;
+      --ant-primary-hover: #4096ff;
+      --ant-primary-active: #0958d9;
+      --ant-primary-bg: #e6f4ff;
+      --ant-primary-border: #91caff;
+      --ant-success: #52c41a;
+      --ant-warning: #faad14;
+      --ant-error: #ff4d4f;
+      --ant-text: rgba(0, 0, 0, .88);
+      --ant-text-secondary: rgba(0, 0, 0, .65);
+      --ant-text-tertiary: rgba(0, 0, 0, .45);
+      --ant-text-quaternary: rgba(0, 0, 0, .25);
+      --ant-border: #d9d9d9;
+      --ant-border-secondary: #f0f0f0;
+      --ant-fill-secondary: rgba(0, 0, 0, .06);
+      --ant-fill-tertiary: rgba(0, 0, 0, .04);
+      --ant-fill-quaternary: rgba(0, 0, 0, .02);
+      --ant-bg-layout: #f5f5f5;
+      --ant-bg-container: #ffffff;
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --surface-soft: #fafafa;
+      --ink: rgba(0, 0, 0, .88);
+      --ink-soft: rgba(0, 0, 0, .65);
+      --muted: rgba(0, 0, 0, .45);
+      --line: #f0f0f0;
+      --line-strong: #d9d9d9;
+      --accent: #1677ff;
+      --accent-hover: #4096ff;
+      --accent-soft: #e6f4ff;
+      --danger: #ff4d4f;
+      --danger-soft: #fff2f0;
+      --warning: #ad6800;
+      --warning-soft: #fffbe6;
+      --shadow: 0 6px 16px 0 rgba(0, 0, 0, .08), 0 3px 6px -4px rgba(0, 0, 0, .12), 0 9px 28px 8px rgba(0, 0, 0, .05);
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    body { color: var(--ant-text); background: var(--ant-bg-layout); font: 14px/1.5714285714 var(--sans); }
+    button, input, select, textarea { font-family: var(--sans); }
+    button { transition: color .2s cubic-bezier(.645,.045,.355,1), background-color .2s cubic-bezier(.645,.045,.355,1), border-color .2s cubic-bezier(.645,.045,.355,1), box-shadow .2s cubic-bezier(.645,.045,.355,1); }
+    button:active:not(:disabled) { transform: none; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 0;
+      border-color: var(--ant-primary);
+      box-shadow: 0 0 0 2px rgba(5, 145, 255, .10);
+    }
+    input, select, textarea {
+      border-color: var(--ant-border);
+      border-radius: 6px;
+      color: var(--ant-text);
+      transition: border-color .2s cubic-bezier(.645,.045,.355,1), box-shadow .2s cubic-bezier(.645,.045,.355,1);
+    }
+    input:hover, select:hover, textarea:hover { border-color: var(--ant-primary-hover); }
+    input:focus, select:focus, textarea:focus { border-color: var(--ant-primary); box-shadow: 0 0 0 2px rgba(5, 145, 255, .10); outline: 0; }
+
+    .demo-bar { min-height: 64px; padding: 0 24px; gap: 24px; background: var(--ant-bg-container); border-bottom: 1px solid var(--ant-border-secondary); }
+    .demo-title { gap: 12px; }
+    .demo-title b { font-size: 15px; font-weight: 600; }
+    .demo-title span { color: var(--ant-text-tertiary); }
+    .demo-logo { width: 32px; height: 32px; border-radius: 6px; background: var(--ant-primary); font-size: 13px; }
+    .demo-controls { gap: 16px; }
+    .demo-control { gap: 8px; color: var(--ant-text-secondary); }
+    .demo-control select { height: 32px; border-radius: 6px; border-color: var(--ant-border); }
+
+    .button { min-height: 32px; padding: 0 15px; border-radius: 6px; border-color: var(--ant-border); color: var(--ant-text); background: var(--ant-bg-container); box-shadow: 0 2px 0 rgba(0, 0, 0, .02); }
+    .button:hover:not(:disabled) { color: var(--ant-primary-hover); border-color: var(--ant-primary-hover); }
+    .button-primary { color: #fff; background: var(--ant-primary); border-color: var(--ant-primary); box-shadow: 0 2px 0 rgba(5, 145, 255, .10); }
+    .button-primary:hover:not(:disabled) { color: #fff; background: var(--ant-primary-hover); border-color: var(--ant-primary-hover); }
+    .button-primary:active:not(:disabled) { background: var(--ant-primary-active); border-color: var(--ant-primary-active); }
+    .button-quiet { min-height: 32px; padding: 0 8px; color: var(--ant-primary); border-color: transparent; background: transparent; box-shadow: none; }
+    .button-quiet:hover:not(:disabled) { color: var(--ant-primary-hover); background: var(--ant-fill-tertiary); border-color: transparent; }
+    .button-danger { color: var(--ant-error); border-color: var(--ant-error); }
+    .button-danger:hover:not(:disabled) { color: #ff7875; border-color: #ff7875; }
+    .button-danger-solid { color: #fff; background: var(--ant-error); border-color: var(--ant-error); box-shadow: 0 2px 0 rgba(255, 77, 79, .10); }
+    .button-danger-solid:hover:not(:disabled) { color: #fff; background: #ff7875; border-color: #ff7875; }
+    .button-danger-solid:active:not(:disabled) { background: #d9363e; border-color: #d9363e; }
+    .button:disabled, .button-primary:disabled, .button-danger-solid:disabled { color: rgba(0, 0, 0, .25); background: rgba(0, 0, 0, .04); border-color: var(--ant-border); opacity: 1; box-shadow: none; }
+
+    .scene-wrap { min-height: calc(100dvh - 64px); padding: 24px; }
+    .app-shell { width: min(1200px, 100%); border: 1px solid var(--ant-border-secondary); border-radius: 8px; background: var(--ant-bg-layout); box-shadow: 0 1px 2px rgba(0, 0, 0, .03); }
+    .app-header { height: 64px; padding: 0 24px; gap: 16px; background: var(--ant-bg-container); border-bottom: 1px solid var(--ant-border-secondary); }
+    .brand { gap: 10px; font-size: 15px; font-weight: 600; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 6px; background: var(--ant-primary); }
+    .breadcrumb, .account { color: var(--ant-text-secondary); }
+    .breadcrumb { padding-left: 16px; border-left-color: var(--ant-border-secondary); }
+    .account-avatar { color: var(--ant-primary); background: var(--ant-primary-bg); }
+
+    .app-content { padding: 24px; background: var(--ant-bg-layout); }
+    .page-heading { padding: 24px; align-items: center; background: var(--ant-bg-container); border: 1px solid var(--ant-border-secondary); border-radius: 8px; }
+    .page-heading h1 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: 0; }
+    .page-heading p { margin-top: 8px; color: var(--ant-text-secondary); font-size: 14px; }
+
+    .summary-strip { margin-top: 16px; min-height: 76px; padding: 16px 24px; gap: 48px; background: var(--ant-bg-container); border-color: var(--ant-border-secondary); border-radius: 8px; }
+    .summary-item { gap: 8px; }
+    .summary-item span { color: var(--ant-text-secondary); }
+    .summary-item strong { color: var(--ant-text); font: 600 24px/1 var(--mono); }
+    .summary-item strong.accent { color: var(--ant-primary); }
+    .summary-hint { color: var(--ant-text-tertiary); }
+
+    .directory { margin-top: 16px; grid-template-columns: 200px minmax(0, 1fr); border-color: var(--ant-border-secondary); border-radius: 8px; background: var(--ant-bg-container); }
+    .class-rail { padding: 12px 8px; background: var(--ant-bg-container); border-right-color: var(--ant-border-secondary); }
+    .rail-title { padding: 0 12px 8px; color: var(--ant-text-tertiary); font-size: 12px; }
+    .class-filter { min-height: 40px; padding: 0 12px; margin: 2px 0; color: var(--ant-text-secondary); border: 0; border-radius: 6px; }
+    .class-filter:hover { color: var(--ant-primary); background: var(--ant-fill-tertiary); }
+    .class-filter.active { color: var(--ant-primary); background: var(--ant-primary-bg); border-left: 0; }
+    .class-filter em { color: var(--ant-text-tertiary); }
+    .student-toolbar { min-height: 64px; padding: 16px; border-bottom-color: var(--ant-border-secondary); }
+    .student-toolbar h2 { font-size: 16px; font-weight: 600; }
+    .search-box input { height: 32px; border-radius: 6px; border-color: var(--ant-border); }
+    .search-box svg { top: 8px; color: var(--ant-text-tertiary); }
+    .student-table-head { min-height: 56px; padding: 0 16px; color: var(--ant-text); background: #fafafa; border-bottom-color: var(--ant-border-secondary); font-size: 14px; font-weight: 600; }
+    .student-row { min-height: 56px; padding: 8px 16px; border-bottom-color: var(--ant-border-secondary); }
+    .student-row:hover { background: #fafafa; }
+    .selection-toolbar { border-bottom-color: var(--ant-border-secondary); }
+    .select-visible { color: var(--ant-text-secondary); }
+    .selection-count { color: var(--ant-text-tertiary); }
+    .student-actions .button { min-height: 32px; border-radius: 6px; }
+    .avatar { width: 32px; height: 32px; color: var(--ant-primary); background: var(--ant-primary-bg); }
+    .student-id strong { color: var(--ant-text); font-size: 14px; font-weight: 500; }
+    .student-class { color: var(--ant-text-secondary); }
+    .student-balance { color: var(--ant-text); font-size: 14px; }
+    .recent-change { color: var(--ant-text-tertiary); }
+    .recent-change.plus { color: var(--ant-primary); }
+    .recent-change.minus { color: var(--ant-error); }
+
+    .recent-panel { margin-top: 16px; background: var(--ant-bg-container); border-color: var(--ant-border-secondary); border-radius: 8px; }
+    .recent-head { min-height: 56px; padding: 0 16px; background: #fafafa; border-bottom-color: var(--ant-border-secondary); }
+    .recent-head h2 { font-size: 16px; font-weight: 600; }
+    .recent-head span { color: var(--ant-text-tertiary); }
+    .recent-item { min-height: 48px; padding: 10px 16px; border-bottom-color: var(--ant-border-secondary); }
+    .recent-item em { color: var(--ant-text-tertiary); }
+    .delta-plus { color: var(--ant-primary); }
+    .delta-minus { color: var(--ant-error); }
+    .app-note { color: var(--ant-text-tertiary); }
+
+    .modal-layer { padding: 16px; background: rgba(0, 0, 0, .45); }
+    .dialog { width: min(840px, calc(100vw - 32px)); border-radius: 8px; box-shadow: var(--shadow); animation: ant-zoom-in .2s cubic-bezier(.08,.82,.17,1) both; }
+    @keyframes ant-zoom-in { from { opacity: 0; transform: scale(.94); } }
+    .dialog-title { min-height: 56px; padding: 16px 24px; color: var(--ant-text); background: var(--ant-bg-container); border-bottom: 1px solid var(--ant-border-secondary); }
+    .dialog-title h2 { color: var(--ant-text); font-size: 16px; line-height: 24px; font-weight: 600; }
+    .close-button { width: 32px; height: 32px; margin-right: -8px; color: var(--ant-text-tertiary); border-radius: 4px; font-size: 22px; }
+    .close-button:hover:not(:disabled) { color: var(--ant-text); background: var(--ant-fill-tertiary); }
+    .dialog-body { padding: 20px 24px 16px; }
+    .form-row { grid-template-columns: 96px minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+    .form-label { padding-top: 5px; color: var(--ant-text); font-size: 14px; }
+    .form-label strong { color: var(--ant-error); }
+    .student-summary { min-width: 0; margin: 0 0 12px 112px; display: flex; align-items: center; gap: 8px; color: var(--ant-text-secondary); font-size: 13px; }
+    .student-summary strong { flex: 0 0 auto; color: var(--ant-text); font-weight: 500; }
+    .student-summary span { min-width: 0; overflow: hidden; color: var(--ant-text-tertiary); text-overflow: ellipsis; white-space: nowrap; }
+    .rule-selector-head { min-height: 32px; display: flex; align-items: center; gap: 10px; }
+    .rule-selector-head > span { color: var(--ant-text-tertiary); font-size: 12px; }
+    .rule-selection { margin-top: 4px; display: grid; }
+    .rule-option { min-height: 42px; padding: 6px 0; display: grid; grid-template-columns: minmax(150px, .8fr) minmax(0, 1.2fr); align-items: center; gap: 12px; border: 0; border-bottom: 1px solid var(--ant-border-secondary); border-radius: 0; background: transparent; }
+    .rule-option:hover, .rule-option.active { background: transparent; border-color: var(--ant-border-secondary); }
+    .rule-choice { min-width: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .rule-choice input { width: 16px; height: 16px; margin: 0; accent-color: var(--ant-primary); }
+    .rule-copy { min-width: 0; }
+    .rule-copy strong { display: block; overflow: hidden; color: var(--ant-text); font-size: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+    .rule-copy small { display: block; color: var(--ant-text-tertiary); font-size: 11px; }
+    .rule-fields { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px; }
+    .rule-fields input { width: 100%; height: 32px; padding: 0 10px; border: 1px solid var(--ant-border); border-radius: 6px; color: var(--ant-text); background: #fff; }
+    .rule-fields .score-input input { padding-right: 28px; }
+    .rule-fields.bad .score-input input { border-color: var(--ant-error); }
+    .rule-selection .new-rule-box { margin-top: 8px; }
+    .rule-selection [data-dialog-action="toggle-new-rule"] { justify-self: start; }
+    .score-input span { top: 5px; color: var(--ant-text-tertiary); }
+    .footer-summary { display: none; }
+    .new-rule-box { margin-top: 8px; padding: 16px; background: #fafafa; border-color: var(--ant-border-secondary); border-radius: 8px; }
+    .new-rule-grid input, .new-rule-grid select { height: 32px; border-radius: 6px; border-color: var(--ant-border); }
+    .new-rule-actions span { color: var(--ant-error); }
+
+    .calculation { min-height: 44px; margin-left: 112px; padding: 8px 0; background: transparent; border: 0; border-top: 1px solid var(--ant-border-secondary); border-radius: 0; }
+    .calculation span { color: var(--ant-text-secondary); }
+    .calculation strong { color: var(--ant-primary); }
+    .calculation small { color: var(--ant-text-tertiary); }
+    .dialog-message { margin: 16px 0 0 112px; padding: 8px 12px; display: flex; align-items: flex-start; gap: 8px; color: var(--ant-text); background: #fff2f0; border-color: #ffccc7; border-radius: 8px; }
+    .dialog-message::before { content: "!"; width: 16px; height: 16px; flex: 0 0 16px; display: grid; place-items: center; margin-top: 2px; color: #fff; background: var(--ant-error); border-radius: 50%; font: 600 11px/1 var(--sans); }
+    .dialog-message.info { color: var(--ant-text); background: #fffbe6; border-color: #ffe58f; }
+    .dialog-message.info::before { color: #613400; background: var(--ant-warning); }
+    .dialog-footer { min-height: 56px; padding: 10px 16px; background: var(--ant-bg-container); border-top-color: var(--ant-border-secondary); }
+    .footer-summary { color: var(--ant-text-secondary); }
+    .dialog-footer .button { min-height: 40px; }
+
+    .toast { color: var(--ant-text); background: var(--ant-bg-container); border: 1px solid var(--ant-border-secondary); border-radius: 8px; box-shadow: var(--shadow); }
+    .toast.error { color: var(--ant-error); background: #fff2f0; border-color: #ffccc7; }
+
+    .app-shell.mobile { border-color: #595959; background: var(--ant-bg-layout); }
+    .app-shell.mobile::before { background: #595959; }
+    .app-shell.mobile .app-header { height: 64px; padding: 22px 16px 0; background: var(--ant-bg-container); }
+    .app-shell.mobile .app-content { height: calc(780px - 16px - 64px); padding: 16px; background: var(--ant-bg-layout); }
+    .app-shell.mobile .page-heading { padding: 16px; }
+    .app-shell.mobile .page-heading h1 { font-size: 20px; }
+    .app-shell.mobile .page-heading p { font-size: 13px; }
+    .app-shell.mobile .summary-strip { margin-top: 12px; min-height: 64px; padding: 12px 16px; gap: 16px; border-radius: 8px; }
+    .app-shell.mobile .class-rail { padding: 0; gap: 4px; border-bottom: 1px solid var(--ant-border-secondary); }
+    .app-shell.mobile .class-filter { min-height: 40px; padding: 0 10px; margin: 0; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; }
+    .app-shell.mobile .class-filter.active { border: 0; border-bottom: 2px solid var(--ant-primary); background: transparent; }
+    .app-shell.mobile .student-pane { border-color: var(--ant-border-secondary); border-radius: 8px; }
+    .app-shell.mobile .student-toolbar { min-height: 56px; padding: 12px; }
+    .app-shell.mobile .search-box { width: 150px; }
+    .app-shell.mobile .student-toolbar { flex-wrap: wrap; gap: 8px; }
+    .app-shell.mobile .student-toolbar h2 { margin-right: auto; }
+    .app-shell.mobile .selection-toolbar { min-height: 48px; padding: 8px 10px; flex-wrap: wrap; gap: 8px; }
+    .app-shell.mobile .selection-actions { gap: 4px; }
+    .app-shell.mobile .selection-actions .button { min-height: 34px; padding-inline: 8px; }
+    .app-shell.mobile .student-row { min-height: 76px; padding: 9px 10px; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 4px 8px; }
+    .app-shell.mobile .student-row .student-select { grid-row: 1; grid-column: 1; }
+    .app-shell.mobile .student-row .student-id { grid-row: 1; grid-column: 2; }
+    .app-shell.mobile .student-row .student-class, .app-shell.mobile .student-row .recent-change { display: none; }
+    .app-shell.mobile .student-row .student-balance { grid-row: 1; grid-column: 3; align-self: center; }
+    .app-shell.mobile .student-row .student-actions { grid-row: 2; grid-column: 2 / 4; }
+    .app-shell.mobile .recent-panel { border-radius: 8px; }
+    .app-shell.mobile .dialog-title { min-height: 56px; padding: 16px 16px 10px; }
+    .app-shell.mobile .dialog-title h2 { font-size: 16px; }
+    .app-shell.mobile .dialog-body { flex: 1; padding: 16px; }
+    .app-shell.mobile .form-label { padding-bottom: 8px; }
+    .app-shell.mobile .student-summary { margin: 0 0 12px; }
+    .app-shell.mobile .rule-option { grid-template-columns: 1fr; gap: 6px; }
+    .app-shell.mobile .rule-fields { grid-template-columns: 92px minmax(0, 1fr); }
+    .app-shell.mobile .rule-fields input { height: 40px; }
+    .app-shell.mobile .rule-fields .score-input span { top: 9px; }
+    .app-shell.mobile .new-rule-grid input, .app-shell.mobile .new-rule-grid select { height: 40px; }
+    .app-shell.mobile .calculation { margin-left: 0; }
+    .app-shell.mobile .dialog-message { margin-left: 0; }
+    .app-shell.mobile .dialog-footer { min-height: 64px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+
+    @media (max-width: 820px) {
+      .scene-wrap { padding: 16px; }
+      .app-shell.desktop .directory { grid-template-columns: 176px minmax(0, 1fr); }
+      .app-shell.desktop .dialog-body { padding-inline: 24px; }
+    }
+    @media (max-width: 580px) {
+      .demo-bar { padding: 12px 16px; }
+      .demo-controls { gap: 8px; }
+      .demo-control { min-width: calc(50% - 4px); }
+      .app-content { padding: 16px; }
+      .app-shell.mobile .app-content { height: calc(100% - 64px); }
+    }
+  </style>
+  <style id="points-dialog-direction">
+    .dialog-title > div { display: flex; align-items: center; gap: 12px; }
+    .direction-mark { width: 24px; height: 24px; flex: 0 0 24px; display: grid; place-items: center; border-radius: 4px; color: var(--accent); background: var(--accent-soft); font-size: 14px; font-weight: 600; line-height: 1; }
+    .dialog[data-direction="minus"] .direction-mark { color: var(--danger); background: var(--danger-soft); }
+    .rule-table-head { display: none; }
+    .dialog .score-input .score-sign { left: 10px; right: auto; color: var(--accent); font-weight: 600; pointer-events: none; }
+    .dialog .score-input input { padding-left: 28px; }
+    .dialog[data-direction="minus"] .score-input .score-sign,
+    .dialog[data-direction="minus"] .calculation strong { color: var(--danger); }
+    .selection-toolbar .selection-link { padding-inline: 6px; font-size: 12px; }
+    .selected-students { display: flex; flex-wrap: wrap; gap: 8px; max-height: 180px; overflow: auto; padding: 12px; border-bottom: 1px solid var(--line); }
+    .selected-student { display: flex; align-items: center; gap: 8px; padding: 2px 4px 2px 10px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: 4px; }
+    .selected-student small { margin-left: 6px; color: var(--ink-soft); font-size: 12px; }
+    .selected-student button { width: 28px; height: 28px; color: var(--ink-soft); background: transparent; border-radius: 4px; }
+    .selected-student button:hover { color: var(--danger); background: var(--danger-soft); }
+    .scope-note { margin: -4px 0 16px; color: var(--ink-soft); font-size: 12px; }
+    .operation-scope .student-summary { display: block; }
+    .student-name-tags { display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto; margin: 10px 0 12px; padding: 0; list-style: none; }
+    .student-name-tag { padding: 3px 10px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink-soft); background: var(--surface); font-size: 13px; line-height: 22px; overflow-wrap: anywhere; }
+    .score-field { min-width: 0; }
+    .dialog .score-error { display: block; margin-top: 4px; color: var(--danger); font-size: 12px; line-height: 20px; }
+    .dialog .rule-fields { align-items: start; }
+    .dialog .rule-fields.bad .score-input input { border-color: var(--danger); }
+    .submit-summary { margin-right: auto; color: var(--ink-soft); font-size: 12px; }
+    .app-shell.mobile .dialog-footer { flex-wrap: wrap; }
+    .app-shell.mobile .submit-summary { flex: 0 0 100%; text-align: center; }
+  </style>
+  <link rel="stylesheet" href="prototype-batch-wone-tokens.css">
+  <link rel="stylesheet" href="prototype-batch-wone-pc.css">
+  <link rel="stylesheet" href="prototype-batch-mobile.css">
+  <link id="pointsVantStyles" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@4.9.21/lib/index.css" media="not all" onerror="this.onerror=null;this.href='https://unpkg.com/vant@4.9.21/lib/index.css'">
+  <link rel="stylesheet" href="student-points-vant/mobile.css">
+</head>
+<body>
+  <header class="demo-bar" aria-label="原型演示设置">
+    <div class="demo-title">
+      <span class="demo-logo">智</span>
+      <div><b>学员积分批量登记</b><span>WOne PC 规范 · 手机端独立预览</span></div>
+    </div>
+    <div class="demo-controls">
+      <label class="demo-control"><span>展示端</span>
+        <select id="deviceSelect" aria-label="展示端">
+          <option value="desktop">电脑端</option>
+          <option value="mobile">手机端</option>
+        </select>
+      </label>
+      <label class="demo-control"><span>权限</span>
+        <select id="permissionSelect" aria-label="积分操作权限">
+          <option value="both">加分及减分</option>
+          <option value="plus">仅加分</option>
+          <option value="minus">仅减分</option>
+        </select>
+      </label>
+      <label class="demo-control"><span>结果</span>
+        <select id="outcomeSelect" aria-label="提交结果">
+          <option value="success">正常成功</option>
+          <option value="fail">整批失败</option>
+          <option value="unknown">超时后核实成功</option>
+        </select>
+      </label>
+      <button class="button" id="resetDemo" type="button">重置演示</button>
+    </div>
+  </header>
+
+  <div id="pointsVantRoot"></div>
+  <main class="scene-wrap">
+    <section class="app-shell desktop" id="appShell" aria-label="智校学员积分">
+      <header class="app-header">
+        <div class="brand"><span class="brand-mark">智</span><span>智校</span></div>
+        <span class="breadcrumb">学员管理 / 学员积分</span>
+        <span class="mobile-page-title">学员积分</span>
+        <span class="app-header-spacer"></span>
+        <div class="account"><span>演示校区</span><span class="account-avatar">毛</span></div>
+      </header>
+
+      <div class="app-content">
+        <section class="page-heading">
+          <div>
+            <h1>学员积分</h1>
+            <p>勾选学员后批量操作，也可直接对单个学员加分或减分。</p>
+          </div>
+        </section>
+
+        <section class="summary-strip" aria-label="积分概览">
+          <div class="summary-item"><span>在读学员</span><strong id="studentCount">0</strong><span>名</span></div>
+          <div class="summary-item"><span>本次已登记</span><strong class="accent" id="recordCount">0</strong><span>条</span></div>
+          <div class="summary-hint">批量提交整批成功或整批失败，不会产生部分结果。</div>
+        </section>
+
+        <section class="directory">
+          <aside class="class-rail" aria-label="班级筛选">
+            <div class="rail-title">班级筛选</div>
+            <div id="classFilters"></div>
+          </aside>
+          <div class="student-pane">
+            <div class="student-toolbar">
+              <h2 id="studentPaneTitle">全部学员</h2>
+              <label class="search-box">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+                <input id="pageSearch" type="search" placeholder="搜索学员" aria-label="搜索学员">
+              </label>
+            </div>
+            <div class="selection-toolbar">
+              <label class="select-visible"><input id="selectVisibleStudents" type="checkbox"><span>全选当前列表</span></label>
+              <span class="selection-count" id="selectionCount">已选 0 名</span>
+              <button class="button button-quiet selection-link" id="viewSelected" type="button" data-selection-action="view" aria-controls="selectedStudents" aria-expanded="false" disabled>查看已选</button>
+              <button class="button button-quiet selection-link" id="clearSelected" type="button" data-selection-action="clear" disabled>清空</button>
+              <div class="selection-actions">
+                <button class="button button-danger" type="button" data-batch-direction="-1" disabled>批量减分</button>
+                <button class="button button-primary" type="button" data-batch-direction="1" disabled>批量加分</button>
+              </div>
+            </div>
+            <div class="selected-students" id="selectedStudents" role="region" aria-label="已选学员名单" hidden></div>
+            <div class="student-table-head" aria-hidden="true">
+              <span></span><span>学员</span><span>所属班级</span><span>当前积分</span><span style="text-align:right">本次变动</span><span></span>
+            </div>
+            <div id="studentList"></div>
+          </div>
+        </section>
+
+        <section class="recent-panel" id="recentPanel" hidden>
+          <div class="recent-head"><h2>本次积分记录</h2><span>按学员和积分项逐条生成</span></div>
+          <div id="recentList"></div>
+        </section>
+
+        <p class="app-note">姓名、班级和分值均为虚构演示数据。权限与积分项规则以系统实际配置为准。</p>
+      </div>
+
+      <div class="modal-layer" id="modalLayer" hidden></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const CLASS_SEED = [
+      { id: 'art', name: '创意美术周六班', ended: false },
+      { id: 'calligraphy', name: '少儿书法周日班', ended: false },
+      { id: 'summer', name: '暑期绘画提高班', ended: true }
+    ];
+
+    const STUDENT_SEED = [
+      { id: 'xu', name: '许星澄', classId: 'art', balance: 128 },
+      { id: 'jiang', name: '江知禾', classId: 'art', balance: 96 },
+      { id: 'cheng', name: '程沐川', classId: 'art', balance: 214 },
+      { id: 'song', name: '宋以安', classId: 'calligraphy', balance: 143 },
+      { id: 'gu', name: '顾予宁', classId: 'calligraphy', balance: 175 },
+      { id: 'lu', name: '陆清遥', classId: 'summer', balance: 118 },
+      { id: 'su', name: '苏亦舟', classId: 'summer', balance: 201 }
+    ];
+
+    const RULE_SEED = [
+      { id: 'active', name: '课堂表现积极', dir: 1, value: 3 },
+      { id: 'homework', name: '按时完成作业', dir: 1, value: 2 },
+      { id: 'practice', name: '课后练习优秀', dir: 1, value: 5 },
+      { id: 'special', name: '其他奖励', dir: 1, value: '' },
+      { id: 'late', name: '迟到', dir: -1, value: 1 },
+      { id: 'unprepared', name: '未带学习用品', dir: -1, value: 2 }
+    ];
+
+    let classes = [];
+    let students = [];
+    let rules = [];
+    let records = [];
+    let permission = 'both';
+    let pageFilter = 'all';
+    let pageQuery = '';
+    let pageSelected = new Set();
+    let selectedExpanded = false;
+    let dialogState = null;
+    let lastTrigger = null;
+    let toastTimer = null;
+    let mobileSubmission = null;
+
+    const appShell = document.getElementById('appShell');
+    const modalLayer = document.getElementById('modalLayer');
+    const toast = document.getElementById('toast');
+    const deviceSelect = document.getElementById('deviceSelect');
+    const permissionSelect = document.getElementById('permissionSelect');
+    const outcomeSelect = document.getElementById('outcomeSelect');
+
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+    const classById = id => classes.find(item => item.id === id);
+    const studentById = id => students.find(item => item.id === id);
+    const ruleById = id => rules.find(item => item.id === id);
+    const allowed = direction => permission === 'both' || (permission === 'plus' ? direction > 0 : direction < 0);
+    const formatScore = value => Number.isInteger(Number(value)) ? String(Number(value)) : Number(value).toFixed(1);
+    const formatDelta = value => `${value > 0 ? '+' : value < 0 ? '−' : ''}${formatScore(Math.abs(value))}`;
+    const selectedDialogStudents = () => dialogState ? students.filter(student => dialogState.selected.has(student.id)) : [];
+    const selectedDialogRules = () => dialogState ? rules.filter(rule => dialogState.ruleIds.has(rule.id)) : [];
+
+    function resetData() {
+      if (dialogState?.busy) return;
+      classes = CLASS_SEED.map(item => ({ ...item }));
+      students = STUDENT_SEED.map(item => ({ ...item }));
+      rules = RULE_SEED.map(item => ({ ...item }));
+      records = [];
+      permission = 'both';
+      pageFilter = 'all';
+      pageQuery = '';
+      pageSelected = new Set();
+      selectedExpanded = false;
+      dialogState = null;
+      permissionSelect.value = 'both';
+      outcomeSelect.value = 'success';
+      closeModal(false);
+      renderPage();
+      hideToast();
+      window.dispatchEvent(new Event('points:refresh'));
+    }
+
+    function setDevice(value) {
+      if (dialogState?.busy) { deviceSelect.value = appShell.classList.contains('mobile') ? 'mobile' : 'desktop'; return; }
+      appShell.classList.toggle('mobile', value === 'mobile');
+      appShell.classList.toggle('desktop', value !== 'mobile');
+      document.getElementById('pointsVantStyles').media = value === 'mobile' ? 'all' : 'not all';
+      window.dispatchEvent(new Event('points:refresh'));
+    }
+
+    function showToast(message, type = 'success') {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.className = `toast show ${type === 'error' ? 'error' : ''}`;
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function hideToast() {
+      clearTimeout(toastTimer);
+      toast.classList.remove('show');
+    }
+
+    function lastStudentChange(studentId) {
+      return records.filter(row => row.studentId === studentId).slice(-1)[0] || null;
+    }
+
+    function renderPage() {
+      const query = pageQuery.trim();
+      const visible = students.filter(student => {
+        const group = classById(student.classId);
+        return (pageFilter === 'all' || student.classId === pageFilter) && `${student.name} ${group?.name || ''}`.includes(query);
+      });
+
+      document.getElementById('studentCount').textContent = students.length;
+      document.getElementById('recordCount').textContent = records.length;
+      document.getElementById('studentPaneTitle').textContent = pageFilter === 'all' ? '全部学员' : classById(pageFilter)?.name || '全部学员';
+      document.getElementById('pageSearch').value = pageQuery;
+      const selectedCount = [...pageSelected].filter(id => studentById(id)).length;
+      document.getElementById('selectionCount').textContent = `已选 ${selectedCount} 名`;
+      if (!selectedCount) selectedExpanded = false;
+      const viewSelected = document.getElementById('viewSelected');
+      viewSelected.disabled = !selectedCount;
+      viewSelected.textContent = selectedExpanded ? '收起已选' : '查看已选';
+      viewSelected.setAttribute('aria-expanded', String(selectedExpanded));
+      document.getElementById('clearSelected').disabled = !selectedCount;
+      const selectedPanel = document.getElementById('selectedStudents');
+      selectedPanel.hidden = !selectedExpanded;
+      selectedPanel.innerHTML = selectedExpanded ? students.filter(student => pageSelected.has(student.id)).map(student => `<div class="selected-student"><span>${escapeHtml(student.name)}<small>${escapeHtml(classById(student.classId)?.name || '')}</small></span><button type="button" data-selection-action="remove" data-student-id="${student.id}" aria-label="移除${escapeHtml(student.name)}">×</button></div>`).join('') : '';
+      document.querySelectorAll('[data-batch-direction]').forEach(button => {
+        const direction = Number(button.dataset.batchDirection);
+        button.disabled = !selectedCount || !allowed(direction);
+        button.title = allowed(direction) ? '按所选学员批量操作' : '当前权限不支持此操作';
+      });
+
+      document.getElementById('classFilters').innerHTML = [
+        `<button class="class-filter ${pageFilter === 'all' ? 'active' : ''}" type="button" data-page-class="all"><span>全部学员</span><em>${students.length}</em></button>`,
+        ...classes.map(group => `<button class="class-filter ${pageFilter === group.id ? 'active' : ''}" type="button" data-page-class="${group.id}"><span>${escapeHtml(group.name)}</span><em>${students.filter(student => student.classId === group.id).length}</em></button>`)
+      ].join('');
+
+      document.getElementById('studentList').innerHTML = visible.length ? visible.map(student => {
+        const group = classById(student.classId);
+        const change = lastStudentChange(student.id);
+        return `
+          <article class="student-row">
+            <label class="student-select" aria-label="选择${escapeHtml(student.name)}"><input type="checkbox" data-student-select="${student.id}" ${pageSelected.has(student.id) ? 'checked' : ''}></label>
+            <div class="student-id">
+              <span class="avatar">${escapeHtml(student.name.slice(0, 1))}</span>
+              <div><strong>${escapeHtml(student.name)}</strong><small>${escapeHtml(group?.name || '')}</small></div>
+            </div>
+            <span class="student-class">${escapeHtml(group?.name || '')}</span>
+            <span class="student-balance">${formatScore(student.balance)}<small>分</small></span>
+            <span class="recent-change ${change ? (change.dir > 0 ? 'plus' : 'minus') : ''}">${change ? `${formatDelta(change.dir * change.value)} 分` : '暂无变动'}</span>
+            <span class="student-actions">
+              <button class="button" type="button" data-student-direction="-1" data-student-id="${student.id}" ${allowed(-1) ? '' : 'disabled'} aria-label="给${escapeHtml(student.name)}减分">减分</button>
+              <button class="button button-primary" type="button" data-student-direction="1" data-student-id="${student.id}" ${allowed(1) ? '' : 'disabled'} aria-label="给${escapeHtml(student.name)}加分">加分</button>
+            </span>
+          </article>
+        `;
+      }).join('') : `<div class="empty-state"><strong>没有找到匹配的学员</strong><span>调整搜索词或切换班级后重试。</span></div>`;
+
+      const visibleIds = visible.map(student => student.id);
+      const selectedVisibleCount = visibleIds.filter(id => pageSelected.has(id)).length;
+      const selectVisible = document.getElementById('selectVisibleStudents');
+      selectVisible.checked = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length;
+      selectVisible.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleIds.length;
+      selectVisible.disabled = visibleIds.length === 0;
+
+      renderRecent();
+    }
+
+    function renderRecent() {
+      const panel = document.getElementById('recentPanel');
+      panel.hidden = records.length === 0;
+      document.getElementById('recentList').innerHTML = records.slice(-8).reverse().map(row => `
+        <div class="recent-item">
+          <strong>${escapeHtml(row.studentName)}</strong>
+          <span>${escapeHtml(row.ruleName)}</span>
+          <span class="${row.dir > 0 ? 'delta-plus' : 'delta-minus'}">${formatDelta(row.dir * row.value)} 分</span>
+          <em>${escapeHtml(row.time)}</em>
+        </div>
+      `).join('');
+    }
+
+    function openDialog(direction, studentIds = [...pageSelected], clearPageSelection = true) {
+      if (!allowed(direction)) {
+        showToast(direction > 0 ? '当前账号没有加分权限。' : '当前账号没有减分权限。', 'error');
+        return;
+      }
+      dialogState = {
+        direction,
+        selected: new Set(studentIds),
+        clearPageSelection,
+        ruleIds: new Set(),
+        rulePicker: null,
+        scores: {},
+        reasons: {},
+        busy: false,
+        verifying: false,
+        error: '',
+        invalidRule: ''
+      };
+      lastTrigger = document.activeElement;
+      hideToast();
+      modalLayer.hidden = false;
+      renderDialog();
+      requestAnimationFrame(() => modalLayer.querySelector(appShell.classList.contains('desktop') ? '.close-button' : '.dialog-title h2')?.focus());
+    }
+
+    function closeModal(restoreFocus = true) {
+      if (dialogState?.busy) return;
+      modalLayer.hidden = true;
+      modalLayer.innerHTML = '';
+      dialogState = null;
+      if (restoreFocus && lastTrigger?.focus) lastTrigger.focus();
+    }
+
+    function renderDialog(focusSelector = '') {
+      if (!dialogState) return;
+      const scrollTop = modalLayer.querySelector('.dialog-body')?.scrollTop || 0;
+      const chosen = selectedDialogStudents();
+      const directionLabel = dialogState.direction > 0 ? '加分' : '减分';
+      const headingTag = appShell.classList.contains('desktop') ? 'h1' : 'h2';
+      const perStudent = selectedDialogRules().reduce((sum, rule) => {
+        const score = Number(dialogState.scores[rule.id]);
+        return sum + (Number.isFinite(score) && score > 0 ? rule.dir * score : 0);
+      }, 0);
+      const total = perStudent * chosen.length;
+      const incomplete = selectedDialogRules().some(rule => scoreError(rule));
+      const error = dialogState.error ? `<div class="dialog-message ${dialogState.verifying ? 'info' : ''}" role="alert" tabindex="-1">${escapeHtml(dialogState.error)}</div>` : '';
+
+      modalLayer.innerHTML = `
+        <section class="dialog" ${dialogState.rulePicker ? 'inert aria-hidden="true"' : 'aria-modal="true"'} data-direction="${dialogState.direction > 0 ? 'plus' : 'minus'}" role="dialog" aria-labelledby="dialogHeading" aria-describedby="ruleInstruction" aria-busy="${dialogState.busy}">
+          <header class="dialog-title">
+            <div><span class="direction-mark" aria-hidden="true">${dialogState.direction > 0 ? '加' : '减'}</span><${headingTag} id="dialogHeading" tabindex="-1">${chosen.length === 1 ? escapeHtml(chosen[0].name) : '批量'}${directionLabel}</${headingTag}></div>
+            <button class="close-button" type="button" data-dialog-action="close" aria-label="关闭" ${dialogState.busy ? 'disabled' : ''}>×</button>
+          </header>
+          <div class="dialog-body">
+            ${chosen.length > 1 ? `<section class="operation-scope" aria-label="本次操作对象"><div class="student-summary" id="studentSummary"><strong>已选 ${chosen.length} 名学员</strong><ul class="student-name-tags" aria-label="本次操作的学员名单">${chosen.map(student => `<li class="student-name-tag">${escapeHtml(student.name)}</li>`).join('')}</ul></div><p class="scope-note">以下积分项统一应用到这 ${chosen.length} 名学员</p></section>` : ''}
+
+            <div class="form-row">
+              <label class="form-label">积分项<strong>*</strong></label>
+              <div class="form-value">
+                <div class="rule-selector-head">
+                  <span id="ruleInstruction">积分项<small class="selected-rule-count">已选 ${selectedDialogRules().length} 项</small></span>
+                </div>
+                <div class="rule-selection">${selectedDialogRules().length ? `<div class="rule-table-head" aria-hidden="true"><span>积分项</span><span>${directionLabel}分值</span><span>原因（选填）</span><span>操作</span></div>` : ''}${renderRuleOptions()}<div class="rule-add-row"><button class="button button-quiet" type="button" data-dialog-action="pick-rules" ${dialogState.busy ? 'disabled' : ''}><span aria-hidden="true">＋</span>${selectedDialogRules().length ? '添加积分项' : '选择积分项'}</button></div></div>
+              </div>
+            </div>
+
+            <div class="calculation" aria-live="polite">
+              ${chosen.length === 1
+                ? `<div><span>本次${directionLabel}</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div>`
+                : `<div><span>每位学员${directionLabel}</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div><div><span>整批${directionLabel}</span><strong data-summary="total">${incomplete ? '待完善' : `${formatDelta(total)} 分`}</strong></div>`}
+              ${chosen.length > 1 ? `<small>${chosen.length} 人 × ${selectedDialogRules().length} 条积分项</small>` : ''}
+            </div>
+            ${error}
+          </div>
+          <footer class="dialog-footer">
+            <span class="submit-summary" data-summary="footer" aria-live="polite">${incomplete ? '请完善标红分值' : selectedDialogRules().length ? `${chosen.length > 1 ? '每人' : '本次'} ${formatDelta(perStudent)} 分` : '请选择积分项'}</span>
+            <button class="button" type="button" data-dialog-action="close" ${dialogState.busy ? 'disabled' : ''}>取消</button>
+            <button class="button ${dialogState.direction < 0 ? 'button-danger-solid' : 'button-primary'}" type="button" data-dialog-action="submit" ${dialogState.busy || !chosen.length || !selectedDialogRules().length || incomplete ? 'disabled' : ''}>${dialogState.busy ? (dialogState.verifying ? '正在核实…' : '正在提交…') : chosen.length > 1 ? `确认给 ${chosen.length} 人${directionLabel}` : `确认${directionLabel}`}</button>
+          </footer>
+        </section>
+        ${renderRuleLibrary()}
+      `;
+
+      const dialogBody = modalLayer.querySelector('.dialog-body');
+      if (dialogBody) dialogBody.scrollTop = scrollTop;
+      if (focusSelector) requestAnimationFrame(() => modalLayer.querySelector(focusSelector)?.focus({ preventScroll: focusSelector.startsWith('[data-rule-toggle=') }));
+    }
+
+    function renderRuleOptions() {
+      return selectedDialogRules().map(rule => `
+        <div class="rule-option active">
+          <span class="rule-copy"><strong title="${escapeHtml(rule.name)}">${escapeHtml(rule.name)}</strong></span>
+          ${renderRuleFields(rule)}
+          <button class="button button-quiet rule-remove" type="button" data-dialog-action="remove-rule" data-rule-id="${rule.id}" aria-label="移除${escapeHtml(rule.name)}" ${dialogState.busy ? 'disabled' : ''}>移除</button>
+        </div>
+      `).join('');
+    }
+
+    function openRuleLibrary() {
+      if (!dialogState || dialogState.busy) return;
+      dialogState.rulePicker = { ids: new Set(dialogState.ruleIds), query: '' };
+      renderDialog('[data-rule-search]');
+    }
+
+    function closeRuleLibrary() {
+      dialogState.rulePicker = null;
+      renderDialog('[data-dialog-action="pick-rules"]');
+    }
+
+    function applyRuleLibrary() {
+      dialogState.ruleIds = new Set(rules.filter(rule => rule.dir === dialogState.direction && dialogState.rulePicker.ids.has(rule.id)).map(rule => rule.id));
+      ensureRuleDefaults();
+      dialogState.error = '';
+      dialogState.invalidRule = '';
+      closeRuleLibrary();
+    }
+
+    function renderLibraryOptions() {
+      const picker = dialogState.rulePicker;
+      const matches = rules.filter(rule => rule.dir === dialogState.direction && rule.name.includes(picker.query.trim()));
+      return matches.length ? matches.map(rule => `<label class="rule-library-option"><input type="checkbox" data-library-rule="${rule.id}" ${picker.ids.has(rule.id) ? 'checked' : ''}><span>${escapeHtml(rule.name)}</span><small>${rule.value === '' ? '填写分值' : `${rule.dir > 0 ? '+' : '−'}${formatScore(rule.value)} 分`}</small></label>`).join('') : '<p class="rule-library-empty">没有匹配的积分项</p>';
+    }
+
+    function renderRuleLibrary() {
+      if (!dialogState.rulePicker) return '';
+      return `<div class="rule-library-layer" data-library-backdrop>
+        <section class="rule-library-panel" role="dialog" aria-modal="true" aria-labelledby="ruleLibraryTitle">
+          <header class="rule-library-title"><h2 id="ruleLibraryTitle">选择${dialogState.direction > 0 ? '加分' : '减分'}项</h2><button class="close-button" type="button" data-dialog-action="cancel-rules" aria-label="关闭积分库">×</button></header>
+          <div class="rule-library-search"><input type="search" data-rule-search placeholder="搜索积分项" aria-label="搜索积分库"></div>
+          <div class="rule-library-options">${renderLibraryOptions()}</div>
+          <footer class="rule-library-footer"><span data-library-count>已选 ${dialogState.rulePicker.ids.size} 项</span><button class="button" type="button" data-dialog-action="cancel-rules">取消</button><button class="button button-primary" type="button" data-dialog-action="apply-rules">确认选择</button></footer>
+        </section>
+      </div>`;
+    }
+
+    function scoreError(rule) {
+      const value = dialogState.scores[rule.id];
+      if (value === '' || value === undefined) return '请填写分值';
+      return !Number.isFinite(Number(value)) || Number(value) <= 0 ? '请输入大于 0 的分值' : '';
+    }
+
+    function renderRuleFields(rule) {
+      const error = scoreError(rule);
+      return `
+        <div class="rule-fields ${error ? 'bad' : ''}">
+          <div class="score-field"><div class="score-input"><span class="score-sign" aria-hidden="true">${rule.dir > 0 ? '+' : '−'}</span><input id="score-${rule.id}" data-score-rule="${rule.id}" type="number" inputmode="decimal" min="0.1" step="0.1" placeholder="分值" aria-label="${escapeHtml(rule.name)}${rule.dir > 0 ? '加分' : '减分'}分值" aria-invalid="${Boolean(error)}" aria-describedby="score-error-${rule.id}" value="${escapeHtml(dialogState.scores[rule.id] ?? '')}" ${dialogState.busy ? 'disabled' : ''}><span>分</span></div><small class="score-error" id="score-error-${rule.id}" ${error ? '' : 'hidden'}>${error}</small></div>
+          <input id="reason-${rule.id}" data-reason-rule="${rule.id}" type="text" value="${escapeHtml(dialogState.reasons[rule.id] || '')}" placeholder="原因（选填）" aria-label="${escapeHtml(rule.name)}原因（选填）" ${dialogState.busy ? 'disabled' : ''}>
+        </div>
+      `;
+    }
+
+    function ensureRuleDefaults() {
+      selectedDialogRules().forEach(rule => {
+        if (dialogState.scores[rule.id] === undefined) dialogState.scores[rule.id] = String(rule.value);
+        if (dialogState.reasons[rule.id] === undefined) dialogState.reasons[rule.id] = '';
+      });
+    }
+
+    function syncCalculation() {
+      if (!dialogState) return;
+      const chosenCount = dialogState.selected.size;
+      const perStudent = selectedDialogRules().reduce((sum, rule) => {
+        const score = Number(dialogState.scores[rule.id]);
+        return sum + (Number.isFinite(score) && score > 0 ? rule.dir * score : 0);
+      }, 0);
+      const total = perStudent * chosenCount;
+      const incomplete = selectedDialogRules().some(rule => scoreError(rule));
+      const perNode = modalLayer.querySelector('[data-summary="per"]');
+      const totalNode = modalLayer.querySelector('[data-summary="total"]');
+      if (perNode) perNode.textContent = incomplete ? '待完善' : `${formatDelta(perStudent)} 分`;
+      if (totalNode) totalNode.textContent = incomplete ? '待完善' : `${formatDelta(total)} 分`;
+      const submit = modalLayer.querySelector('[data-dialog-action="submit"]');
+      if (submit) submit.disabled = dialogState.busy || !chosenCount || !selectedDialogRules().length || incomplete;
+      const footer = modalLayer.querySelector('[data-summary="footer"]');
+      if (footer) footer.textContent = incomplete ? '请完善标红分值' : selectedDialogRules().length ? `${chosenCount > 1 ? '每人' : '本次'} ${formatDelta(perStudent)} 分` : '请选择积分项';
+      selectedDialogRules().forEach(rule => {
+        const error = scoreError(rule);
+        const input = modalLayer.querySelector(`#score-${rule.id}`);
+        if (input) {
+          input.setAttribute('aria-invalid', String(Boolean(error)));
+          input.closest('.rule-fields').classList.toggle('bad', Boolean(error));
+        }
+        const message = modalLayer.querySelector(`#score-error-${rule.id}`);
+        if (message) { message.hidden = !error; message.textContent = error; }
+      });
+    }
+
+    function validateDialog() {
+      if (!dialogState.selected.size) return '请至少选择一名学员。';
+      if (!selectedDialogRules().length) return '请至少选择一个积分项。';
+      const invalidRule = selectedDialogRules().find(rule => scoreError(rule));
+      if (invalidRule) {
+        dialogState.invalidRule = invalidRule.id;
+        return `请填写“${invalidRule.name}”的有效分值。`;
+      }
+      dialogState.invalidRule = '';
+      return '';
+    }
+
+    function settleDialog() {
+      const time = new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date());
+      const chosen = selectedDialogStudents();
+      const selectedRules = selectedDialogRules();
+      chosen.forEach(student => {
+        selectedRules.forEach(rule => {
+          const value = Number(dialogState.scores[rule.id]);
+          student.balance += rule.dir * value;
+          records.push({ studentId: student.id, studentName: student.name, ruleName: rule.name, dir: rule.dir, value, reason: dialogState.reasons[rule.id] || '—', time });
+        });
+      });
+      const studentCount = chosen.length;
+      const detailCount = studentCount * selectedRules.length;
+      const focusStudentId = dialogState.selected.size === 1 ? [...dialogState.selected][0] : '';
+      const focusDirection = lastTrigger?.dataset.studentDirection;
+      if (dialogState.clearPageSelection) pageSelected.clear();
+      dialogState.busy = false;
+      closeModal(false);
+      renderPage();
+      showToast(`已为 ${studentCount} 名学员完成积分登记，共生成 ${detailCount} 条记录。`);
+      if (focusStudentId && focusDirection) {
+        document.querySelector(`[data-student-id="${focusStudentId}"][data-student-direction="${focusDirection}"]`)?.focus();
+      } else lastTrigger?.focus?.();
+      if (mobileSubmission) {
+        const request = mobileSubmission;
+        mobileSubmission = null;
+        request.resolve(window.pointsMobileBridge.snapshot());
+      }
+      window.dispatchEvent(new Event('points:refresh'));
+    }
+
+    function submitDialog() {
+      if (!dialogState || dialogState.busy) return;
+      const error = validateDialog();
+      if (error) {
+        dialogState.error = error;
+        renderDialog(dialogState.invalidRule ? `#score-${dialogState.invalidRule}` : '');
+        return;
+      }
+      dialogState.error = '';
+      dialogState.busy = true;
+      dialogState.verifying = false;
+      renderDialog();
+      const outcome = outcomeSelect.value;
+      setTimeout(() => {
+        if (outcome === 'fail') {
+          dialogState.busy = false;
+          dialogState.error = '整批提交失败：演示学员状态发生变化。本批次未产生任何积分或记录，原有输入已保留，请核对学员状态后重新提交。';
+          renderDialog('.dialog-message');
+          if (mobileSubmission) {
+            const request = mobileSubmission;
+            mobileSubmission = null;
+            request.reject(new Error('本次提交失败，积分未变动。已保留填写内容，请重试。'));
+          }
+          return;
+        }
+        if (outcome === 'unknown') {
+          dialogState.verifying = true;
+          mobileSubmission?.onProgress?.();
+          dialogState.error = '处理结果待确认，系统正在核实本次提交，核实期间请勿重复操作。';
+          renderDialog('.dialog-message');
+          setTimeout(settleDialog, 1300);
+          return;
+        }
+        settleDialog();
+      }, 700);
+    }
+
+    document.getElementById('classFilters').addEventListener('click', event => {
+      const button = event.target.closest('[data-page-class]');
+      if (!button) return;
+      pageFilter = button.dataset.pageClass;
+      renderPage();
+    });
+
+    document.getElementById('pageSearch').addEventListener('input', event => {
+      pageQuery = event.target.value;
+      renderPage();
+      const search = document.getElementById('pageSearch');
+      search.focus();
+      search.setSelectionRange(search.value.length, search.value.length);
+    });
+
+    document.querySelector('.student-pane').addEventListener('change', event => {
+      if (event.target.id === 'selectVisibleStudents') {
+        document.querySelectorAll('[data-student-select]').forEach(input => {
+          if (event.target.checked) pageSelected.add(input.dataset.studentSelect);
+          else pageSelected.delete(input.dataset.studentSelect);
+        });
+        renderPage();
+        return;
+      }
+      if (event.target.matches('[data-student-select]')) {
+        const studentId = event.target.dataset.studentSelect;
+        if (event.target.checked) pageSelected.add(studentId);
+        else pageSelected.delete(studentId);
+        renderPage();
+      }
+    });
+
+    document.querySelector('.student-pane').addEventListener('click', event => {
+      const selectionButton = event.target.closest('[data-selection-action]');
+      if (selectionButton) {
+        const action = selectionButton.dataset.selectionAction;
+        if (action === 'view') selectedExpanded = !selectedExpanded;
+        if (action === 'clear') { pageSelected.clear(); selectedExpanded = false; }
+        if (action === 'remove') pageSelected.delete(selectionButton.dataset.studentId);
+        renderPage();
+        if (action === 'remove') document.getElementById(pageSelected.size ? 'viewSelected' : 'pageSearch').focus();
+        if (action === 'clear') document.getElementById('pageSearch').focus();
+        return;
+      }
+      const batchButton = event.target.closest('[data-batch-direction]');
+      if (batchButton && pageSelected.size) {
+        openDialog(Number(batchButton.dataset.batchDirection));
+        return;
+      }
+      const studentButton = event.target.closest('[data-student-direction]');
+      if (studentButton) openDialog(Number(studentButton.dataset.studentDirection), [studentButton.dataset.studentId], false);
+    });
+
+    modalLayer.addEventListener('click', event => {
+      if (event.target.matches('[data-library-backdrop]')) { closeRuleLibrary(); return; }
+      if (event.target === modalLayer) {
+        showToast('为避免误操作，请使用“取消”或右上角关闭按钮退出。');
+        return;
+      }
+      const button = event.target.closest('[data-dialog-action]');
+      if (!button || !dialogState) return;
+      const action = button.dataset.dialogAction;
+      if (action === 'pick-rules') openRuleLibrary();
+      if (action === 'cancel-rules') closeRuleLibrary();
+      if (action === 'apply-rules') applyRuleLibrary();
+      if (action === 'remove-rule' && !dialogState.busy) {
+        dialogState.ruleIds.delete(button.dataset.ruleId);
+        dialogState.error = '';
+        dialogState.invalidRule = '';
+        renderDialog('[data-dialog-action="pick-rules"]');
+      }
+      if (action === 'close') closeModal();
+      if (action === 'submit') submitDialog();
+    });
+
+    modalLayer.addEventListener('change', event => {
+      if (!dialogState) return;
+      if (event.target.matches('[data-library-rule]') && dialogState.rulePicker) {
+        const ruleId = event.target.dataset.libraryRule;
+        if (event.target.checked) dialogState.rulePicker.ids.add(ruleId);
+        else dialogState.rulePicker.ids.delete(ruleId);
+        modalLayer.querySelector('[data-library-count]').textContent = `已选 ${dialogState.rulePicker.ids.size} 项`;
+      }
+    });
+
+    modalLayer.addEventListener('input', event => {
+      if (!dialogState) return;
+      if (event.target.matches('[data-rule-search]') && dialogState.rulePicker) {
+        dialogState.rulePicker.query = event.target.value;
+        modalLayer.querySelector('.rule-library-options').innerHTML = renderLibraryOptions();
+        return;
+      }
+      if (event.target.matches('[data-score-rule]')) {
+        dialogState.scores[event.target.dataset.scoreRule] = event.target.value;
+        dialogState.invalidRule = '';
+        dialogState.error = '';
+        syncCalculation();
+        return;
+      }
+      if (event.target.matches('[data-reason-rule]')) {
+        dialogState.reasons[event.target.dataset.reasonRule] = event.target.value;
+      }
+    });
+
+    modalLayer.addEventListener('keydown', event => {
+      if (!dialogState) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (dialogState.rulePicker) closeRuleLibrary();
+        else closeModal();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const scope = modalLayer.querySelector(dialogState.rulePicker ? '.rule-library-panel' : '.dialog');
+      const focusable = [...(scope?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)') || [])].filter(node => node.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    deviceSelect.addEventListener('change', event => setDevice(event.target.value));
+    permissionSelect.addEventListener('change', event => {
+      if (dialogState?.busy) {
+        event.target.value = permission;
+        showToast('提交处理中，暂时不能切换权限。', 'error');
+        return;
+      }
+      permission = event.target.value;
+      if (dialogState) closeModal(false);
+      renderPage();
+      showToast('权限已切换，请重新打开积分操作。');
+      window.dispatchEvent(new Event('points:refresh'));
+    });
+    document.getElementById('resetDemo').addEventListener('click', resetData);
+
+    function updateMobileViewport() {
+      document.documentElement.style.setProperty('--points-mobile-viewport', `${Math.round(window.visualViewport?.height || window.innerHeight)}px`);
+    }
+    window.visualViewport?.addEventListener('resize', updateMobileViewport);
+    window.addEventListener('resize', updateMobileViewport);
+    updateMobileViewport();
+    setDevice(new URLSearchParams(window.location.search).get('device') || (window.innerWidth <= 580 ? 'mobile' : 'desktop'));
+    deviceSelect.value = appShell.classList.contains('mobile') ? 'mobile' : 'desktop';
+    resetData();
+    window.pointsMobileBridge = {
+      snapshot() {
+        return JSON.parse(JSON.stringify({ classes, students, rules, records, permission, selected: [...pageSelected] }));
+      },
+      select(ids) { pageSelected = new Set(ids); renderPage(); },
+      cancel() { if (!dialogState?.busy) closeModal(false); },
+      submit(payload, onProgress) {
+        return new Promise((resolve, reject) => {
+          if (dialogState?.busy || mobileSubmission) return reject(new Error('正在处理，请勿重复提交'));
+          if (!allowed(payload.direction)) return reject(new Error('当前账号没有此操作权限'));
+          openDialog(payload.direction, payload.ids, !payload.single);
+          dialogState.ruleIds = new Set(payload.items.map(item => item.id));
+          payload.items.forEach(item => { dialogState.scores[item.id] = item.score; dialogState.reasons[item.id] = item.reason; });
+          const error = validateDialog();
+          if (error) return reject(new Error(error));
+          mobileSubmission = { resolve, reject, onProgress };
+          submitDialog();
+        });
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js" onerror="this.dataset.failed='true'"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vant@4.9.21/lib/vant.min.js" onerror="this.dataset.failed='true'"></script>
+  <script src="student-points-vant/mobile.js"></script>
+</body>
+</html>
