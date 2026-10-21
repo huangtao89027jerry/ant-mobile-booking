@@ -213,19 +213,19 @@
           <footer class="vp-confirm van-safe-area-bottom"><div class="vp-confirm-summary">{{verifying?'正在核实，请勿重复操作':incomplete?'请完善分值':chosenRules.length?(targets.length>1?'每人 ':'本次 ')+delta(perPerson)+' 分':'请选择积分项'}}</div><van-button type="primary" block :color="direction<0?'var(--van-danger-color)':undefined" :disabled="!canSubmit" :loading="busy" :loading-text="verifying?'正在核实…':'正在提交…'" @click="submit">确认给 {{targets.length}} 人{{directionText}}</van-button></footer>
         </van-popup>
         <van-popup v-if="mounted" v-model:show="showRulePicker" :teleport="host" position="bottom" round class="vp-rule-picker" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="'选择'+directionText+'项'">
-          <van-nav-bar :title="creatingRule?'新增'+directionText+'规则':'选择'+directionText+'项'" :left-text="creatingRule?'返回':'取消'" @click-left="creatingRule ? creatingRule=false : showRulePicker=false" />
+          <van-nav-bar :title="creatingRule?'新增'+directionText+'规则':'选择'+directionText+'项'" :left-text="creatingRule?'返回':'取消'" :left-arrow="creatingRule" @click-left="creatingRule ? creatingRule=false : showRulePicker=false" />
           <template v-if="creatingRule">
             <div class="vp-library-scroll vp-rule-form">
               <van-cell-group :border="false">
-                <van-field v-model="newRuleName" label="规则名称" placeholder="请输入规则名称" required />
-                <van-field :label="directionText+'分值类型'"><template #input><van-radio-group v-model="newRuleType" direction="horizontal"><van-radio name="fixed" icon-size="18px">固定分值</van-radio><van-radio name="unlimited" icon-size="18px">不限分值</van-radio></van-radio-group></template></van-field>
-                <van-field v-if="newRuleType==='fixed'" v-model="newRuleValue" :label="'默认'+directionText+'分值'" required type="number" inputmode="decimal" placeholder="请输入默认分值"><template #left-icon><span class="vp-sign" :class="{'vp-negative':direction<0}">{{direction>0?'+':'−'}}</span></template><template #extra>分</template></van-field>
-                <van-field v-model="newRuleReason" label="原因" type="textarea" :autosize="{ minHeight: 82 }" placeholder="请输入原因" />
+                <van-field v-model="newRuleName" label="规则名称" label-align="top" placeholder="请输入规则名称" required :border="false" />
+                <van-field class="vp-rule-type" :label="directionText+'分值类型'" label-align="top" :border="false"><template #input><van-radio-group v-model="newRuleType" direction="horizontal"><van-radio name="fixed" :class="{'is-selected':newRuleType==='fixed'}" icon-size="18px">固定分值</van-radio><van-radio name="unlimited" :class="{'is-selected':newRuleType==='unlimited'}" icon-size="18px">不限分值</van-radio></van-radio-group></template></van-field>
+                <van-field v-if="newRuleType==='fixed'" v-model="newRuleValue" :label="'默认'+directionText+'分值'" label-align="top" required :border="false" type="number" inputmode="decimal" placeholder="请输入默认分值"><template #extra>分</template></van-field>
+                <van-field v-model="newRuleReason" label="原因（选填）" label-align="top" :border="false" type="textarea" :autosize="{ minHeight: 72, maxHeight: 120 }" placeholder="请输入原因" />
               </van-cell-group>
-              <p class="vp-rule-hint">保存后返回规则列表并自动勾选，再应用到本次操作。积分在主弹窗点击确定后生效。</p>
+              <p class="vp-rule-hint">保存后返回规则库并自动勾选，确认选择后应用到本次操作。积分在主页面提交后生效。</p>
               <p v-if="newRuleError" class="vp-new-rule-error" role="alert">{{newRuleError}}</p>
             </div>
-            <footer class="vp-picker-footer van-safe-area-bottom"><van-button @click="creatingRule=false">返回规则列表</van-button><van-button type="primary" @click="saveRule">保存并选中</van-button></footer>
+            <footer class="vp-picker-footer vp-new-rule-footer van-safe-area-bottom"><van-button type="primary" block @click="saveRule">保存并选中</van-button></footer>
           </template>
           <template v-else>
           <van-search v-model="ruleQuery" placeholder="搜索积分项" aria-label="搜索积分库" clearable show-action><template #action><van-button type="primary" plain size="small" icon="plus" @click="openRuleForm">新增</van-button></template></van-search>
