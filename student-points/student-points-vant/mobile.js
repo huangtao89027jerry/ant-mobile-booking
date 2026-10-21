@@ -12,6 +12,27 @@
   const app = Vue.createApp({
     setup() {
       const data = ref(bridge.snapshot());
+      const studentView = new URLSearchParams(window.location.search).get('view') !== 'batch';
+      const studentId = new URLSearchParams(window.location.search).get('student');
+      const currentStudent = computed(() => data.value.students.find(student => student.id === studentId) || data.value.students[0]);
+      const recordPeriod = ref('all');
+      const recordDirection = ref(0);
+      const periodOptions = [{ text: '全部时间', value: 'all' }, { text: '今天', value: 'today' }, { text: '近 7 天', value: 'week' }];
+      const directionOptions = [{ text: '全部类型', value: 0 }, { text: '加分记录', value: 1 }, { text: '减分记录', value: -1 }];
+      const historyRecords = [
+        { ruleName: '学员交费加分', dir: 1, value: 10, reason: '单次交费10元，加10分。', time: '2026-10-20 16:55:05' },
+        { ruleName: '学员交费加分', dir: 1, value: 10, reason: '单次交费10元，加10分。', time: '2026-10-20 16:13:39' },
+        { ruleName: '学员课消数量加分', dir: 1, value: 3, reason: '完成课程学习，加3分。', time: '2026-10-19 18:08:02' }
+      ];
+      const studentRecords = computed(() => {
+        const today = new Date();
+        const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (recordPeriod.value === 'week' ? 6 : 0));
+        return [...data.value.records.filter(record => record.studentId === currentStudent.value.id).reverse(), ...historyRecords].filter(record => {
+          const parts = record.time.match(/\d+/g).map(Number);
+          const date = parts.length >= 5 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date(today.getFullYear(), parts[0] - 1, parts[1]);
+          return (!recordDirection.value || record.dir === recordDirection.value) && (recordPeriod.value === 'all' || date >= start);
+        });
+      });
       const selected = ref([...data.value.selected]);
       const query = ref('');
       const classId = ref('all');
@@ -128,6 +149,18 @@
         error.value = '';
         showEditor.value = true;
       }
+      function openStudent() {
+        open(allowed(1) ? 1 : -1, [currentStudent.value.id], true);
+      }
+      async function switchStudentDirection(dir) {
+        if (busy.value || dir === direction.value || !allowed(dir)) return;
+        if (chosenRules.value.length) {
+          try {
+            await vant.showConfirmDialog({ title: `切换为${dir > 0 ? '加分' : '减分'}？`, message: '当前已选择和填写的积分项将清空。', teleport: host.value, confirmButtonColor: '#2878e8' });
+          } catch { return; }
+        }
+        open(dir, [currentStudent.value.id], true);
+      }
       function openRulePicker() {
         if (busy.value) return;
         draftRuleIds.value = [...ruleIds.value];
@@ -187,8 +220,14 @@
           showEditor.value = false;
           selectedOnly.value = false;
           refresh();
+          if (studentView) {
+            recordPeriod.value = 'all';
+            recordDirection.value = 0;
+            const profilePage = host.value?.querySelector('.vp-profile-page');
+            if (profilePage) profilePage.scrollTop = 0;
+          }
           prepareBalanceAnimation(previousBalances);
-          vant.showSuccessToast({ message: `${count} 名学员登记成功\n每人 ${delta(total)} 分`, teleport: host.value });
+          vant.showSuccessToast({ message: studentView ? `${directionText.value}成功\n本次 ${delta(total)} 分` : `${count} 名学员登记成功\n每人 ${delta(total)} 分`, teleport: host.value });
         } catch (cause) { error.value = cause.message; }
         finally { busy.value = false; verifying.value = false; }
       }
@@ -202,13 +241,34 @@
         clearBalanceAnimation();
       });
       return { data, selected, query, classId, selectedOnly, showEditor, showRecords, direction, targets,
+        studentView, currentStudent, studentRecords, recordPeriod, recordDirection, periodOptions, directionOptions, openStudent, switchStudentDirection,
         ruleIds, showRulePicker, draftRuleIds, ruleQuery, creatingRule, newRuleName, newRuleType, newRuleValue, newRuleReason, newRuleError, scores, touchedScores, reasons, busy, verifying, error, host, mounted,
         directionText, libraryRules, chosenRules, chosenStudents, visible, allVisible, someVisible, incomplete,
         perPerson, canSubmit, format, delta, groupName, allowed, invalid, scoreError, balanceAnimations, animateBalances, select, toggleStudent, toggleAll,
         open, openRulePicker, openRuleForm, saveRule, toggleDraftRule, applyRuleSelection, removeRule, closeEditor, submit };
     },
     template: `
-      <div ref="host" class="vp-app" :class="{ 'vp-editing': showEditor }">
+      <div ref="host" class="vp-app" :class="{ 'vp-editing': showEditor, 'vp-student-view': studentView }">
+        <template v-if="studentView">
+          <van-nav-bar title="学员信息" safe-area-inset-top />
+          <main class="vp-profile-page">
+            <section class="vp-profile-card">
+              <div class="vp-profile-avatar" aria-hidden="true">{{currentStudent.name.slice(0,1)}}</div>
+              <div class="vp-profile-info"><h1>{{currentStudent.name}}<span>（S39755）</span></h1><van-tag plain type="primary">在读学员</van-tag><p>{{groupName(currentStudent.classId)}}</p></div>
+            </section>
+            <div class="vp-profile-quick" aria-label="学员服务"><div><van-icon name="balance-o" /><span>报名收费</span></div><div><van-icon name="clock-o" /><span>请假申请</span></div><div><van-icon name="description-o" /><span>上传附件</span></div><div><van-icon name="coupon-o" /><span>发优惠券</span></div></div>
+            <div class="vp-profile-tabs"><span>在读班级</span><strong aria-current="page">积分</strong><span>优惠券</span><span>请假记录</span></div>
+            <section class="vp-profile-balance" aria-label="当前积分"><span>当前积分</span><strong class="vp-balance" :class="{'vp-balance-changing':balanceAnimations[currentStudent.id], 'vp-balance-down':balanceAnimations[currentStudent.id]?.direction<0}">{{format(balanceAnimations[currentStudent.id]?.value ?? currentStudent.balance)}}<small>分</small></strong></section>
+            <van-dropdown-menu class="vp-record-filters"><van-dropdown-item v-model="recordPeriod" :options="periodOptions" :teleport="host" /><van-dropdown-item v-model="recordDirection" :options="directionOptions" :teleport="host" /></van-dropdown-menu>
+            <div class="vp-profile-records" aria-label="积分明细">
+              <article v-for="(record,index) in studentRecords" :key="index" class="vp-profile-record"><header><h2>{{record.ruleName}}</h2><strong :class="{'vp-negative':record.dir<0}">{{delta(record.dir*record.value)}}</strong></header><dl><dt>操作时间</dt><dd>{{record.time}}</dd><dt>原因</dt><dd>{{record.reason}}</dd></dl></article>
+              <van-empty v-if="!studentRecords.length" description="当前条件下暂无积分记录" />
+            </div>
+            <p class="vp-demo-note">演示学员与积分记录 · 刷新后恢复初始数据</p>
+          </main>
+          <div class="vp-profile-action"><van-button type="primary" round :disabled="!allowed(1)&&!allowed(-1)" @click="openStudent">加减积分</van-button></div>
+        </template>
+        <template v-else>
         <van-nav-bar title="学员积分" fixed placeholder safe-area-inset-top>
           <template #right><van-button size="small" type="primary" plain @click="showRecords=true">积分记录</van-button></template>
         </van-nav-bar>
@@ -239,9 +299,12 @@
           <div class="vp-batch-count"><span>已选 <b>{{selected.length}}</b> 人</span><van-button v-if="selected.length" size="small" plain @click="select([]);selectedOnly=false">清空</van-button></div>
           <div class="vp-batch-actions"><van-button :disabled="!selected.length || !allowed(-1)" @click="open(-1)">减分</van-button><van-button type="primary" :disabled="!selected.length || !allowed(1)" @click="open(1)">加分</van-button></div>
         </div>
-        <van-popup v-if="mounted" :show="showEditor" :teleport="host" position="right" class="vp-editor" :overlay="false" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="directionText" :aria-busy="busy" @closed="animateBalances">
-          <van-nav-bar :title="targets.length>1 ? '批量'+directionText : (chosenStudents[0]?.name||'')+directionText" :left-text="busy?'处理中':'返回'" left-arrow safe-area-inset-top @click-left="closeEditor"><template #right><van-tag :type="direction<0?'danger':'primary'">{{directionText}}</van-tag></template></van-nav-bar>
+        </template>
+        <van-popup v-if="mounted" :show="showEditor" :teleport="host" :position="studentView?'bottom':'right'" class="vp-editor" :class="{'vp-student-sheet':studentView}" :overlay="studentView" :close-on-click-overlay="!busy" @click-overlay="closeEditor" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="studentView?'加减积分':directionText" :aria-busy="busy" @closed="animateBalances">
+          <van-nav-bar :title="studentView?'加减积分':targets.length>1 ? '批量'+directionText : (chosenStudents[0]?.name||'')+directionText" :left-text="busy?'处理中':studentView?'取消':'返回'" :left-arrow="!studentView" safe-area-inset-top @click-left="closeEditor"><template v-if="!studentView" #right><van-tag :type="direction<0?'danger':'primary'">{{directionText}}</van-tag></template></van-nav-bar>
           <div class="vp-editor-scroll">
+            <div v-if="studentView" class="vp-sheet-context"><span>操作学员</span><strong>{{currentStudent.name}}</strong><span>当前 {{format(currentStudent.balance)}} 分</span></div>
+            <div v-if="studentView" class="vp-direction-switch" aria-label="积分操作类型"><van-button :class="{'is-active':direction===1}" :aria-pressed="direction===1" :disabled="busy||!allowed(1)" @click="switchStudentDirection(1)">加积分</van-button><van-button :class="{'is-active is-minus':direction===-1}" :aria-pressed="direction===-1" :disabled="busy||!allowed(-1)" @click="switchStudentDirection(-1)">减积分</van-button></div>
             <div v-if="targets.length>1" class="vp-scope"><div class="vp-scope-title">已选 {{targets.length}} 名学员</div><div class="vp-names"><van-tag v-for="student in chosenStudents" :key="student.id" plain>{{student.name}}</van-tag></div><p>以下积分项统一应用到所选学员</p></div>
             <div class="vp-section-title"><span>积分项<small>已选 {{chosenRules.length}} 项</small></span></div>
             <van-cell-group inset class="vp-rules">
@@ -262,7 +325,7 @@
             <div v-if="chosenRules.length" class="vp-calculation"><div><span>{{targets.length>1?'每位学员':'本次'}}{{directionText}}</span><strong :class="{'vp-negative':direction<0&&!incomplete, 'vp-summary-pending':incomplete}">{{incomplete?'待完善':delta(perPerson)+' 分'}}</strong></div><div v-if="targets.length>1"><span>整批合计</span><strong :class="{'vp-negative':direction<0&&!incomplete, 'vp-summary-pending':incomplete}">{{incomplete?'待完善':delta(perPerson*targets.length)+' 分'}}</strong></div><p>{{targets.length}} 人 · {{chosenRules.length}} 个积分项</p></div>
             <van-notice-bar v-if="error" wrapable :scrollable="false" color="var(--van-danger-color)" background="var(--van-red-light)" :text="error" role="alert" />
           </div>
-          <footer class="vp-confirm van-safe-area-bottom"><div class="vp-confirm-summary">{{verifying?'正在核实，请勿重复操作':incomplete?'请完善分值':chosenRules.length?(targets.length>1?'每人 ':'本次 ')+delta(perPerson)+' 分':'请选择积分项'}}</div><van-button type="primary" block :color="direction<0?'var(--van-danger-color)':undefined" :disabled="!canSubmit" :loading="busy" :loading-text="verifying?'正在核实…':'正在提交…'" @click="submit">确认给 {{targets.length}} 人{{directionText}}</van-button></footer>
+          <footer class="vp-confirm van-safe-area-bottom"><div class="vp-confirm-summary">{{verifying?'正在核实，请勿重复操作':incomplete?'请完善分值':chosenRules.length?(targets.length>1?'每人 ':'本次 ')+delta(perPerson)+' 分':'请选择积分项'}}</div><van-button type="primary" block :color="direction<0?'var(--van-danger-color)':undefined" :disabled="!canSubmit" :loading="busy" :loading-text="verifying?'正在核实…':'正在提交…'" @click="submit">{{studentView?'确认'+directionText:'确认给 '+targets.length+' 人'+directionText}}</van-button></footer>
         </van-popup>
         <van-popup v-if="mounted" v-model:show="showRulePicker" :teleport="host" position="bottom" round class="vp-rule-picker" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="'选择'+directionText+'项'">
           <van-nav-bar :title="creatingRule?'新增'+directionText+'规则':'选择'+directionText+'项'" :left-text="creatingRule?'返回':'取消'" :left-arrow="creatingRule" @click-left="creatingRule ? creatingRule=false : showRulePicker=false" />
