@@ -25,6 +25,10 @@
       const showRulePicker = ref(false);
       const draftRuleIds = ref([]);
       const ruleQuery = ref('');
+      const creatingRule = ref(false);
+      const newRuleName = ref('');
+      const newRuleValue = ref('');
+      const newRuleError = ref('');
       const scores = reactive({});
       const reasons = reactive({});
       const busy = ref(false);
@@ -81,7 +85,25 @@
         if (busy.value) return;
         draftRuleIds.value = [...ruleIds.value];
         ruleQuery.value = '';
+        creatingRule.value = false;
         showRulePicker.value = true;
+      }
+      function openRuleForm() {
+        newRuleName.value = ruleQuery.value.trim().slice(0, 30);
+        newRuleValue.value = '';
+        newRuleError.value = '';
+        creatingRule.value = true;
+      }
+      function saveRule() {
+        try {
+          const rule = bridge.createRule(newRuleName.value, direction.value, newRuleValue.value);
+          refresh();
+          scores[rule.id] = rule.value;
+          reasons[rule.id] = '';
+          draftRuleIds.value.push(rule.id);
+          ruleQuery.value = '';
+          creatingRule.value = false;
+        } catch (cause) { newRuleError.value = cause.message; }
       }
       function toggleDraftRule(rule) {
         draftRuleIds.value = draftRuleIds.value.includes(rule.id) ? draftRuleIds.value.filter(id => id !== rule.id) : [...draftRuleIds.value, rule.id];
@@ -125,10 +147,10 @@
       });
       onBeforeUnmount(() => window.removeEventListener('points:refresh', refresh));
       return { data, selected, query, classId, selectedOnly, showEditor, showRecords, direction, targets,
-        ruleIds, showRulePicker, draftRuleIds, ruleQuery, scores, reasons, busy, verifying, error, host, mounted,
+        ruleIds, showRulePicker, draftRuleIds, ruleQuery, creatingRule, newRuleName, newRuleValue, newRuleError, scores, reasons, busy, verifying, error, host, mounted,
         directionText, libraryRules, chosenRules, chosenStudents, visible, allVisible, someVisible, incomplete,
         perPerson, canSubmit, format, delta, groupName, allowed, invalid, select, toggleStudent, toggleAll,
-        open, openRulePicker, toggleDraftRule, applyRuleSelection, removeRule, closeEditor, submit };
+        open, openRulePicker, openRuleForm, saveRule, toggleDraftRule, applyRuleSelection, removeRule, closeEditor, submit };
     },
     template: `
       <div ref="host" class="vp-app" :class="{ 'vp-editing': showEditor }">
@@ -187,17 +209,30 @@
           <footer class="vp-confirm van-safe-area-bottom"><div class="vp-confirm-summary">{{verifying?'正在核实，请勿重复操作':incomplete?'请完善分值':chosenRules.length?(targets.length>1?'每人 ':'本次 ')+delta(perPerson)+' 分':'请选择积分项'}}</div><van-button type="primary" block :color="direction<0?'var(--van-danger-color)':undefined" :disabled="!canSubmit" :loading="busy" :loading-text="verifying?'正在核实…':'正在提交…'" @click="submit">确认给 {{targets.length}} 人{{directionText}}</van-button></footer>
         </van-popup>
         <van-popup v-if="mounted" v-model:show="showRulePicker" :teleport="host" position="bottom" round class="vp-rule-picker" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="'选择'+directionText+'项'">
-          <van-nav-bar :title="'选择'+directionText+'项'" left-text="取消" @click-left="showRulePicker=false" />
-          <van-search v-model="ruleQuery" placeholder="搜索积分项" aria-label="搜索积分库" clearable />
+          <van-nav-bar :title="(creatingRule?'新增':'选择')+directionText+'项'" :left-text="creatingRule?'返回':'取消'" @click-left="creatingRule ? creatingRule=false : showRulePicker=false" />
+          <template v-if="creatingRule">
+            <div class="vp-library-scroll vp-rule-form">
+              <van-cell-group :border="false">
+                <van-field v-model="newRuleName" label="名称" placeholder="请输入积分项名称" required maxlength="30" />
+                <van-field v-model="newRuleValue" label="默认分值" type="number" inputmode="decimal" placeholder="可留空"><template #left-icon><span class="vp-sign" :class="{'vp-negative':direction<0}">{{direction>0?'+':'−'}}</span></template><template #extra>分</template></van-field>
+              </van-cell-group>
+              <p class="vp-rule-hint">留空时，每次操作需填写分值。保存后加入积分库并自动勾选。</p>
+              <p v-if="newRuleError" class="vp-new-rule-error" role="alert">{{newRuleError}}</p>
+            </div>
+            <footer class="vp-picker-footer van-safe-area-bottom"><van-button @click="creatingRule=false">返回列表</van-button><van-button type="primary" @click="saveRule">保存并选中</van-button></footer>
+          </template>
+          <template v-else>
+          <van-search v-model="ruleQuery" placeholder="搜索积分项" aria-label="搜索积分库" clearable show-action><template #action><van-button type="primary" plain size="small" icon="plus" @click="openRuleForm">新增</van-button></template></van-search>
           <div class="vp-library-scroll">
             <van-cell-group :border="false">
               <van-cell v-for="rule in libraryRules" :key="rule.id" :title="rule.name" :value="rule.value === '' ? '填写分值' : (direction>0?'+':'−')+format(rule.value)+' 分'" clickable @click="toggleDraftRule(rule)">
                 <template #icon><van-checkbox :model-value="draftRuleIds.includes(rule.id)" shape="square" icon-size="20px" :aria-label="rule.name" @click.stop="toggleDraftRule(rule)" /></template>
               </van-cell>
             </van-cell-group>
-            <van-empty v-if="!libraryRules.length" image="search" :description="ruleQuery.trim()?'没有匹配的积分项':'积分库暂无'+directionText+'项'" />
+            <van-empty v-if="!libraryRules.length" image="search" :description="ruleQuery.trim()?'没有匹配的积分项':'积分库暂无'+directionText+'项'"><van-button type="primary" plain size="small" @click="openRuleForm">新增积分项</van-button></van-empty>
           </div>
           <footer class="vp-picker-footer van-safe-area-bottom"><span>已选 {{draftRuleIds.length}} 项</span><van-button type="primary" @click="applyRuleSelection">确认选择</van-button></footer>
+          </template>
         </van-popup>
         <van-popup v-if="mounted" v-model:show="showRecords" :teleport="host" position="right" class="vp-records" :overlay="false" :lock-scroll="false" role="dialog" aria-modal="true" aria-label="本次积分记录">
           <van-nav-bar title="本次积分记录" left-text="返回" left-arrow safe-area-inset-top @click-left="showRecords=false" />

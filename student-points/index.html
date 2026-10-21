@@ -1106,6 +1106,11 @@
     }
 
     function closeRuleLibrary() {
+      if (dialogState.rulePicker.creating) {
+        dialogState.rulePicker.creating = false;
+        renderDialog('[data-rule-search]');
+        return;
+      }
       dialogState.rulePicker = null;
       renderDialog('[data-dialog-action="pick-rules"]');
     }
@@ -1121,17 +1126,59 @@
     function renderLibraryOptions() {
       const picker = dialogState.rulePicker;
       const matches = rules.filter(rule => rule.dir === dialogState.direction && rule.name.includes(picker.query.trim()));
-      return matches.length ? matches.map(rule => `<label class="rule-library-option"><input type="checkbox" data-library-rule="${rule.id}" ${picker.ids.has(rule.id) ? 'checked' : ''}><span>${escapeHtml(rule.name)}</span><small>${rule.value === '' ? '填写分值' : `${rule.dir > 0 ? '+' : '−'}${formatScore(rule.value)} 分`}</small></label>`).join('') : '<p class="rule-library-empty">没有匹配的积分项</p>';
+      return matches.length ? matches.map(rule => `<label class="rule-library-option"><input type="checkbox" data-library-rule="${rule.id}" ${picker.ids.has(rule.id) ? 'checked' : ''}><span>${escapeHtml(rule.name)}</span><small>${rule.value === '' ? '填写分值' : `${rule.dir > 0 ? '+' : '−'}${formatScore(rule.value)} 分`}</small></label>`).join('') : '<div class="rule-library-empty"><p>没有合适的积分项？</p><button class="button button-quiet" type="button" data-dialog-action="new-library-rule">＋ 新增积分项</button></div>';
+    }
+
+    function createLibraryRule(name, direction, value) {
+      if (!allowed(direction)) throw new Error('当前账号没有此操作权限');
+      name = name.trim();
+      if (!name) throw new Error('请输入积分项名称');
+      if (name.length > 30) throw new Error('名称最多 30 个字');
+      if (rules.some(rule => rule.dir === direction && rule.name === name)) throw new Error('同名积分项已存在，请从库中选择');
+      const blank = String(value).trim() === '';
+      if (!blank && (!Number.isFinite(Number(value)) || Number(value) <= 0)) throw new Error('请输入大于 0 的默认分值');
+      const rule = { id: `custom-${Date.now()}-${rules.length}`, name, dir: direction, value: blank ? '' : Number(value) };
+      rules.push(rule);
+      window.dispatchEvent(new Event('points:refresh'));
+      return { ...rule };
+    }
+
+    function openLibraryRuleForm() {
+      dialogState.rulePicker.creating = true;
+      dialogState.rulePicker.name = dialogState.rulePicker.query.trim().slice(0, 30);
+      dialogState.rulePicker.value = '';
+      dialogState.rulePicker.error = '';
+      renderDialog('[data-new-rule="name"]');
+    }
+
+    function saveLibraryRule() {
+      const picker = dialogState.rulePicker;
+      try {
+        const rule = createLibraryRule(picker.name, dialogState.direction, picker.value);
+        picker.ids.add(rule.id);
+        picker.creating = false;
+        picker.query = '';
+        renderDialog(`[data-library-rule="${rule.id}"]`);
+      } catch (cause) {
+        picker.error = cause.message;
+        renderDialog('.rule-library-error');
+      }
     }
 
     function renderRuleLibrary() {
       if (!dialogState.rulePicker) return '';
+      const picker = dialogState.rulePicker;
+      const label = dialogState.direction > 0 ? '加分' : '减分';
       return `<div class="rule-library-layer" data-library-backdrop>
         <section class="rule-library-panel" role="dialog" aria-modal="true" aria-labelledby="ruleLibraryTitle">
-          <header class="rule-library-title"><h2 id="ruleLibraryTitle">选择${dialogState.direction > 0 ? '加分' : '减分'}项</h2><button class="close-button" type="button" data-dialog-action="cancel-rules" aria-label="关闭积分库">×</button></header>
-          <div class="rule-library-search"><input type="search" data-rule-search placeholder="搜索积分项" aria-label="搜索积分库"></div>
-          <div class="rule-library-options">${renderLibraryOptions()}</div>
-          <footer class="rule-library-footer"><span data-library-count>已选 ${dialogState.rulePicker.ids.size} 项</span><button class="button" type="button" data-dialog-action="cancel-rules">取消</button><button class="button button-primary" type="button" data-dialog-action="apply-rules">确认选择</button></footer>
+          <header class="rule-library-title"><h2 id="ruleLibraryTitle">${picker.creating ? '新增' : '选择'}${label}项</h2><button class="close-button" type="button" data-dialog-action="cancel-rules" aria-label="${picker.creating ? '返回规则列表' : '关闭积分库'}">×</button></header>
+          ${picker.creating ? `<div class="rule-library-form">
+            <label for="libraryRuleName">积分项名称<span>*</span></label><input id="libraryRuleName" data-new-rule="name" maxlength="30" placeholder="请输入名称" value="${escapeHtml(picker.name)}">
+            <label for="libraryRuleValue">默认${label}分值</label><div class="rule-library-score"><span>${dialogState.direction > 0 ? '+' : '−'}</span><input id="libraryRuleValue" data-new-rule="value" type="number" inputmode="decimal" min="0.1" step="0.1" placeholder="可留空" value="${escapeHtml(picker.value)}"><span>分</span></div>
+            <p>留空时，每次操作需填写分值。保存后加入积分库并自动勾选。</p>
+            ${picker.error ? `<div class="rule-library-error" role="alert" tabindex="-1">${escapeHtml(picker.error)}</div>` : ''}
+          </div>` : `<div class="rule-library-search"><input type="search" data-rule-search placeholder="搜索积分项" aria-label="搜索积分库" value="${escapeHtml(picker.query)}"><button class="button button-quiet" type="button" data-dialog-action="new-library-rule">＋ 新增</button></div><div class="rule-library-options">${renderLibraryOptions()}</div>`}
+          <footer class="rule-library-footer">${picker.creating ? '<span></span><button class="button" type="button" data-dialog-action="cancel-rules">返回列表</button><button class="button button-primary" type="button" data-dialog-action="save-library-rule">保存并选中</button>' : `<span data-library-count>已选 ${picker.ids.size} 项</span><button class="button" type="button" data-dialog-action="cancel-rules">取消</button><button class="button button-primary" type="button" data-dialog-action="apply-rules">确认选择</button>`}</footer>
         </section>
       </div>`;
     }
@@ -1333,6 +1380,8 @@
       if (action === 'pick-rules') openRuleLibrary();
       if (action === 'cancel-rules') closeRuleLibrary();
       if (action === 'apply-rules') applyRuleLibrary();
+      if (action === 'new-library-rule') openLibraryRuleForm();
+      if (action === 'save-library-rule') saveLibraryRule();
       if (action === 'remove-rule' && !dialogState.busy) {
         dialogState.ruleIds.delete(button.dataset.ruleId);
         dialogState.error = '';
@@ -1355,6 +1404,10 @@
 
     modalLayer.addEventListener('input', event => {
       if (!dialogState) return;
+      if (event.target.matches('[data-new-rule]') && dialogState.rulePicker?.creating) {
+        dialogState.rulePicker[event.target.dataset.newRule] = event.target.value;
+        return;
+      }
       if (event.target.matches('[data-rule-search]') && dialogState.rulePicker) {
         dialogState.rulePicker.query = event.target.value;
         modalLayer.querySelector('.rule-library-options').innerHTML = renderLibraryOptions();
@@ -1425,6 +1478,7 @@
       },
       select(ids) { pageSelected = new Set(ids); renderPage(); },
       cancel() { if (!dialogState?.busy) closeModal(false); },
+      createRule: createLibraryRule,
       submit(payload, onProgress) {
         return new Promise((resolve, reject) => {
           if (dialogState?.busy || mobileSubmission) return reject(new Error('正在处理，请勿重复提交'));
