@@ -33,6 +33,10 @@
       const newRuleError = ref('');
       const scores = reactive({});
       const reasons = reactive({});
+      const balanceAnimations = reactive({});
+      let balanceFrame = 0;
+      let balanceHighlightTimer = 0;
+      let pendingBalanceAnimation = false;
       const busy = ref(false);
       const verifying = ref(false);
       const error = ref('');
@@ -71,8 +75,46 @@
         visible.value.forEach(student => allVisible.value ? ids.delete(student.id) : ids.add(student.id));
         select([...ids]);
       }
+      function clearBalanceAnimation() {
+        cancelAnimationFrame(balanceFrame);
+        clearTimeout(balanceHighlightTimer);
+        pendingBalanceAnimation = false;
+        Object.keys(balanceAnimations).forEach(id => delete balanceAnimations[id]);
+      }
+      function prepareBalanceAnimation(previous) {
+        clearBalanceAnimation();
+        data.value.students.forEach(student => {
+          const from = previous.get(student.id);
+          const to = student.balance;
+          if (from === undefined || from === to) return;
+          const precision = Math.max(...[from, to].map(value => value.toFixed(8).replace(/0+$/, '').split('.')[1]?.length || 0));
+          balanceAnimations[student.id] = { from, to, value: from, precision, direction: Math.sign(to - from) };
+        });
+        pendingBalanceAnimation = Object.keys(balanceAnimations).length > 0;
+      }
+      function animateBalances() {
+        if (!pendingBalanceAnimation) return;
+        pendingBalanceAnimation = false;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          clearBalanceAnimation();
+          return;
+        }
+        const started = performance.now();
+        const entries = Object.values(balanceAnimations);
+        function tick(now) {
+          const progress = Math.min(1, (now - started) / 700);
+          const eased = 1 - (1 - progress) ** 3;
+          entries.forEach(entry => {
+            entry.value = progress === 1 ? entry.to : Number((entry.from + (entry.to - entry.from) * eased).toFixed(entry.precision));
+          });
+          if (progress < 1) balanceFrame = requestAnimationFrame(tick);
+          else balanceHighlightTimer = setTimeout(clearBalanceAnimation, 1000);
+        }
+        balanceFrame = requestAnimationFrame(tick);
+      }
       function open(dir, ids = selected.value, isSingle = false) {
         if (!ids.length || !allowed(dir)) return;
+        clearBalanceAnimation();
         bridge.cancel();
         direction.value = dir;
         targets.value = [...ids];
@@ -133,6 +175,7 @@
         error.value = '';
         const count = targets.value.length;
         const total = perPerson.value;
+        const previousBalances = new Map(chosenStudents.value.map(student => [student.id, student.balance]));
         try {
           await bridge.submit({ ids: [...targets.value], single: single.value, direction: direction.value,
             items: chosenRules.value.map(rule => ({ id: rule.id, score: String(scores[rule.id]), reason: reasons[rule.id] || '' }))
@@ -140,6 +183,7 @@
           showEditor.value = false;
           selectedOnly.value = false;
           refresh();
+          prepareBalanceAnimation(previousBalances);
           vant.showSuccessToast({ message: `${count} 名学员登记成功\n每人 ${delta(total)} 分`, teleport: host.value });
         } catch (cause) { error.value = cause.message; }
         finally { busy.value = false; verifying.value = false; }
@@ -149,11 +193,14 @@
         document.body.classList.add('vant-mobile-ready');
         window.addEventListener('points:refresh', refresh);
       });
-      onBeforeUnmount(() => window.removeEventListener('points:refresh', refresh));
+      onBeforeUnmount(() => {
+        window.removeEventListener('points:refresh', refresh);
+        clearBalanceAnimation();
+      });
       return { data, selected, query, classId, selectedOnly, showEditor, showRecords, direction, targets,
         ruleIds, showRulePicker, draftRuleIds, ruleQuery, creatingRule, newRuleName, newRuleType, newRuleValue, newRuleReason, newRuleError, scores, reasons, busy, verifying, error, host, mounted,
         directionText, libraryRules, chosenRules, chosenStudents, visible, allVisible, someVisible, incomplete,
-        perPerson, canSubmit, format, delta, groupName, allowed, invalid, select, toggleStudent, toggleAll,
+        perPerson, canSubmit, format, delta, groupName, allowed, invalid, balanceAnimations, animateBalances, select, toggleStudent, toggleAll,
         open, openRulePicker, openRuleForm, saveRule, toggleDraftRule, applyRuleSelection, removeRule, closeEditor, submit };
     },
     template: `
@@ -178,7 +225,7 @@
               <template #icon><van-checkbox :model-value="selected.includes(student.id)" shape="square" icon-size="20px" :aria-label="'选择'+student.name" @click.stop="toggleStudent(student.id)" /></template>
               <template #title><span class="vp-name">{{student.name}}</span></template>
               <template #label><span>{{groupName(student.classId)}}</span></template>
-              <template #value><span class="vp-balance">{{format(student.balance)}}<small>分</small></span></template>
+              <template #value><span class="vp-balance" :class="{'vp-balance-changing':balanceAnimations[student.id], 'vp-balance-down':balanceAnimations[student.id]?.direction<0}" :aria-label="format(student.balance)+' 分'">{{format(balanceAnimations[student.id]?.value ?? student.balance)}}<small>分</small></span></template>
             </van-cell>
           </van-cell-group>
           <van-empty v-if="!visible.length" image="search" :description="selectedOnly ? '当前条件下没有已选学员' : '没有匹配的学员'"><van-button size="small" @click="query='';classId='all';selectedOnly=false">重置筛选</van-button></van-empty>
@@ -188,7 +235,7 @@
           <div class="vp-batch-count"><span>已选 <b>{{selected.length}}</b> 人</span><van-button v-if="selected.length" size="small" plain @click="select([]);selectedOnly=false">清空</van-button></div>
           <div class="vp-batch-actions"><van-button :disabled="!selected.length || !allowed(-1)" @click="open(-1)">减分</van-button><van-button type="primary" :disabled="!selected.length || !allowed(1)" @click="open(1)">加分</van-button></div>
         </div>
-        <van-popup v-if="mounted" :show="showEditor" :teleport="host" position="right" class="vp-editor" :overlay="false" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="directionText" :aria-busy="busy">
+        <van-popup v-if="mounted" :show="showEditor" :teleport="host" position="right" class="vp-editor" :overlay="false" :lock-scroll="false" :close-on-popstate="false" role="dialog" aria-modal="true" :aria-label="directionText" :aria-busy="busy" @closed="animateBalances">
           <van-nav-bar :title="targets.length>1 ? '批量'+directionText : (chosenStudents[0]?.name||'')+directionText" :left-text="busy?'处理中':'返回'" left-arrow safe-area-inset-top @click-left="closeEditor"><template #right><van-tag :type="direction<0?'danger':'primary'">{{directionText}}</van-tag></template></van-nav-bar>
           <div class="vp-editor-scroll">
             <div v-if="targets.length>1" class="vp-scope"><div class="vp-scope-title">已选 {{targets.length}} 名学员</div><div class="vp-names"><van-tag v-for="student in chosenStudents" :key="student.id" plain>{{student.name}}</van-tag></div><p>以下积分项统一应用到所选学员</p></div>

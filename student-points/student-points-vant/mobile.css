@@ -49,8 +49,11 @@ body.vant-mobile-ready:has(.app-shell.mobile) .scene-wrap { display: none; }
 .vp-student .van-cell__value { flex: 0 0 auto; min-width: 64px; overflow: visible; }
 .vp-name { font-size: 15px; font-weight: 600; }
 .vp-student .van-cell__label { margin-top: 4px; font-size: 12px; line-height: 18px; overflow-wrap: anywhere; }
-.vp-balance { display: block; color: var(--van-text-color); font-size: 18px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vp-balance { display: block; border-radius: 4px; color: var(--van-text-color); font-size: 18px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; transition: color 180ms, background-color 180ms; }
 .vp-balance small { margin-left: 4px; font-size: 12px; font-weight: 400; color: var(--van-text-color-2); }
+.vp-balance.vp-balance-changing { color: var(--van-primary-color); background: #edf5ff; }
+.vp-balance.vp-balance-down { color: var(--van-danger-color); background: var(--van-red-light); }
+.vp-balance-changing small { color: inherit; }
 .vp-demo-note { margin: 16px; color: var(--van-text-color-3); font-size: 11px; text-align: center; }
 .vp-batch-bar { flex-shrink: 0; padding: 8px 16px 12px; background: var(--van-background-2); border-top: 1px solid var(--van-border-color); }
 .vp-batch-count { display: flex; align-items: center; justify-content: space-between; min-height: 32px; font-size: 13px; }
@@ -130,6 +133,9 @@ body.vant-mobile-ready:has(.app-shell.mobile) .scene-wrap { display: none; }
 .vp-record-scroll .van-cell__label { overflow-wrap: anywhere; }
 .vp-editing .vp-list-page { overflow: hidden; }
 .vp-app .van-toast { max-width: calc(100% - 48px); }
+@media (prefers-reduced-motion: reduce) {
+  .vp-balance { transition: none; }
+}
 @media (max-width: 580px) {
   body.vant-mobile-ready:has(.app-shell.mobile) { height: var(--points-mobile-viewport, 100dvh); min-height: 0; overflow: hidden; }
   body:has(.app-shell.mobile) #pointsVantRoot { flex: 1; min-height: 0; }
