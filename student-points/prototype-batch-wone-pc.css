@@ -127,15 +127,15 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell.desktop .recent-item { min-height: 40px; padding: 8px 12px; border-color: var(--color-border-subtle); }
 .app-shell.desktop .modal-layer { background: var(--color-overlay-emphasis); }
 .app-shell.desktop .dialog { --points-columns: minmax(140px, 1fr) 112px minmax(140px, 1fr) 40px; width: 760px; max-width: calc(100vw - 32px); border-radius: 4px; animation-duration: 180ms; }
-.app-shell.desktop .dialog-title { height: 74px; min-height: 74px; flex-shrink: 0; padding: 0 24px; }
+.app-shell.desktop .dialog-title { height: 56px; min-height: 56px; flex-shrink: 0; padding: 0 24px; }
 .app-shell.desktop .dialog-title :is(h1, h2) { margin: 0; color: var(--color-text); font-size: 16px; line-height: 26px; font-weight: 600; }
 .app-shell.desktop .close-button { font-size: 16px; margin-right: 0; }
-.app-shell.desktop .dialog-body { padding: 24px; }
-.app-shell.desktop .operation-scope { margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; background: var(--color-background-neutral-subtle); }
+.app-shell.desktop .dialog-body { padding: 20px 24px; }
+.app-shell.desktop .operation-scope { margin-bottom: 16px; padding: 12px; border-radius: 4px; background: var(--color-background-neutral-subtle); }
 .app-shell.desktop .operation-scope .student-summary { display: flex; align-items: flex-start; margin: 0; gap: 12px; font-size: 14px; }
-.app-shell.desktop .student-summary strong { padding-top: 2px; line-height: 24px; }
+.app-shell.desktop .student-summary strong { padding-top: 0; line-height: 24px; }
 .app-shell.desktop .student-name-tags { flex: 1; min-width: 0; margin: 0; gap: 6px; }
-.app-shell.desktop .student-name-tag { padding: 1px 8px; font-size: 12px; line-height: 22px; }
+.app-shell.desktop .student-name-tag { padding: 0 8px; font-size: 12px; line-height: 22px; }
 .app-shell.desktop .student-summary span { color: var(--color-text-subtle); }
 .app-shell.desktop .scope-note { margin: 4px 0 0; color: var(--color-text-subtlest); font-size: 12px; line-height: 20px; }
 .app-shell.desktop .student-summary strong { font-weight: 600; }
@@ -147,19 +147,23 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell.desktop .rule-selection { margin-top: 8px; border: 0; border-top: 1px solid var(--color-border-subtle); border-bottom: 1px solid var(--color-border-subtle); border-radius: 0; overflow: hidden; }
 .app-shell.desktop :is(.rule-table-head, .rule-option) { grid-template-columns: var(--points-columns); gap: 16px; }
 .app-shell.desktop .rule-table-head { display: grid; align-items: center; min-height: 40px; padding: 8px 12px; color: var(--color-text-subtle); background: var(--color-background-neutral-subtle); border-bottom: 1px solid var(--color-border-subtle); font-size: 12px; }
-.app-shell.desktop .rule-option { min-height: 56px; padding: 6px 12px; }
+.app-shell.desktop .rule-option { min-height: 48px; padding: 8px 12px; }
 .app-shell.desktop .rule-option:last-child { border-bottom: 0; }
 .app-shell.desktop .rule-fields { display: contents; }
 .app-shell.desktop .rule-copy strong { font-size: 14px; font-weight: 400; }
-.app-shell.desktop .rule-option.active .rule-copy strong { font-weight: 600; }
+.app-shell.desktop .rule-option.active .rule-copy strong { font-weight: 400; line-height: 22px; }
 .app-shell.desktop .rule-option.active .rule-copy small { display: none; }
 .app-shell.desktop .rule-copy small { font-size: 12px; line-height: 20px; }
-.app-shell.desktop .rule-fields input { background: var(--color-background-surface); }
+.app-shell.desktop .rule-fields input { border-radius: 4px; background: var(--color-background-surface); font-size: 14px; line-height: 22px; }
+.app-shell.desktop .dialog .score-input input { appearance: textfield; -moz-appearance: textfield; text-align: right; font-variant-numeric: tabular-nums; }
+.app-shell.desktop .dialog .score-input input::-webkit-inner-spin-button,
+.app-shell.desktop .dialog .score-input input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
+.app-shell.desktop .dialog .score-input span { top: 50%; transform: translateY(-50%); line-height: 20px; pointer-events: none; }
 .app-shell.desktop .selected-rule-count { margin-left: 8px; color: var(--color-text-subtlest); font-size: 12px; font-weight: 400; }
-.app-shell.desktop .rule-table-head span:last-child { text-align: right; }
-.app-shell.desktop .rule-option .rule-remove { min-width: 40px; padding: 0; border: 0; color: var(--color-text-subtle); font-size: 12px; }
+.app-shell.desktop .rule-table-head span:last-child { text-align: center; }
+.app-shell.desktop .rule-option .rule-remove { min-width: 40px; min-height: 32px; padding: 0; border: 0; color: var(--color-text-subtle); font-size: 12px; line-height: 20px; text-align: center; }
 .app-shell.desktop .rule-add-row { padding: 0 12px; }
-.app-shell.desktop .rule-option + .rule-add-row { border-top: 1px solid var(--color-border-subtle); }
+.app-shell.desktop .rule-option + .rule-add-row { border-top: 0; }
 .app-shell.desktop .rule-add-row .button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0; border: 0; background: transparent; color: var(--color-text-brand-accessible); font-size: 14px; font-weight: 400; }
 .app-shell.desktop .rule-add-row .button span { font-size: 16px; line-height: 1; }
 .app-shell .rule-library-layer { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--color-overlay-emphasis); }
@@ -196,12 +200,12 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell.desktop .dialog[data-direction="minus"] .direction-mark,
 .app-shell.desktop .dialog[data-direction="minus"] .score-input .score-sign,
 .app-shell.desktop .dialog[data-direction="minus"] .calculation strong { color: var(--color-text-danger); }
-.app-shell.desktop .dialog .calculation { margin: 0; min-height: 56px; padding: 4px 0 0; gap: 8px 24px; flex-wrap: wrap; border: 0; border-radius: 0; background: transparent; }
-.app-shell.desktop .calculation div { gap: 12px; }
+.app-shell.desktop .dialog .calculation { margin: 0; min-height: 36px; padding: 0; gap: 8px 20px; align-items: center; flex-wrap: wrap; border: 0; border-radius: 0; background: transparent; }
+.app-shell.desktop .calculation div { gap: 8px; }
 .app-shell.desktop .calculation strong { font-size: 20px; line-height: 28px; }
-.app-shell.desktop .calculation div:nth-child(2) { margin-left: auto; }
+.app-shell.desktop .calculation div:nth-child(2) { margin-left: 0; padding-left: 20px; border-left: 1px solid var(--color-border-subtle); }
 .app-shell.desktop .calculation div:nth-child(2) strong { color: var(--color-text); font-size: 16px; }
-.app-shell.desktop .dialog .calculation small { flex-basis: 100%; margin-left: 0; font-size: 12px; }
+.app-shell.desktop .dialog .calculation small { flex-basis: auto; margin-left: auto; font-size: 12px; line-height: 20px; }
 .app-shell.desktop .new-rule-box { background: var(--color-background-neutral-subtle); }
 .app-shell.desktop .dialog-message { margin-left: 0; border-radius: 4px; background: var(--color-background-danger-subtle); border-color: var(--color-border-dangerSubtle); }
 .app-shell.desktop .dialog-message::before { color: var(--color-text-inverse); }
