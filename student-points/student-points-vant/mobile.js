@@ -148,11 +148,11 @@
           </div>
           <van-notice-bar v-if="selectedOnly" :scrollable="false" wrapable text="当前只显示已选学员，可取消勾选移除。" />
           <van-cell-group :border="false" class="vp-students">
-            <van-cell v-for="student in visible" :key="student.id" class="vp-student" :class="{'is-selected':selected.includes(student.id)}" :border="true">
-              <template #icon><van-checkbox :model-value="selected.includes(student.id)" shape="square" icon-size="20px" :aria-label="'选择'+student.name" @click="toggleStudent(student.id)" /></template>
+            <van-cell v-for="student in visible" :key="student.id" class="vp-student" :class="{'is-selected':selected.includes(student.id)}" :border="true" clickable @click="toggleStudent(student.id)">
+              <template #icon><van-checkbox :model-value="selected.includes(student.id)" shape="square" icon-size="20px" :aria-label="'选择'+student.name" @click.stop="toggleStudent(student.id)" /></template>
               <template #title><span class="vp-name">{{student.name}}</span></template>
               <template #label><span>{{groupName(student.classId)}}</span></template>
-              <template #value><span class="vp-balance">{{format(student.balance)}}<small>分</small></span><div class="vp-row-actions"><van-button size="small" type="primary" plain :disabled="!allowed(1)" :aria-label="'给'+student.name+'加分'" @click="open(1,[student.id],true)">加分</van-button><van-button size="small" plain :disabled="!allowed(-1)" :aria-label="'给'+student.name+'减分'" @click="open(-1,[student.id],true)">减分</van-button></div></template>
+              <template #value><span class="vp-balance">{{format(student.balance)}}<small>分</small></span></template>
             </van-cell>
           </van-cell-group>
           <van-empty v-if="!visible.length" image="search" :description="selectedOnly ? '当前条件下没有已选学员' : '没有匹配的学员'"><van-button size="small" @click="query='';classId='all';selectedOnly=false">重置筛选</van-button></van-empty>
