@@ -146,7 +146,11 @@ body:has(.app-shell.desktop) .student-actions .button:disabled { color: var(--co
 .app-shell.desktop .rule-selector-head > span { color: var(--color-text); font-size: 14px; font-weight: 600; }
 .app-shell.desktop .rule-selector-head .button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0; border: 0; background: transparent; color: var(--color-text-brand-accessible); font-size: 14px; font-weight: 400; }
 .app-shell.desktop .rule-selection { margin: 0; border: 0; border-top: 1px solid var(--color-border-subtle); border-radius: 0; overflow: hidden; }
-.app-shell.desktop .points-editor:not(:has(.rule-option)) :is(.rule-selection, .calculation, .selected-rule-count) { display: none; }
+.app-shell.desktop .points-editor:not(:has(.rule-option)) :is(.rule-selection, .calculation) { display: none; }
+.app-shell.desktop .rule-empty { margin: 0; padding: 16px 12px; color: var(--color-text-subtlest); font-size: 14px; line-height: 22px; }
+.app-shell.desktop .rule-selector-head.is-empty { border-top: 1px solid var(--color-border-subtle); }
+.app-shell.desktop .rule-selector-head.is-empty .button { order: -1; }
+.app-shell.desktop .rule-selector-head.is-empty .selected-rule-count { margin-left: 0; }
 .app-shell.desktop :is(.rule-table-head, .rule-option) { grid-template-columns: var(--points-columns); gap: 16px; }
 .app-shell.desktop .rule-table-head { display: grid; align-items: center; min-height: 40px; padding: 8px 12px; color: var(--color-text-subtle); background: var(--color-background-neutral-subtle); border-bottom: 1px solid var(--color-border-subtle); font-size: 12px; }
 .app-shell.desktop .rule-option { min-height: 48px; padding: 8px 12px; }
