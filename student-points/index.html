@@ -1044,42 +1044,39 @@
         const score = Number(dialogState.scores[rule.id]);
         return sum + (Number.isFinite(score) && score > 0 ? rule.dir * score : 0);
       }, 0);
-      const total = perStudent * chosen.length;
       const incomplete = selectedDialogRules().some(rule => scoreError(rule));
       const error = dialogState.error ? `<div class="dialog-message ${dialogState.verifying ? 'info' : ''}" role="alert" tabindex="-1">${escapeHtml(dialogState.error)}</div>` : '';
 
       modalLayer.innerHTML = `
         <section class="dialog" ${dialogState.rulePicker ? 'inert aria-hidden="true"' : 'aria-modal="true"'} data-direction="${dialogState.direction > 0 ? 'plus' : 'minus'}" role="dialog" aria-labelledby="dialogHeading" aria-describedby="ruleInstruction" aria-busy="${dialogState.busy}">
           <header class="dialog-title">
-            <div><span class="direction-mark" aria-hidden="true">${dialogState.direction > 0 ? '加' : '减'}</span><${headingTag} id="dialogHeading" tabindex="-1">${chosen.length === 1 ? escapeHtml(chosen[0].name) : '批量'}${directionLabel}</${headingTag}></div>
+            <div><span class="direction-mark" aria-hidden="true">${dialogState.direction > 0 ? '加' : '减'}</span><${headingTag} id="dialogHeading" tabindex="-1">${directionLabel}</${headingTag}></div>
             <button class="close-button" type="button" data-dialog-action="close" aria-label="关闭" ${dialogState.busy ? 'disabled' : ''}>×</button>
           </header>
           <div class="dialog-body">
-            ${chosen.length > 1 ? `<section class="operation-scope" aria-label="本次操作对象"><div class="student-summary" id="studentSummary"><strong>已选 ${chosen.length} 名学员</strong><ul class="student-name-tags" aria-label="本次操作的学员名单">${chosen.map(student => `<li class="student-name-tag">${escapeHtml(student.name)}</li>`).join('')}</ul></div><p class="scope-note">以下积分项统一应用到这 ${chosen.length} 名学员</p></section>` : ''}
+            <section class="operation-scope" aria-label="本次操作对象"><div class="student-summary" id="studentSummary"><strong>学员：</strong><ul class="student-name-tags" aria-label="本次操作的学员名单">${chosen.map(student => `<li class="student-name-tag">${escapeHtml(student.name)}</li>`).join('')}</ul></div><p class="scope-note">共 ${chosen.length} 人</p></section>
 
             <div class="form-row">
-              <label class="form-label">积分项<strong>*</strong></label>
+              <label class="form-label">规则：</label>
               <section class="form-value points-editor" aria-labelledby="ruleInstruction">
                 <div class="rule-selector-head">
-                  <span id="ruleInstruction">积分项<small class="selected-rule-count">已选 ${selectedDialogRules().length} 项</small></span>
-                  <button class="button button-quiet" type="button" data-dialog-action="pick-rules" ${dialogState.busy ? 'disabled' : ''}><span aria-hidden="true">＋</span>${selectedDialogRules().length ? '添加积分项' : '选择积分项'}</button>
+                  <span id="ruleInstruction">规则<small class="selected-rule-count">已添加 ${selectedDialogRules().length} 条</small></span>
+                  <button class="button button-quiet" type="button" data-dialog-action="pick-rules" ${dialogState.busy ? 'disabled' : ''}>添加…</button>
                 </div>
-                <div class="rule-selection">${selectedDialogRules().length ? `<div class="rule-table-head" aria-hidden="true"><span>积分项</span><span>${directionLabel}分值</span><span>原因（选填）</span><span>操作</span></div>` : ''}${renderRuleOptions()}</div>
+                <div class="rule-selection">${selectedDialogRules().length ? `<div class="rule-table-head" aria-hidden="true"><span>已选规则</span><span>分值</span><span>原因</span><span>操作</span></div>` : ''}${renderRuleOptions()}</div>
 
                 <div class="calculation" aria-live="polite">
-              ${chosen.length === 1
-                ? `<div><span>本次${directionLabel}</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div>`
-                : `<div><span>每位学员${directionLabel}</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div><div><span>整批${directionLabel}</span><strong data-summary="total">${incomplete ? '待完善' : `${formatDelta(total)} 分`}</strong></div>`}
-              ${chosen.length > 1 ? `<small>${chosen.length} 人 × ${selectedDialogRules().length} 条积分项</small>` : ''}
+                  <div><span>${chosen.length} 名学员 × ${selectedDialogRules().length} 条规则，每人净变动</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div>
+                  <small>同组规则应用到每位学员，逐人逐规则记录，整批全部成功或全部失败。</small>
                 </div>
               </section>
             </div>
             ${error}
           </div>
           <footer class="dialog-footer">
-            <span class="submit-summary" data-summary="footer" aria-live="polite">${incomplete ? '请完善标红分值' : selectedDialogRules().length ? `${chosen.length > 1 ? '每人' : '本次'} ${formatDelta(perStudent)} 分` : '请选择积分项'}</span>
+            <span class="submit-summary" data-summary="footer" aria-live="polite">${incomplete ? '请完善标红分值' : selectedDialogRules().length ? `${chosen.length > 1 ? '每人' : '本次'} ${formatDelta(perStudent)} 分` : '请选择规则'}</span>
             <button class="button" type="button" data-dialog-action="close" ${dialogState.busy ? 'disabled' : ''}>取消</button>
-            <button class="button ${dialogState.direction < 0 ? 'button-danger-solid' : 'button-primary'}" type="button" data-dialog-action="submit" ${dialogState.busy || !chosen.length || !selectedDialogRules().length || incomplete ? 'disabled' : ''}>${dialogState.busy ? (dialogState.verifying ? '正在核实…' : '正在提交…') : chosen.length > 1 ? `确认给 ${chosen.length} 人${directionLabel}` : `确认${directionLabel}`}</button>
+            <button class="button ${dialogState.direction < 0 ? 'button-danger-solid' : 'button-primary'}" type="button" data-dialog-action="submit" ${dialogState.busy || !chosen.length || !selectedDialogRules().length || incomplete ? 'disabled' : ''}>${dialogState.busy ? (dialogState.verifying ? '正在核实…' : '正在提交…') : '确定'}</button>
           </footer>
         </section>
         ${renderRuleLibrary()}
@@ -1174,7 +1171,7 @@
       const label = dialogState.direction > 0 ? '加分' : '减分';
       return `<div class="rule-library-layer" data-library-backdrop>
         <section class="rule-library-panel" role="dialog" aria-modal="true" aria-labelledby="ruleLibraryTitle">
-          <header class="rule-library-title"><h2 id="ruleLibraryTitle">${picker.creating ? `新增${label}规则` : `选择${label}项`}</h2><button class="close-button" type="button" data-dialog-action="cancel-rules" aria-label="${picker.creating ? '返回规则列表' : '关闭积分库'}">×</button></header>
+          <header class="rule-library-title"><h2 id="ruleLibraryTitle">${picker.creating ? `新增${label}规则` : `选择${label}规则`}</h2><button class="close-button" type="button" data-dialog-action="cancel-rules" aria-label="${picker.creating ? '返回规则列表' : '关闭规则库'}">×</button></header>
           ${picker.creating ? `<div class="rule-library-form">
             <label for="libraryRuleName">规则名称<span>*</span></label><input id="libraryRuleName" data-new-rule="name" placeholder="请输入规则名称" value="${escapeHtml(picker.name)}">
             <label for="libraryRuleType">${label}分值类型</label><select id="libraryRuleType" data-new-rule-type><option value="fixed" ${picker.type === 'fixed' ? 'selected' : ''}>固定分值</option><option value="unlimited" ${picker.type === 'unlimited' ? 'selected' : ''}>不限分值</option></select>
@@ -1182,7 +1179,7 @@
             <label for="libraryRuleReason">原因</label><textarea id="libraryRuleReason" data-new-rule="reason" placeholder="请输入原因">${escapeHtml(picker.reason)}</textarea>
             <p>保存后返回规则列表并自动勾选，再应用到本次操作。积分在主弹窗点击确定后生效。</p>
             ${picker.error ? `<div class="rule-library-error" role="alert" tabindex="-1">${escapeHtml(picker.error)}</div>` : ''}
-          </div>` : `<div class="rule-library-search"><input type="search" data-rule-search placeholder="搜索积分项" aria-label="搜索积分库" value="${escapeHtml(picker.query)}"><button class="button button-quiet" type="button" data-dialog-action="new-library-rule">＋ 新增</button></div><div class="rule-library-options">${renderLibraryOptions()}</div>`}
+          </div>` : `<div class="rule-library-search"><input type="search" data-rule-search placeholder="搜索规则名称" aria-label="搜索规则库" value="${escapeHtml(picker.query)}"><button class="button button-quiet" type="button" data-dialog-action="new-library-rule">＋ 新增</button></div><div class="rule-library-options">${renderLibraryOptions()}</div>`}
           <footer class="rule-library-footer">${picker.creating ? '<span></span><button class="button" type="button" data-dialog-action="cancel-rules">返回规则列表</button><button class="button button-primary" type="button" data-dialog-action="save-library-rule">保存并选中</button>' : `<span data-library-count>已选 ${picker.ids.size} 项</span><button class="button" type="button" data-dialog-action="cancel-rules">取消</button><button class="button button-primary" type="button" data-dialog-action="apply-rules">确认选择</button>`}</footer>
         </section>
       </div>`;
@@ -1199,7 +1196,7 @@
       return `
         <div class="rule-fields ${error ? 'bad' : ''}">
           <div class="score-field"><div class="score-input"><span class="score-sign" aria-hidden="true">${rule.dir > 0 ? '+' : '−'}</span><input id="score-${rule.id}" data-score-rule="${rule.id}" type="number" inputmode="decimal" min="0" step="any" placeholder="分值" aria-label="${escapeHtml(rule.name)}${rule.dir > 0 ? '加分' : '减分'}分值" aria-invalid="${Boolean(error)}" aria-describedby="score-error-${rule.id}" value="${escapeHtml(dialogState.scores[rule.id] ?? '')}" ${dialogState.busy ? 'disabled' : ''}><span>分</span></div><small class="score-error" id="score-error-${rule.id}" ${error ? '' : 'hidden'}>${error}</small></div>
-          <input id="reason-${rule.id}" data-reason-rule="${rule.id}" type="text" value="${escapeHtml(dialogState.reasons[rule.id] || '')}" placeholder="原因（选填）" aria-label="${escapeHtml(rule.name)}原因（选填）" ${dialogState.busy ? 'disabled' : ''}>
+          <input id="reason-${rule.id}" data-reason-rule="${rule.id}" type="text" value="${escapeHtml(dialogState.reasons[rule.id] || '')}" placeholder="请输入原因" aria-label="${escapeHtml(rule.name)}原因（选填）" ${dialogState.busy ? 'disabled' : ''}>
         </div>
       `;
     }
@@ -1218,16 +1215,13 @@
         const score = Number(dialogState.scores[rule.id]);
         return sum + (Number.isFinite(score) && score > 0 ? rule.dir * score : 0);
       }, 0);
-      const total = perStudent * chosenCount;
       const incomplete = selectedDialogRules().some(rule => scoreError(rule));
       const perNode = modalLayer.querySelector('[data-summary="per"]');
-      const totalNode = modalLayer.querySelector('[data-summary="total"]');
       if (perNode) perNode.textContent = incomplete ? '待完善' : `${formatDelta(perStudent)} 分`;
-      if (totalNode) totalNode.textContent = incomplete ? '待完善' : `${formatDelta(total)} 分`;
       const submit = modalLayer.querySelector('[data-dialog-action="submit"]');
       if (submit) submit.disabled = dialogState.busy || !chosenCount || !selectedDialogRules().length || incomplete;
       const footer = modalLayer.querySelector('[data-summary="footer"]');
-      if (footer) footer.textContent = incomplete ? '请完善标红分值' : selectedDialogRules().length ? `${chosenCount > 1 ? '每人' : '本次'} ${formatDelta(perStudent)} 分` : '请选择积分项';
+      if (footer) footer.textContent = incomplete ? '请完善标红分值' : selectedDialogRules().length ? `${chosenCount > 1 ? '每人' : '本次'} ${formatDelta(perStudent)} 分` : '请选择规则';
       selectedDialogRules().forEach(rule => {
         const error = scoreError(rule);
         const input = modalLayer.querySelector(`#score-${rule.id}`);
@@ -1242,7 +1236,7 @@
 
     function validateDialog() {
       if (!dialogState.selected.size) return '请至少选择一名学员。';
-      if (!selectedDialogRules().length) return '请至少选择一个积分项。';
+      if (!selectedDialogRules().length) return '请至少选择一条规则。';
       const invalidRule = selectedDialogRules().find(rule => scoreError(rule));
       if (invalidRule) {
         dialogState.invalidRule = invalidRule.id;
