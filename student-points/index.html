@@ -1001,7 +1001,7 @@
       `).join('');
     }
 
-    function openDialog(direction, studentIds = [...pageSelected], clearPageSelection = true) {
+    function openDialog(direction, studentIds = [...pageSelected], clearPageSelection = true, startWithRulePicker = false) {
       if (!allowed(direction)) {
         showToast(direction > 0 ? '当前账号没有加分权限。' : '当前账号没有减分权限。', 'error');
         return;
@@ -1023,7 +1023,8 @@
       hideToast();
       modalLayer.hidden = false;
       renderDialog();
-      requestAnimationFrame(() => modalLayer.querySelector(appShell.classList.contains('desktop') ? '.close-button' : '.dialog-title h2')?.focus());
+      if (startWithRulePicker) openRuleLibrary();
+      else requestAnimationFrame(() => modalLayer.querySelector(appShell.classList.contains('desktop') ? '.close-button' : '.dialog-title h2')?.focus());
     }
 
     function closeModal(restoreFocus = true) {
@@ -1360,11 +1361,11 @@
       }
       const batchButton = event.target.closest('[data-batch-direction]');
       if (batchButton && pageSelected.size) {
-        openDialog(Number(batchButton.dataset.batchDirection));
+        openDialog(Number(batchButton.dataset.batchDirection), [...pageSelected], true, true);
         return;
       }
       const studentButton = event.target.closest('[data-student-direction]');
-      if (studentButton) openDialog(Number(studentButton.dataset.studentDirection), [studentButton.dataset.studentId], false);
+      if (studentButton) openDialog(Number(studentButton.dataset.studentDirection), [studentButton.dataset.studentId], false, true);
     });
 
     modalLayer.addEventListener('click', event => {
