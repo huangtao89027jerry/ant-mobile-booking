@@ -716,7 +716,7 @@
     .app-shell.mobile .submit-summary { flex: 0 0 100%; text-align: center; }
   </style>
   <link rel="stylesheet" href="prototype-batch-wone-tokens.css">
-  <link rel="stylesheet" href="prototype-batch-wone-pc.css?v=rule-empty-spacing-20261022">
+  <link rel="stylesheet" href="prototype-batch-wone-pc.css?v=summary-unit-20261022">
   <link rel="stylesheet" href="prototype-batch-mobile.css">
   <link id="pointsVantStyles" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@4.9.21/lib/index.css" media="not all" onerror="this.onerror=null;this.href='https://unpkg.com/vant@4.9.21/lib/index.css'">
   <link rel="stylesheet" href="student-points-vant/mobile.css?v=student-profile-20261021">
@@ -1066,7 +1066,7 @@
                 <div class="rule-selection">${selectedDialogRules().length ? `<div class="rule-table-head" aria-hidden="true"><span>已选规则</span><span>分值</span><span>原因</span><span>操作</span></div>` : ''}${renderRuleOptions()}</div>
 
                 <div class="calculation" aria-live="polite">
-                  <div><span>${chosen.length} 名学员 × ${selectedDialogRules().length} 条规则，每人净变动</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)} 分`}</strong></div>
+                  <div><span>${chosen.length} 名学员 × ${selectedDialogRules().length} 条规则，每人净变动</span><strong data-summary="per">${incomplete ? '待完善' : `${formatDelta(perStudent)}<span class="calculation-unit">分</span>`}</strong></div>
                   <small>同组规则应用到每位学员，逐人逐规则记录，整批全部成功或全部失败。</small>
                 </div>
               </section>
@@ -1217,7 +1217,7 @@
       }, 0);
       const incomplete = selectedDialogRules().some(rule => scoreError(rule));
       const perNode = modalLayer.querySelector('[data-summary="per"]');
-      if (perNode) perNode.textContent = incomplete ? '待完善' : `${formatDelta(perStudent)} 分`;
+      if (perNode) perNode.innerHTML = incomplete ? '待完善' : `${formatDelta(perStudent)}<span class="calculation-unit">分</span>`;
       const submit = modalLayer.querySelector('[data-dialog-action="submit"]');
       if (submit) submit.disabled = dialogState.busy || !chosenCount || !selectedDialogRules().length || incomplete;
       const footer = modalLayer.querySelector('[data-summary="footer"]');
